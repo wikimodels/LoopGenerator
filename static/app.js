@@ -10,8 +10,12 @@ const state = {
     notes: [], // Will be populated dynamically
     grid: [], // 2D array [rowIndex][stepIndex] -> boolean
     gridMeta: [], // 2D array [rowIndex][stepIndex] -> { duration, velocity, chance }
-    isPlaying: false
+    isPlaying: false,
+    rating: 0
 };
+
+let catalogLoops = [];
+let catalogSearchQuery = '';
 
 // Helper: Generate 8 notes for the grid based on key and scale
 function generateScale(root, scaleType) {
@@ -147,21 +151,13 @@ function createDrumKit() {
         noise: { type: "white" },
         envelope: { attack: 0.001, decay: 0.2, sustain: 0 }
     }).toDestination();
-    const hihat = new Tone.MetalSynth({
-        frequency: 200,
-        envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
-        harmonicity: 5.1,
-        modulationIndex: 32,
-        resonance: 4000,
-        octaves: 1.5
+    const hihat = new Tone.NoiseSynth({
+        noise: { type: "white" },
+        envelope: { attack: 0.001, decay: 0.05, sustain: 0 }
     }).toDestination();
-    const openHat = new Tone.MetalSynth({
-        frequency: 200,
-        envelope: { attack: 0.001, decay: 0.4, release: 0.1 },
-        harmonicity: 5.1,
-        modulationIndex: 32,
-        resonance: 4000,
-        octaves: 1.5
+    const openHat = new Tone.NoiseSynth({
+        noise: { type: "white" },
+        envelope: { attack: 0.01, decay: 0.3, sustain: 0 }
     }).toDestination();
     const tomH = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 4, oscillator: { type: "sine" } }).toDestination();
     const tomL = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 4, oscillator: { type: "sine" } }).toDestination();
@@ -169,13 +165,9 @@ function createDrumKit() {
         noise: { type: "pink" },
         envelope: { attack: 0.001, decay: 0.3, sustain: 0 }
     }).toDestination();
-    const crash = new Tone.MetalSynth({
-        frequency: 300,
-        envelope: { attack: 0.001, decay: 1.0, release: 0.5 },
-        harmonicity: 5.1,
-        modulationIndex: 32,
-        resonance: 4000,
-        octaves: 1.5
+    const crash = new Tone.NoiseSynth({
+        noise: { type: "pink" },
+        envelope: { attack: 0.01, decay: 1.5, sustain: 0 }
     }).toDestination();
 
     return {
@@ -248,18 +240,32 @@ function setupEventListeners() {
     playBtn.addEventListener('click', async () => {
         await initAudioContext();
         await Tone.start();
-        if (state.isPlaying) return;
+        
+        const playIcon = document.getElementById('play-icon');
+        
+        if (state.isPlaying) {
+            Tone.Transport.pause();
+            state.isPlaying = false;
+            if (playIcon) playIcon.innerText = 'play_arrow';
+            playBtn.classList.remove('paused');
+            return;
+        }
         
         Tone.Transport.bpm.value = state.bpm;
         Tone.Transport.swing = state.swing;
         Tone.Transport.swingSubdivision = "8n";
-        setupSequence();
+        
+        if (!toneSequence) {
+            setupSequence();
+        }
+        
         Tone.Transport.start();
         state.isPlaying = true;
+        if (playIcon) playIcon.innerText = 'pause';
+        playBtn.classList.add('paused');
     });
 
     stopBtn.addEventListener('click', () => {
-        if (!state.isPlaying) return;
         Tone.Transport.stop();
         if (toneSequence) {
             toneSequence.stop();
@@ -267,6 +273,10 @@ function setupEventListeners() {
             toneSequence = null;
         }
         state.isPlaying = false;
+        
+        const playIcon = document.getElementById('play-icon');
+        if (playIcon) playIcon.innerText = 'play_arrow';
+        playBtn.classList.remove('paused');
         
         // Remove playing class from all cells
         document.querySelectorAll('.grid-cell.playing').forEach(el => el.classList.remove('playing'));
@@ -459,6 +469,67 @@ function setupEventListeners() {
         document.execCommand('copy');
         showToast("Prompt copied to clipboard!");
     });
+
+    // --- Sidebar Search Logic ---
+    const sidebarHeader = document.getElementById('sidebar-header');
+    const btnSearch = document.getElementById('btn-sidebar-search');
+    const btnSearchClose = document.getElementById('btn-sidebar-search-close');
+    const searchInput = document.getElementById('sidebar-search-input');
+
+    if (btnSearch && sidebarHeader && searchInput) {
+        btnSearch.addEventListener('click', () => {
+            sidebarHeader.classList.add('search-active');
+            searchInput.focus();
+        });
+
+        btnSearchClose.addEventListener('click', () => {
+            sidebarHeader.classList.remove('search-active');
+            searchInput.value = '';
+            catalogSearchQuery = '';
+            renderCatalog();
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            catalogSearchQuery = e.target.value;
+            renderCatalog();
+        });
+    }
+
+    const starRatingContainer = document.getElementById('current-loop-rating');
+    if (starRatingContainer) {
+        starRatingContainer.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', async (e) => {
+                const val = parseInt(e.target.dataset.value);
+                state.rating = state.rating === val ? 0 : val;
+                
+                starRatingContainer.querySelectorAll('.star').forEach((s, idx) => {
+                    s.classList.toggle('filled', idx < state.rating);
+                });
+
+                if (state.loopName && state.loopName !== "My New Loop") {
+                    try {
+                        const filename = state.loopName.replace(/\s+/g, '_') + '.json';
+                        await fetch(`/api/meta/${filename}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ rating: state.rating })
+                        });
+                        showToast("Rating saved!");
+                        fetchLoops(); // Update catalog stars silently
+                    } catch(e) { console.error(e); }
+                }
+            });
+            star.addEventListener('mouseenter', (e) => {
+                const val = parseInt(e.target.dataset.value);
+                starRatingContainer.querySelectorAll('.star').forEach((s, idx) => {
+                    s.classList.toggle('hovered', idx < val);
+                });
+            });
+            star.addEventListener('mouseleave', () => {
+                starRatingContainer.querySelectorAll('.star').forEach(s => s.classList.remove('hovered'));
+            });
+        });
+    }
 }
 
 function handleScaleChange() {
@@ -557,6 +628,7 @@ function getLoopData() {
         key: state.key,
         scale: state.scale,
         swing: state.swing,
+        rating: state.rating,
         notes: activeNotes
     };
 }
@@ -615,6 +687,14 @@ function loadLoopData(data) {
         });
     }
 
+    state.rating = data.rating || 0;
+    const starRatingContainer = document.getElementById('current-loop-rating');
+    if (starRatingContainer) {
+        starRatingContainer.querySelectorAll('.star').forEach((s, idx) => {
+            s.classList.toggle('filled', idx < state.rating);
+        });
+    }
+
     createGridUI();
     showToast("Loop loaded!");
 }
@@ -622,16 +702,23 @@ function loadLoopData(data) {
 async function fetchLoops() {
     try {
         const res = await fetch('/api/loops');
-        const loops = await res.json();
-        renderCatalog(loops);
+        catalogLoops = await res.json();
+        renderCatalog();
     } catch (e) {
         console.error("Failed to fetch loops", e);
     }
 }
 
-function renderCatalog(loops) {
+function renderCatalog() {
     loopList.innerHTML = '';
-    loops.forEach(loop => {
+    
+    const filtered = catalogLoops.filter(loop => {
+        if (!catalogSearchQuery) return true;
+        const name = loop.name || "";
+        return name.toLowerCase().includes(catalogSearchQuery.toLowerCase());
+    });
+
+    filtered.forEach(loop => {
         const div = document.createElement('div');
         div.className = 'loop-item';
         

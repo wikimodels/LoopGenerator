@@ -33,17 +33,28 @@
             <div class="catalog-header">
                 <div class="header-title-row">
                     <h2>Your Loops</h2>
-                    <label class="custom-checkbox-wrapper">
-                        <input type="checkbox" id="check-all">
-                        <span class="checkmark"></span>
-                        Select All
-                    </label>
+                    <div class="header-filters">
+                        <div class="search-wrapper">
+                            <input type="text" id="search-input" class="search-input" placeholder="Search loops...">
+                        </div>
+                        <div class="star-filter" id="star-filter" title="Filter by rating">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="action-bar-content">
                     <div class="selection-info">
-                        <span id="selected-count">0</span> selected
+                        <label class="custom-checkbox-wrapper">
+                            <input type="checkbox" id="check-all">
+                            <span class="checkmark"></span>
+                            Select All
+                        </label>
+                        <span><span id="selected-count">0</span> selected</span>
                     </div>
-                    
                     <div id="progress-container" class="progress-container hidden">
                         <div class="progress-text" id="progress-text">Exporting...</div>
                         <div class="progress-bar-bg">

@@ -1,15 +1,31 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import json
 import os
 
 app = FastAPI()
 
-# Directory to save catalogs/loops
+# Directory to save loops
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
+
+# Metadata file (ratings, notes, etc.)
+META_FILE = os.path.join(DATA_DIR, "_loop_meta.json")
+
+def load_meta() -> dict:
+    if os.path.exists(META_FILE):
+        try:
+            with open(META_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_meta(meta: dict):
+    with open(META_FILE, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2, ensure_ascii=False)
 
 class Note(BaseModel):
     step: int
@@ -22,6 +38,11 @@ class Loop(BaseModel):
     instrument: str
     steps: int
     notes: List[Note]
+
+class LoopMeta(BaseModel):
+    rating: Optional[int] = 0      # 0-5 stars
+    tags: Optional[List[str]] = []
+    notes: Optional[str] = ""
 
 @app.get("/api/loops")
 def get_loops():
@@ -55,8 +76,28 @@ def delete_loop(filename: str):
     filepath = os.path.join(DATA_DIR, safe_filename)
     if os.path.exists(filepath):
         os.remove(filepath)
+        # Clean up metadata too
+        meta = load_meta()
+        if safe_filename in meta:
+            del meta[safe_filename]
+            save_meta(meta)
         return {"status": "success"}
     raise HTTPException(status_code=404, detail="File not found")
+
+@app.get("/api/meta")
+def get_meta():
+    return load_meta()
+
+@app.patch("/api/meta/{filename}")
+def update_meta(filename: str, patch: LoopMeta):
+    safe_filename = os.path.basename(filename)
+    meta = load_meta()
+    existing = meta.get(safe_filename, {})
+    incoming = patch.dict(exclude_none=True)
+    existing.update(incoming)
+    meta[safe_filename] = existing
+    save_meta(meta)
+    return {"status": "success", "filename": safe_filename, "meta": existing}
 
 # Create static directory if it doesn't exist
 os.makedirs("static", exist_ok=True)

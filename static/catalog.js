@@ -1,6 +1,10 @@
 let loopsData = [];
+let filteredLoops = [];
+let loopMeta = {};   // { filename: { rating, tags, notes } }
 let selectedLoops = new Set();
 let isAudioInitialized = false;
+let currentSearchQuery = '';
+let currentStarFilter = 0;
 
 // Audio state
 let synths = {};
@@ -8,10 +12,10 @@ let silentSynths = {};
 let recorder = null;
 let activeSequence = null;
 let activeLoopName = null;
-let fft = null;
+let activeItemEl = null; // DOM element of the currently active catalog-item
+let fft = null;       // native AnalyserNode
 let eqBars = [];
 let animFrameId = null;
-let masterBus = null;
 
 // DOM Elements
 const catalogList = document.getElementById('catalog-list');
@@ -26,6 +30,7 @@ const toastEl = document.getElementById('toast');
 
 // --- Initialization ---
 async function init() {
+    await fetchMeta();
     await fetchLoops();
     
     // Generate 72 bars dynamically
@@ -41,30 +46,83 @@ async function init() {
     setupEventListeners();
 }
 
+async function fetchMeta() {
+    try {
+        const res = await fetch('/api/meta');
+        loopMeta = await res.json();
+    } catch(e) {
+        loopMeta = {};
+    }
+}
+
+async function setRating(filename, rating) {
+    // Toggle off if clicking same star
+    const current = (loopMeta[filename] || {}).rating || 0;
+    const newRating = current === rating ? 0 : rating;
+    loopMeta[filename] = { ...(loopMeta[filename] || {}), rating: newRating };
+    try {
+        await fetch(`/api/meta/${filename}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating: newRating })
+        });
+    } catch(e) { console.error('Failed to save rating', e); }
+    return newRating;
+}
+
+function buildStarRating(filename, currentRating) {
+    const container = document.createElement('div');
+    container.className = 'star-rating';
+    for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('span');
+        star.className = 'star' + (i <= currentRating ? ' filled' : '');
+        star.textContent = '★';
+        star.dataset.value = i;
+        star.addEventListener('mouseenter', () => {
+            container.querySelectorAll('.star').forEach((s, idx) => {
+                s.classList.toggle('hovered', idx < i);
+            });
+        });
+        star.addEventListener('mouseleave', () => {
+            container.querySelectorAll('.star').forEach(s => s.classList.remove('hovered'));
+        });
+        star.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const newR = await setRating(filename, i);
+            container.querySelectorAll('.star').forEach((s, idx) => {
+                s.classList.toggle('filled', idx < newR);
+            });
+        });
+        container.appendChild(star);
+    }
+    return container;
+}
+
 async function initAudioContext() {
     if (isAudioInitialized) return;
     await Tone.start();
 
-    if (!masterBus) {
-        masterBus = new Tone.Channel().toDestination();
-        fft = new Tone.FFT(128);
-        masterBus.connect(fft);
-    }
+    // Native AnalyserNode — just listens to whatever plays, never touches the signal chain
+    const ctx = Tone.getContext().rawContext;
+    fft = ctx.createAnalyser();
+    fft.fftSize = 256;
+    fft.smoothingTimeConstant = 0.8;
+    Tone.getDestination().output.connect(fft);
 
-    // Normal synths (loud)
+    // Normal synths — plain .toDestination(), no routing magic
     synths = {
-        synth: new Tone.PolySynth(Tone.Synth).connect(masterBus),
-        amSynth: new Tone.PolySynth(Tone.AMSynth).connect(masterBus),
-        fmSynth: new Tone.PolySynth(Tone.FMSynth).connect(masterBus),
+        synth: new Tone.PolySynth(Tone.Synth).toDestination(),
+        amSynth: new Tone.PolySynth(Tone.AMSynth).toDestination(),
+        fmSynth: new Tone.PolySynth(Tone.FMSynth).toDestination(),
         piano: new Tone.Sampler({
             urls: { "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3" },
             release: 1,
             baseUrl: "https://tonejs.github.io/audio/salamander/"
-        }).connect(masterBus),
-        drums: createDrumKit(masterBus)
+        }).toDestination(),
+        drums: createDrumKit()
     };
 
-    // Silent synths for background rendering
+    // Silent synths for background rendering (export)
     recorder = new Tone.Recorder();
     silentSynths = {
         synth: new Tone.PolySynth(Tone.Synth).connect(recorder),
@@ -77,59 +135,30 @@ async function initAudioContext() {
         }).connect(recorder),
         drums: createDrumKit(recorder)
     };
-    
+
     isAudioInitialized = true;
 }
 
 function createDrumKit(outputNode) {
     const dest = outputNode || Tone.getDestination();
-    const createDrum = (synthNode) => {
-        synthNode.connect(dest);
-        return synthNode;
-    };
-
-    const kick = createDrum(new Tone.MembraneSynth());
-    const snare = createDrum(new Tone.NoiseSynth({
-        noise: { type: "white" },
-        envelope: { attack: 0.001, decay: 0.2, sustain: 0 }
-    }));
-    const hihat = createDrum(new Tone.MetalSynth({
-        frequency: 200,
-        envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
-        harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
-    }));
-    const openHat = createDrum(new Tone.MetalSynth({
-        frequency: 200,
-        envelope: { attack: 0.001, decay: 0.4, release: 0.1 },
-        harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
-    }));
-    const tomH = createDrum(new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 4, oscillator: { type: "sine" } }));
-    const tomL = createDrum(new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 4, oscillator: { type: "sine" } }));
-    const clap = createDrum(new Tone.NoiseSynth({
-        noise: { type: "pink" },
-        envelope: { attack: 0.001, decay: 0.3, sustain: 0 }
-    }));
-    const crash = createDrum(new Tone.MetalSynth({
-        frequency: 300,
-        envelope: { attack: 0.001, decay: 1.0, release: 0.5 },
-        harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
-    }));
+    const mk = (s) => { s.connect(dest); return s; };
 
     return {
         triggerAttackRelease: (note, duration, time, velocity) => {
             switch(note) {
-                case "Kick": kick.triggerAttackRelease("C2", duration, time, velocity); break;
-                case "Snare": snare.triggerAttackRelease(duration, time, velocity); break;
-                case "HiHat": hihat.triggerAttackRelease("32n", time, velocity); break;
-                case "OpenHat": openHat.triggerAttackRelease("8n", time, velocity); break;
-                case "Clap": clap.triggerAttackRelease(duration, time, velocity); break;
-                case "Tom H": tomH.triggerAttackRelease("C4", duration, time, velocity); break;
-                case "Tom L": tomL.triggerAttackRelease("C3", duration, time, velocity); break;
-                case "Crash": crash.triggerAttackRelease("1n", time, velocity); break;
+                case "Kick":    mk(new Tone.MembraneSynth()).triggerAttackRelease("C2", duration, time, velocity); break;
+                case "Snare":   mk(new Tone.NoiseSynth({ noise:{type:"white"}, envelope:{attack:0.001,decay:0.2,sustain:0} })).triggerAttackRelease(duration, time, velocity); break;
+                case "HiHat":   mk(new Tone.NoiseSynth({ noise:{type:"white"}, envelope:{attack:0.001,decay:0.05,sustain:0} })).triggerAttackRelease(duration, time, velocity); break;
+                case "OpenHat": mk(new Tone.NoiseSynth({ noise:{type:"white"}, envelope:{attack:0.01,decay:0.3,sustain:0} })).triggerAttackRelease(duration, time, velocity); break;
+                case "Clap":    mk(new Tone.NoiseSynth({ noise:{type:"pink"}, envelope:{attack:0.001,decay:0.3,sustain:0} })).triggerAttackRelease(duration, time, velocity); break;
+                case "Tom H":   mk(new Tone.MembraneSynth({pitchDecay:0.05,octaves:4,oscillator:{type:"sine"}})).triggerAttackRelease("C4", duration, time, velocity); break;
+                case "Tom L":   mk(new Tone.MembraneSynth({pitchDecay:0.05,octaves:4,oscillator:{type:"sine"}})).triggerAttackRelease("C3", duration, time, velocity); break;
+                case "Crash":   mk(new Tone.NoiseSynth({ noise:{type:"pink"}, envelope:{attack:0.01,decay:1.5,sustain:0} })).triggerAttackRelease(duration, time, velocity); break;
             }
         }
     };
 }
+
 
 function showToast(msg) {
     toastEl.innerText = msg;
@@ -150,7 +179,23 @@ async function fetchLoops() {
 
 function renderCatalog() {
     catalogList.innerHTML = '';
-    loopsData.forEach(loop => {
+    
+    filteredLoops = loopsData.filter(loop => {
+        // Search
+        if (currentSearchQuery) {
+            const query = currentSearchQuery.toLowerCase();
+            const textToSearch = `${loop.name} ${loop.instrument}`.toLowerCase();
+            if (!textToSearch.includes(query)) return false;
+        }
+        // Star Filter
+        if (currentStarFilter > 0) {
+            const rating = (loopMeta[loop._filename] || {}).rating || 0;
+            if (rating !== currentStarFilter) return false;
+        }
+        return true;
+    });
+
+    filteredLoops.forEach(loop => {
         const div = document.createElement('div');
         div.className = 'catalog-item';
         
@@ -170,14 +215,26 @@ function renderCatalog() {
         // Info
         const info = document.createElement('div');
         info.className = 'item-info';
-        info.innerHTML = `
-            <div class="item-name">${loop.name}</div>
-            <div class="item-meta">
-                <span><span class="material-icons">speed</span> ${loop.bpm} BPM</span>
-                <span><span class="material-icons">piano</span> ${loop.instrument}</span>
-                <span><span class="material-icons">straighten</span> ${loop.steps} steps</span>
-            </div>
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'item-name';
+        nameEl.textContent = loop.name;
+
+        const metaEl = document.createElement('div');
+        metaEl.className = 'item-meta';
+        metaEl.innerHTML = `
+            <span><span class="material-icons">speed</span> ${loop.bpm} BPM</span>
+            <span><span class="material-icons">piano</span> ${loop.instrument}</span>
+            <span><span class="material-icons">straighten</span> ${loop.steps} steps</span>
         `;
+
+        // Stars placed after meta tags, inside item-info
+        const currentRating = (loopMeta[loop._filename] || {}).rating || 0;
+        const stars = buildStarRating(loop._filename, currentRating);
+
+        info.appendChild(nameEl);
+        info.appendChild(metaEl);
+        info.appendChild(stars);
 
         // Controls
         const controls = document.createElement('div');
@@ -200,9 +257,9 @@ function renderCatalog() {
         btnStop.disabled = true;
         btnStop.title = 'Stop';
 
-        btnPlay.addEventListener('click', () => playLoop(loop, btnPlay, btnPause, btnStop));
-        btnPause.addEventListener('click', () => pauseLoop(btnPlay, btnPause));
-        btnStop.addEventListener('click', () => stopLoop(btnPlay, btnPause, btnStop));
+        btnPlay.addEventListener('click', () => playLoop(loop, btnPlay, btnPause, btnStop, div));
+        btnPause.addEventListener('click', () => pauseLoop(btnPlay, btnPause, div));
+        btnStop.addEventListener('click', () => stopLoop(btnPlay, btnPause, btnStop, div));
 
         controls.appendChild(btnPlay);
         controls.appendChild(btnPause);
@@ -221,7 +278,16 @@ function updateSelection() {
     selectedCount.innerText = selectedLoops.size;
     btnDownload.disabled = selectedLoops.size === 0;
     btnDelete.disabled = selectedLoops.size === 0;
-    checkAll.checked = loopsData.length > 0 && selectedLoops.size === loopsData.length;
+    
+    if (filteredLoops.length === 0) {
+        checkAll.checked = false;
+        checkAll.indeterminate = false;
+    } else {
+        // Check how many of the currently visible (filtered) loops are selected
+        const selectedVisible = filteredLoops.filter(l => selectedLoops.has(l._filename)).length;
+        checkAll.checked = selectedVisible === filteredLoops.length;
+        checkAll.indeterminate = selectedVisible > 0 && selectedVisible < filteredLoops.length;
+    }
 }
 
 function setupEventListeners() {
@@ -229,44 +295,85 @@ function setupEventListeners() {
 
     checkAll.addEventListener('change', (e) => {
         if (e.target.checked) {
-            loopsData.forEach(l => selectedLoops.add(l._filename));
+            filteredLoops.forEach(l => selectedLoops.add(l._filename));
         } else {
-            selectedLoops.clear();
+            filteredLoops.forEach(l => selectedLoops.delete(l._filename));
         }
-        renderCatalog(); // lazy way to update all checkboxes
+        renderCatalog(); 
     });
+
+    // Search
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            currentSearchQuery = e.target.value;
+            renderCatalog();
+        });
+    }
+
+    // Header Star Filter
+    const starFilterEl = document.getElementById('star-filter');
+    if (starFilterEl) {
+        starFilterEl.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', (e) => {
+                const val = parseInt(e.target.dataset.value);
+                currentStarFilter = currentStarFilter === val ? 0 : val;
+                
+                // update UI
+                starFilterEl.querySelectorAll('.star').forEach((s, idx) => {
+                    s.classList.toggle('filled', idx < currentStarFilter);
+                });
+                renderCatalog();
+            });
+        });
+    }
 
     btnDownload.addEventListener('click', batchExport);
     btnDelete.addEventListener('click', bulkDelete);
 }
 
+// Helper: clear state classes from an item element
+function clearItemState(el) {
+    if (!el) return;
+    el.classList.remove('is-loading', 'is-playing', 'is-paused');
+}
+
 // --- Playback Logic ---
-async function playLoop(loopData, btnPlay, btnPause, btnStop) {
+async function playLoop(loopData, btnPlay, btnPause, btnStop, itemEl) {
     await initAudioContext();
     if (Tone.context.state !== 'running') await Tone.start();
-    
-    // If it's already the active loop and we are resuming from pause
+
+    // If resuming from pause on the same loop
     if (activeSequence && activeLoopName === loopData.name && Tone.Transport.state === 'paused') {
         Tone.Transport.start();
         btnPlay.disabled = true;
         btnPause.disabled = false;
+        if (activeItemEl) {
+            clearItemState(activeItemEl);
+            activeItemEl.classList.add('is-playing');
+        }
         return;
     }
 
-    // Stop any existing entirely different loop
+    // Stop any existing loop and clear its state
     if (activeSequence) {
         Tone.Transport.stop();
         activeSequence.stop();
         activeSequence.dispose();
+        clearItemState(activeItemEl);
         document.querySelectorAll('.catalog-item .play').forEach(b => { b.disabled = false; });
         document.querySelectorAll('.catalog-item .pause').forEach(b => { b.disabled = true; });
         document.querySelectorAll('.catalog-item .stop').forEach(b => { b.disabled = true; });
     }
 
+    // Set loading state immediately
+    activeItemEl = itemEl;
     activeLoopName = loopData.name;
+    clearItemState(itemEl);
+    itemEl.classList.add('is-loading');
     btnPlay.disabled = true;
-    btnPause.disabled = false;
-    btnStop.disabled = false;
+    btnPause.disabled = true;
+    btnStop.disabled = true;
 
     Tone.Transport.bpm.value = loopData.bpm || 120;
     Tone.Transport.swing = loopData.swing || 0.0;
@@ -274,6 +381,12 @@ async function playLoop(loopData, btnPlay, btnPause, btnStop) {
 
     const currentSynth = synths[loopData.instrument] || synths.piano;
     const stepsArray = Array.from({length: loopData.steps}, (_, i) => i);
+
+    // Transition from loading → playing
+    clearItemState(itemEl);
+    itemEl.classList.add('is-playing');
+    btnPause.disabled = false;
+    btnStop.disabled = false;
     
     // Preserve full metadata for notes
     const stepNotes = {};
@@ -318,46 +431,48 @@ function renderEq() {
         eqBars.forEach(bar => bar.style.height = '4px');
         return;
     }
-    
-    const values = fft.getValue();
+
+    const bufferLength = fft.frequencyBinCount; // = fftSize / 2 = 128
+    const dataArray = new Uint8Array(bufferLength);
+    fft.getByteFrequencyData(dataArray);
+
     for (let i = 0; i < eqBars.length; i++) {
-        // Values array may be larger than 72, we just take the first 72 bands
-        let db = values[i] !== undefined ? values[i] : -100;
-        if (!isFinite(db)) db = -100;
-        
-        // More sensitive
-        let normalized = (db + 75) / 65; 
-        if (normalized < 0) normalized = 0;
-        if (normalized > 1) normalized = 1;
-        
-        normalized = Math.pow(normalized, 1.2);
-        
-        let height = 4 + (normalized * 36); 
+        // Map 72 bars across 128 frequency bins
+        const binIndex = Math.floor((i / eqBars.length) * bufferLength);
+        const value = dataArray[binIndex]; // 0–255
+        const normalized = value / 255;
+        const height = 4 + (normalized * 36);
         eqBars[i].style.height = `${height}px`;
     }
-    
+
     animFrameId = requestAnimationFrame(renderEq);
 }
 
-function pauseLoop(btnPlay, btnPause) {
+function pauseLoop(btnPlay, btnPause, itemEl) {
     if (activeSequence && Tone.Transport.state === 'started') {
         Tone.Transport.pause();
         btnPlay.disabled = false;
         btnPause.disabled = true;
+        if (itemEl) {
+            clearItemState(itemEl);
+            itemEl.classList.add('is-paused');
+        }
     }
 }
 
-function stopLoop(btnPlay, btnPause, btnStop) {
+function stopLoop(btnPlay, btnPause, btnStop, itemEl) {
     if (activeSequence) {
         Tone.Transport.stop();
         activeSequence.stop();
         activeSequence.dispose();
         activeSequence = null;
     }
+    clearItemState(itemEl || activeItemEl);
+    activeItemEl = null;
     if (btnPlay) btnPlay.disabled = false;
     if (btnPause) btnPause.disabled = true;
     if (btnStop) btnStop.disabled = true;
-    
+
     // Stop eq
     if (animFrameId) cancelAnimationFrame(animFrameId);
     eqBars.forEach(bar => bar.style.height = '4px');

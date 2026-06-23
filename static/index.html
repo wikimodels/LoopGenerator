@@ -43,7 +43,12 @@
         <main class="main-content">
             <!-- Sidebar / Catalog -->
             <aside class="sidebar">
-                <h3>Loop Catalog</h3>
+                <div class="sidebar-header" id="sidebar-header">
+                    <h3 id="sidebar-title">Loop Catalog</h3>
+                    <span class="material-icons search-toggle" id="btn-sidebar-search">search</span>
+                    <input type="text" id="sidebar-search-input" class="sidebar-search-input" placeholder="Search loops...">
+                    <span class="material-icons search-close" id="btn-sidebar-search-close">close</span>
+                </div>
                 <div id="loop-list" class="loop-list">
                     <!-- Loops will be populated here -->
                 </div>
@@ -51,80 +56,96 @@
 
             <!-- Main Editor -->
             <section class="editor">
-                <div class="controls-panel">
-                    <div class="control-group">
-                        <label for="loop-name">Loop Name</label>
-                        <input type="text" id="loop-name" value="My New Loop" class="input-text">
-                    </div>
-                    
-                    <div class="control-group">
-                        <label for="bpm-slider">BPM: <span id="bpm-val">120</span></label>
-                        <input type="range" id="bpm-slider" min="60" max="240" value="120" class="slider">
-                    </div>
-
-                    <div class="control-group">
-                        <label for="swing-slider">Swing: <span id="swing-val">0.0</span></label>
-                        <input type="range" id="swing-slider" min="0" max="1" step="0.05" value="0" class="slider">
-                    </div>
-
-                    <div class="control-group">
-                        <label for="key-select">Key</label>
-                        <select id="key-select" class="select-dropdown">
-                            <option value="C" selected>C</option>
-                            <option value="C#">C# / Db</option>
-                            <option value="D">D</option>
-                            <option value="D#">D# / Eb</option>
-                            <option value="E">E</option>
-                            <option value="F">F</option>
-                            <option value="F#">F# / Gb</option>
-                            <option value="G">G</option>
-                            <option value="G#">G# / Ab</option>
-                            <option value="A">A</option>
-                            <option value="A#">A# / Bb</option>
-                            <option value="B">B</option>
-                        </select>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="scale-select">Scale</label>
-                        <select id="scale-select" class="select-dropdown">
-                            <option value="Major" selected>Major</option>
-                            <option value="Minor">Minor</option>
-                            <option value="Pentatonic">Pentatonic</option>
-                        </select>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="instrument-select">Instrument</label>
-                        <select id="instrument-select" class="select-dropdown">
-                            <option value="piano">Real Piano</option>
-                            <option value="synth">Poly Synth</option>
-                            <option value="amSynth">AM Synth</option>
-                            <option value="fmSynth">FM Synth</option>
-                            <option value="drums">Drum Kit</option>
-                        </select>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="steps-select">Steps</label>
-                        <select id="steps-select" class="select-dropdown">
-                            <option value="8">8</option>
-                            <option value="16" selected>16</option>
-                            <option value="32">32</option>
-                            <option value="64">64</option>
-                            <option value="128">128</option>
-                            <option value="256">256</option>
-                        </select>
-                    </div>
-
+                <div class="controls-panel compact">
                     <div class="playback-controls">
-                        <button id="btn-play" class="btn icon-btn play">
-                            <span class="material-icons">play_arrow</span>
+                        <button id="btn-play" class="btn icon-btn play" title="Play/Pause">
+                            <span class="material-icons" id="play-icon">play_arrow</span>
                         </button>
-                        <button id="btn-stop" class="btn icon-btn stop">
+                        <button id="btn-stop" class="btn icon-btn stop" title="Stop">
                             <span class="material-icons">stop</span>
                         </button>
-                        <button id="btn-clear" class="btn secondary">Clear Grid</button>
+                    </div>
+
+                    <div class="control-group">
+                        <input type="text" id="loop-name" value="My New Loop" class="input-text loop-name-input" placeholder="Loop Name" title="Loop Name">
+                    </div>
+
+                    <div class="divider"></div>
+                    
+                    <div style="display: flex; flex: 1; justify-content: space-evenly; align-items: center; gap: 1rem;">
+                        <div class="control-group inline">
+                            <span class="material-icons icon-label" title="BPM">speed</span>
+                            <input type="range" id="bpm-slider" min="60" max="240" value="120" class="slider compact-slider" title="BPM">
+                            <span id="bpm-val" class="val-display">120</span>
+                        </div>
+
+                        <div class="control-group inline">
+                            <span class="material-icons icon-label" title="Swing">waves</span>
+                            <input type="range" id="swing-slider" min="0" max="1" step="0.05" value="0" class="slider compact-slider" title="Swing">
+                            <span id="swing-val" class="val-display">0.0</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-basis: 100%; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+                        <div class="control-group">
+                            <select id="key-select" class="select-dropdown" title="Key">
+                                <option value="C" selected>C</option>
+                                <option value="C#">C# / Db</option>
+                                <option value="D">D</option>
+                                <option value="D#">D# / Eb</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="F#">F# / Gb</option>
+                                <option value="G">G</option>
+                                <option value="G#">G# / Ab</option>
+                                <option value="A">A</option>
+                                <option value="A#">A# / Bb</option>
+                                <option value="B">B</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <select id="scale-select" class="select-dropdown" title="Scale">
+                                <option value="Major" selected>Major</option>
+                                <option value="Minor">Minor</option>
+                                <option value="Pentatonic">Pentatonic</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <select id="instrument-select" class="select-dropdown" title="Instrument">
+                                <option value="piano">Real Piano</option>
+                                <option value="synth">Poly Synth</option>
+                                <option value="amSynth">AM Synth</option>
+                                <option value="fmSynth">FM Synth</option>
+                                <option value="drums">Drum Kit</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <select id="steps-select" class="select-dropdown" title="Steps">
+                                <option value="8">8 Steps</option>
+                                <option value="16" selected>16 Steps</option>
+                                <option value="32">32 Steps</option>
+                                <option value="64">64 Steps</option>
+                                <option value="128">128 Steps</option>
+                                <option value="256">256 Steps</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group star-rating-group" title="Loop Rating">
+                            <div class="star-rating" id="current-loop-rating">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                        </div>
+
+                        <button id="btn-clear" class="btn icon-btn secondary" title="Clear Grid">
+                            <span class="material-icons">delete_sweep</span>
+                        </button>
                     </div>
                 </div>
 
@@ -138,53 +159,73 @@
 
     <!-- Instructions Modal -->
     <div id="instructions-modal" class="modal hidden">
-        <div class="modal-content">
+        <div class="modal-content wide">
             <div class="modal-header">
                 <h2>Instructions & AI Prompt</h2>
-                <button id="btn-close-modal" class="icon-btn stop"><span class="material-icons">close</span></button>
+                <button id="btn-close-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
             </div>
             <div class="modal-body">
-                <h2>AI Prompt Generator</h2>
-                <p>Copy the prompt below and send it to an AI (like ChatGPT, Claude, etc.) to have it generate beautiful music loops for you!</p>
-                <div class="ai-prompt-container">
-                    <button id="btn-copy-prompt" class="btn secondary" style="margin-bottom: 0.5rem;"><span class="material-icons">content_copy</span> Copy Prompt</button>
+                <div class="ai-prompt-container" style="margin: 20px 0;">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+                        <button id="btn-copy-prompt" class="btn secondary" style="transform: scale(0.8); transform-origin: right center;"><span class="material-icons">content_copy</span> Copy Prompt</button>
+                    </div>
                     <textarea id="ai-prompt-text" class="input-text prompt-textarea" readonly>
-You are an expert music producer and sound designer. I have a custom web-based step sequencer built with Tone.js.
-I want you to generate a JSON file containing a musical loop. 
+You are an expert music producer, beatmaker, and sound designer. I am building a custom web-based step sequencer using Tone.js and I need you to generate loops for me.
 
-Here are the strict technical constraints you MUST follow:
-1. The JSON must be an ARRAY of loop objects:
+IMPORTANT: Before doing anything else, please recall and review the official Tone.js documentation, especially regarding Timing/Time notation (such as "16n", "8n", "8t", "4n", "2m", etc.) and note formats.
+
+Once you have that context, generate a JSON file containing a musical loop. You MUST strictly follow these technical constraints:
+
+1. Format: The output MUST be a JSON ARRAY containing one or more loop objects.
+Example:
 [
   {
-    "name": "Name of your loop",
-    "bpm": 120, // (integer, 60 to 240)
-    "instrument": "piano", // (one of: "piano", "synth", "amSynth", "fmSynth", "drums")
-    "steps": 16, // (integer, controls loop length. 16, 32, 64)
-    "key": "C", // (string, one of: "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
-    "scale": "Major", // (string, one of: "Major", "Minor", "Pentatonic")
-    "swing": 0.0, // (float from 0.0 to 1.0) controls the groove/shuffle of the beat.
+    "name": "Cyberpunk FM Bassline",
+    "bpm": 130, // integer from 60 to 240
+    "instrument": "fmSynth", // MUST BE EXACTLY ONE OF: "piano", "synth", "amSynth", "fmSynth", "drums"
+    "steps": 16, // typical lengths: 16, 32, 64
+    "key": "A", // "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+    "scale": "Minor", // "Major", "Minor", "Pentatonic"
+    "swing": 0.0, // float from 0.0 to 1.0
     "notes": [
-      {"step": 0, "note": "C4", "duration": "8n"}
+      {"step": 0, "note": "A4", "duration": "16n", "velocity": 1.0},
+      {"step": 3, "note": "C5", "duration": "16n", "velocity": 0.6}
     ]
   }
 ]
 
-2. The "notes" array contains the melody/beat.
-- "step": an integer from 0 to (steps - 1). 
-- "note": 
-   - If instrument is melodic (e.g. piano), it must be a valid note from your chosen Key and Scale (e.g. C4, D#4).
-   - If instrument is "drums", it must be exactly one of: "Crash", "Tom H", "Tom L", "OpenHat", "HiHat", "Clap", "Snare", "Kick".
-- "duration": standard Tone.js duration like "8n", "16n", "4n".
-- "velocity": a float from 0.0 to 1.0 representing how hard the key is struck (volume). Default is 1.0. Use this for dynamics and ghost notes!
-- "chance": a float from 0.0 to 1.0. The probability that this note will trigger. E.g., 0.5 means it plays 50% of the time. Default is 1.0.
+2. The "notes" Array Rules:
+- "step": Integer representing the position in the sequencer grid (0-indexed). For a 16-step loop, steps are 0 to 15.
+- "duration": MUST use valid Tone.js duration notation (e.g., "16n" for 16th note, "8n" for 8th note, "4n" for quarter note, "32n", "8t").
+- "velocity": Float from 0.0 to 1.0. Use this heavily to create groove, accents, and ghost notes!
+- "chance" (optional): Float from 0.0 to 1.0 representing probability of the note playing.
 
-3. Musical Guidance:
-- Keep the melody coherent.
-- You can place multiple notes on the same "step" to create chords.
-- Be creative with rhythmic patterns across all your steps.
-- "piano" is a real acoustic piano sampler, "synth" is a standard PolySynth, "amSynth" is good for bells/electric pianos, "fmSynth" is good for aggressive/metallic tones.
+3. "note" Pitch Rules (CRITICAL):
+A. Melodic Instruments ("piano", "synth", "amSynth", "fmSynth"):
+- Use standard scientific pitch notation (e.g., "C4", "D#5", "Bb3").
+- Ensure all notes strictly belong to the specified "key" and "scale".
+- You can place multiple notes on the exact same "step" to create chords.
 
-Generate a complete, raw JSON response for a cool loop without any markdown blocks.
+B. Drum Kit ("drums"):
+- If the instrument is "drums", the "note" field MUST be EXACTLY one of these strings (no standard pitches!):
+  - "Kick" (Membrane synth, deep sub)
+  - "Snare" (Noise synth)
+  - "Clap" (Noise synth)
+  - "HiHat" (Short closed hat)
+  - "OpenHat" (Long open hat)
+  - "Tom H" (High tom)
+  - "Tom L" (Low tom)
+  - "Crash" (Long cymbal crash)
+- Example drum note: {"step": 4, "note": "Snare", "duration": "16n", "velocity": 1.0}
+
+4. Musical Guidelines:
+- "piano": Real acoustic piano.
+- "synth": PolySynth (good for chords/pads).
+- "amSynth": AM Synth (good for bells/electric pianos).
+- "fmSynth": FM Synth (good for aggressive/metallic basses and leads).
+- Add polyrhythms, syncopation, and realistic velocities to make it sound human.
+
+Output ONLY valid JSON. No markdown blocks, no explanations.
 </textarea>
                 </div>
             </div>
@@ -196,7 +237,7 @@ Generate a complete, raw JSON response for a cool loop without any markdown bloc
         <div class="modal-content wide">
             <div class="modal-header">
                 <h2>Insert JSON Loops</h2>
-                <button id="btn-close-insert" class="icon-btn stop"><span class="material-icons">close</span></button>
+                <button id="btn-close-insert" class="modal-close-btn"><span class="material-icons">close</span></button>
             </div>
             <div class="modal-body">
                 <p>Paste a JSON <strong>Array</strong> of loop objects to import them into your catalog.</p>

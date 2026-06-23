@@ -21,7 +21,7 @@
 
 .prompt-textarea {
     width: 100%;
-    height: 250px;
+    height: 60vh;
     font-family: 'Consolas', 'Courier New', monospace;
     font-size: 0.8rem;
     padding: 1rem;
@@ -30,6 +30,11 @@
     border: 1px solid var(--border-color);
     resize: vertical;
     white-space: pre;
+    scrollbar-width: none; /* Firefox */
+}
+
+.prompt-textarea::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 .ai-prompt-container {

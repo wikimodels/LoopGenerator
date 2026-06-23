@@ -127,9 +127,84 @@ body {
     gap: 0.5rem;
 }
 
-.sidebar h3 {
-    font-size: 0.9rem;
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 0.25rem;
+    height: 24px;
+    position: relative;
+}
+
+.sidebar-header h3 {
+    font-size: 0.9rem;
+    margin: 0;
+    transition: opacity 0.2s;
+}
+
+.search-toggle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s, opacity 0.2s;
+}
+
+.search-toggle:hover {
+    color: var(--text-color);
+}
+
+.sidebar-search-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 4px;
+    padding: 0 1.5rem 0 0.5rem;
+    font-size: 0.8rem;
+    outline: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, border-color 0.2s;
+    z-index: 2;
+}
+
+.sidebar-search-input:focus {
+    border-color: var(--primary);
+}
+
+.search-close {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, color 0.2s;
+    z-index: 3;
+}
+
+.search-close:hover {
+    color: var(--text-color);
+}
+
+/* Active Search State */
+.sidebar-header.search-active h3,
+.sidebar-header.search-active .search-toggle {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sidebar-header.search-active .sidebar-search-input,
+.sidebar-header.search-active .search-close {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .loop-list {
@@ -137,6 +212,12 @@ body {
     flex-direction: column;
     gap: 0;
     overflow-y: auto;
+    flex: 1;
+    scrollbar-width: none; /* Firefox */
+}
+
+.loop-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 .loop-item {
@@ -181,27 +262,75 @@ body {
     gap: 1rem;
 }
 
-.controls-panel {
+.controls-panel.compact {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-end;
+    gap: 0.75rem;
+    align-items: center;
     background-color: var(--panel-bg);
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
 }
 
-.control-group {
-    display: flex;
-    flex-direction: column;
+.controls-panel.compact .divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--border-color);
+    margin: 0 0.25rem;
+}
+
+.controls-panel.compact .break {
+    flex-basis: 100%;
+    height: 0;
+}
+
+.control-group.inline {
+    flex-direction: row;
+    align-items: center;
     gap: 0.5rem;
 }
 
-.control-group label {
+.icon-label {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.val-display {
     font-size: 0.75rem;
     color: var(--text-muted);
-    margin-bottom: 0.1rem;
+    min-width: 1.5rem;
+    text-align: right;
+}
+
+.loop-name-input {
+    width: 420px;
+    font-weight: 600;
+}
+
+.compact-slider {
+    width: 100px;
+}
+
+.star-rating-group .star-rating {
+    font-size: 1.2rem;
+    display: flex;
+    gap: 0.1rem;
+}
+
+.star-rating .star {
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s;
+}
+
+.star-rating .star.filled,
+.star-rating .star.hovered {
+    color: #eab308; /* Yellow */
+}
+
+.icon-btn.play.paused {
+    background-color: #eab308; /* Yellow */
 }
 
 .input-text, .select-dropdown {
