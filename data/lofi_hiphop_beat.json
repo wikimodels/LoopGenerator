@@ -1,0 +1,32 @@
+{
+    "name": "Lo-Fi Hip-Hop Beat (Heavy Swing)",
+    "bpm": 82,
+    "instrument": "drums",
+    "steps": 16,
+    "swing": 0.65,
+    "notes": [
+        {"step": 0, "note": "Kick", "duration": "8n", "velocity": 1.0},
+        {"step": 3, "note": "Kick", "duration": "8n", "velocity": 0.5, "chance": 0.7},
+        {"step": 7, "note": "Kick", "duration": "8n", "velocity": 0.8},
+        {"step": 10, "note": "Kick", "duration": "8n", "velocity": 0.6},
+        
+        {"step": 4, "note": "Snare", "duration": "8n", "velocity": 1.0},
+        {"step": 12, "note": "Snare", "duration": "8n", "velocity": 1.0},
+        {"step": 15, "note": "Snare", "duration": "8n", "velocity": 0.3, "chance": 0.4},
+        
+        {"step": 0, "note": "HiHat", "duration": "16n", "velocity": 0.8},
+        {"step": 1, "note": "HiHat", "duration": "16n", "velocity": 0.4},
+        {"step": 2, "note": "HiHat", "duration": "16n", "velocity": 0.6},
+        {"step": 3, "note": "HiHat", "duration": "16n", "velocity": 0.3},
+        {"step": 4, "note": "HiHat", "duration": "16n", "velocity": 0.7},
+        {"step": 5, "note": "HiHat", "duration": "16n", "velocity": 0.4},
+        {"step": 6, "note": "OpenHat", "duration": "8n", "velocity": 0.6},
+        {"step": 8, "note": "HiHat", "duration": "16n", "velocity": 0.8},
+        {"step": 9, "note": "HiHat", "duration": "16n", "velocity": 0.4},
+        {"step": 10, "note": "HiHat", "duration": "16n", "velocity": 0.6},
+        {"step": 11, "note": "HiHat", "duration": "16n", "velocity": 0.3},
+        {"step": 12, "note": "HiHat", "duration": "16n", "velocity": 0.7},
+        {"step": 13, "note": "HiHat", "duration": "16n", "velocity": 0.4},
+        {"step": 14, "note": "OpenHat", "duration": "8n", "velocity": 0.6}
+    ]
+}

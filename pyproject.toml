@@ -1,0 +1,19 @@
+[project]
+name = "loop-generator"
+version = "0.1.0"
+description = "Music loop generator and player"
+authors = [
+    {name = "User",email = "user@example.com"}
+]
+readme = "README.md"
+requires-python = "^3.10"
+dependencies = [
+    "fastapi (>=0.138.0,<0.139.0)",
+    "uvicorn (>=0.49.0,<0.50.0)",
+    "pydantic (>=2.13.4,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

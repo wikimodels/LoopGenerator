@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loop Catalog - LoopGenerator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_catalog.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Tone.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- JSZip CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="top-bar">
+            <div class="logo">
+                <span class="material-icons">library_music</span>
+                Loop Catalog
+            </div>
+            <div class="header-actions">
+                <a href="index.html" class="btn secondary" title="Back to Editor">
+                    <span class="material-icons">arrow_back</span> Editor
+                </a>
+            </div>
+        </header>
+
+        <main class="main-content catalog-main">
+            <div class="catalog-header">
+                <div class="header-title-row">
+                    <h2>Your Loops</h2>
+                    <label class="custom-checkbox-wrapper">
+                        <input type="checkbox" id="check-all">
+                        <span class="checkmark"></span>
+                        Select All
+                    </label>
+                </div>
+                <div class="action-bar-content">
+                    <div class="selection-info">
+                        <span id="selected-count">0</span> selected
+                    </div>
+                    
+                    <div id="progress-container" class="progress-container hidden">
+                        <div class="progress-text" id="progress-text">Exporting...</div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Equalizer Container -->
+                    <div class="header-eq" id="header-eq">
+                        <div class="eq-bar"></div><div class="eq-bar"></div>
+                        <div class="eq-bar"></div><div class="eq-bar"></div>
+                        <div class="eq-bar"></div><div class="eq-bar"></div>
+                        <div class="eq-bar"></div><div class="eq-bar"></div>
+                        <div class="eq-bar"></div><div class="eq-bar"></div>
+                        <div class="eq-bar"></div><div class="eq-bar"></div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="btn-delete-selected" class="btn danger" disabled>
+                            <span class="material-icons">delete</span> Bulk Delete
+                        </button>
+                        <button id="btn-download-selected" class="btn primary" disabled>
+                            <span class="material-icons">archive</span> Download ZIP
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="catalog-list" class="catalog-list">
+                <!-- Loops rendered here via JS -->
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">Message</div>
+
+    <script src="catalog.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+"name": "Ascending Arpeggio Loop",
+"bpm": 125,
+"instrument": "piano",
+"steps": 16,
+"notes": [
+{"step": 0, "note": "C4", "duration": "8n"},
+{"step": 2, "note": "E4", "duration": "8n"},
+{"step": 4, "note": "G4", "duration": "8n"},
+{"step": 6, "note": "C5", "duration": "8n"},
+{"step": 8, "note": "B4", "duration": "8n"},
+{"step": 10, "note": "G4", "duration": "8n"},
+{"step": 12, "note": "E4", "duration": "8n"},
+{"step": 14, "note": "C4", "duration": "8n"}
+]
+}

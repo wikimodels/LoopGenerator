@@ -1,0 +1,24 @@
+{
+  "name": "Dancing Fairies",
+  "bpm": 130,
+  "instrument": "synth",
+  "steps": 32,
+  "notes": [
+    {"step": 0, "note": "C5", "duration": "16n"},
+    {"step": 2, "note": "G4", "duration": "16n"},
+    {"step": 3, "note": "E4", "duration": "16n"},
+    {"step": 5, "note": "C5", "duration": "16n"},
+    {"step": 8, "note": "B4", "duration": "16n"},
+    {"step": 10, "note": "G4", "duration": "16n"},
+    {"step": 11, "note": "D4", "duration": "16n"},
+    {"step": 13, "note": "F4", "duration": "16n"},
+    {"step": 16, "note": "A4", "duration": "16n"},
+    {"step": 18, "note": "E4", "duration": "16n"},
+    {"step": 19, "note": "C4", "duration": "16n"},
+    {"step": 21, "note": "A4", "duration": "16n"},
+    {"step": 24, "note": "G4", "duration": "16n"},
+    {"step": 26, "note": "E4", "duration": "16n"},
+    {"step": 27, "note": "C4", "duration": "16n"},
+    {"step": 29, "note": "G4", "duration": "16n"}
+  ]
+}

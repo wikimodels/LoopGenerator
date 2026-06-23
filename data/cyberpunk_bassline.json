@@ -1,0 +1,22 @@
+{
+    "name": "Cyberpunk FM Bassline",
+    "bpm": 130,
+    "instrument": "fmSynth",
+    "steps": 16,
+    "key": "A",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {"step": 0, "note": "A4", "duration": "16n", "velocity": 1.0},
+        {"step": 1, "note": "A4", "duration": "16n", "velocity": 0.4},
+        {"step": 2, "note": "A4", "duration": "16n", "velocity": 0.8},
+        {"step": 3, "note": "C5", "duration": "16n", "velocity": 0.6},
+        {"step": 6, "note": "A4", "duration": "16n", "velocity": 0.9},
+        {"step": 7, "note": "D5", "duration": "16n", "velocity": 0.7},
+        {"step": 8, "note": "E5", "duration": "8n", "velocity": 1.0},
+        {"step": 11, "note": "C5", "duration": "16n", "velocity": 0.6},
+        {"step": 12, "note": "A4", "duration": "16n", "velocity": 0.8},
+        {"step": 14, "note": "G4", "duration": "16n", "velocity": 0.7},
+        {"step": 15, "note": "A4", "duration": "16n", "velocity": 0.5}
+    ]
+}
