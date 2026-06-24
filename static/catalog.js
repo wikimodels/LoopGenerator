@@ -27,6 +27,7 @@ const checkAll = document.getElementById('check-all');
 const selectedCount = document.getElementById('selected-count');
 const btnDownload = document.getElementById('btn-download-selected');
 const btnDownloadJson = document.getElementById('btn-download-json');
+const btnInsertJson = document.getElementById('btn-insert-json');
 const btnMergeDownload = document.getElementById('btn-merge-download');
 const btnDelete = document.getElementById('btn-delete-selected');
 const progressContainer = document.getElementById('progress-container');
@@ -46,6 +47,12 @@ const btnMergeConfirmDownload = document.getElementById('btn-merge-confirm-downl
 const mergeProgressContainer = document.getElementById('merge-progress-container');
 const mergeProgressText = document.getElementById('merge-progress-text');
 const mergeProgressFill = document.getElementById('merge-progress-fill');
+
+// Insert JSON Modal Elements
+const insertModal = document.getElementById('insert-modal');
+const btnCloseInsert = document.getElementById('btn-close-insert');
+const btnImportPasted = document.getElementById('btn-import-pasted');
+const jsonPasteArea = document.getElementById('json-paste-area');
 
 // Bank of words for poetic loop names
 const poeticWords = {
@@ -455,6 +462,59 @@ function setupEventListeners() {
             a.click();
             URL.revokeObjectURL(url);
             showToast("JSON downloaded!");
+        });
+    }
+
+    if (btnInsertJson) {
+        btnInsertJson.addEventListener('click', () => {
+            insertModal.classList.remove('hidden');
+        });
+    }
+
+    if (btnCloseInsert) {
+        btnCloseInsert.addEventListener('click', () => {
+            insertModal.classList.add('hidden');
+        });
+    }
+
+    if (insertModal) {
+        insertModal.addEventListener('click', (e) => {
+            if (e.target === insertModal) {
+                insertModal.classList.add('hidden');
+            }
+        });
+    }
+
+    if (btnImportPasted) {
+        btnImportPasted.addEventListener('click', async () => {
+            const text = jsonPasteArea.value.trim();
+            if (!text) return;
+            try {
+                const data = JSON.parse(text);
+                if (!Array.isArray(data)) {
+                    showToast("Error: JSON must be an array [...]");
+                    return;
+                }
+                
+                let successCount = 0;
+                for (const loop of data) {
+                    const res = await fetch('/api/loops', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(loop)
+                    });
+                    if (res.ok) successCount++;
+                }
+                
+                showToast(`Imported ${successCount} loops!`);
+                fetchLoops(); // refresh catalog
+                
+                insertModal.classList.add('hidden');
+                jsonPasteArea.value = ''; // clear after success
+            } catch (err) {
+                showToast("Invalid JSON text");
+                console.error(err);
+            }
         });
     }
 

@@ -25,6 +25,9 @@
                 Loop Catalog
             </div>
             <div class="header-actions">
+                <button id="btn-insert-json" class="btn secondary" title="Insert JSON">
+                    <span class="material-icons">data_object</span> Insert JSON
+                </button>
                 <a href="index.html" class="btn secondary" title="Back to Editor">
                     <span class="material-icons">arrow_back</span> Editor
                 </a>
@@ -132,6 +135,34 @@
                     </button>
                     <button id="btn-merge-confirm-download" class="btn primary">
                         <span class="material-icons">download</span> Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insert JSON Modal -->
+    <div id="insert-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2>Insert JSON Loops</h2>
+                <button id="btn-close-insert" class="modal-close-btn"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Paste a JSON <strong>Array</strong> of loop objects to import them into your catalog.</p>
+                <textarea id="json-paste-area" class="input-text large-textarea" placeholder="[
+  {
+    &quot;name&quot;: &quot;Loop 1&quot;,
+    ...
+  },
+  {
+    &quot;name&quot;: &quot;Loop 2&quot;,
+    ...
+  }
+]"></textarea>
+                <div style="display: flex; justify-content: flex-end;">
+                    <button id="btn-import-pasted" class="btn primary">
+                        <span class="material-icons">playlist_add</span> Import Array
                     </button>
                 </div>
             </div>
