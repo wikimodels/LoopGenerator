@@ -1086,7 +1086,21 @@ async function mergeExportFromModal() {
         const url = URL.createObjectURL(recording);
         const a = document.createElement("a");
         a.href = url;
-        const generatedName = generatePoeticName().replace(/\s+/g, '_');
+        
+        let selectedBaseName = "Merged_Loop";
+        const pianoLoop = loopsToExport.find(l => l.instrument === "piano");
+        if (pianoLoop) {
+            selectedBaseName = pianoLoop.name;
+        } else {
+            const nonDrumLoop = loopsToExport.find(l => l.instrument !== "drums");
+            if (nonDrumLoop) {
+                selectedBaseName = nonDrumLoop.name;
+            } else if (loopsToExport.length > 0) {
+                selectedBaseName = loopsToExport[0].name;
+            }
+        }
+        
+        const generatedName = selectedBaseName.replace(/\s+/g, '_');
         a.download = `---Loop_${generatedName}.webm`;
         a.click();
         URL.revokeObjectURL(url);
