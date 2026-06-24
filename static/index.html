@@ -216,7 +216,8 @@ B. Drum Kit ("drums"):
   - "Tom H" (High tom)
   - "Tom L" (Low tom)
   - "Crash" (Long cymbal crash)
-- Example drum note: {"step": 4, "note": "Snare", "duration": "16n", "velocity": 1.0}
+- PROHIBITION: Do NOT use "Crash", "OpenHat", "HiHat", "Clap", or "Snare" without special permission. If you think the requested genre deeply requires them, you MUST first ask the user for permission before generating the loop.
+- Example drum note: {"step": 4, "note": "Kick", "duration": "16n", "velocity": 1.0}
 
 4. Musical Guidelines:
 - "piano": Real acoustic piano.
@@ -229,6 +230,9 @@ B. Drum Kit ("drums"):
 - The length of the generated loop MUST be a minimum of 8 seconds in real time.
 - You must calculate the appropriate number of steps, BPM, and note durations based on this 8-second minimum.
 - If anything is unclear, please make suggestions or ask for clarifications.
+
+6. Mixed Loops Naming Convention:
+- The naming convention for mixed loops MUST follow this pattern: ---Loop_{loop_name}.{file_extension}
 
 Please output the JSON block within markdown code tags. You may include suggestions or explanations outside of the JSON block if needed.
 </textarea>

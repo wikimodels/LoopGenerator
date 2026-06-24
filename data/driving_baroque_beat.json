@@ -1,0 +1,88 @@
+{
+    "name": "Driving Baroque Beat",
+    "bpm": 140,
+    "instrument": "drums",
+    "steps": 32,
+    "notes": [
+        {
+            "step": 0,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 2,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 4,
+            "note": "Snare",
+            "duration": "16n"
+        },
+        {
+            "step": 6,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 8,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 10,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 12,
+            "note": "Snare",
+            "duration": "16n"
+        },
+        {
+            "step": 14,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 16,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 18,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 20,
+            "note": "Snare",
+            "duration": "16n"
+        },
+        {
+            "step": 22,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 24,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 26,
+            "note": "Tom H",
+            "duration": "16n"
+        },
+        {
+            "step": 28,
+            "note": "Snare",
+            "duration": "16n"
+        },
+        {
+            "step": 30,
+            "note": "Crash",
+            "duration": "8n"
+        }
+    ]
+}
