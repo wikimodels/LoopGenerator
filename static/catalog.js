@@ -47,6 +47,21 @@ const mergeProgressContainer = document.getElementById('merge-progress-container
 const mergeProgressText = document.getElementById('merge-progress-text');
 const mergeProgressFill = document.getElementById('merge-progress-fill');
 
+// Bank of words for poetic loop names
+const poeticWords = {
+    actions: ["Echoes", "Dancing", "Lost", "Shadows", "Rhythm", "Whispers", "Memories", "Footsteps", "Dreams", "Visions", "Signals", "Voices", "Secrets", "Illusions", "Sparks", "Fragments", "Awakening", "Journey", "Falling", "Floating", "Drifting", "Running", "Hiding", "Waiting", "Breathing", "Fading", "Glowing", "Vibrations", "Pulses", "Glimmers"],
+    prepositions: ["In", "Of", "Under", "Beyond", "Through", "Across", "Within", "Towards", "Above", "Below"],
+    places: ["Future", "Dark", "Quantum Space", "Neon", "Night", "Abyss", "Void", "City", "Ocean", "Forest", "Desert", "Cosmos", "Galaxy", "Simulation", "Matrix", "Storm", "Silence", "Nebula", "Horizon", "Twilight", "Dawn", "Dusk", "Midnight", "Unknown", "Aether", "Rain", "Mist", "Shadows", "Light", "Eternity"]
+};
+
+function generatePoeticName() {
+    const action = poeticWords.actions[Math.floor(Math.random() * poeticWords.actions.length)];
+    const prep = poeticWords.prepositions[Math.floor(Math.random() * poeticWords.prepositions.length)];
+    const place = poeticWords.places[Math.floor(Math.random() * poeticWords.places.length)];
+    
+    return `${action} ${prep} ${place} Loop`;
+}
+
 // --- Initialization ---
 async function init() {
     await fetchMeta();
@@ -60,6 +75,17 @@ async function init() {
         bar.className = 'eq-bar';
         headerEq.appendChild(bar);
     }
+    
+    const mergeEq = document.getElementById('merge-eq');
+    if (mergeEq) {
+        mergeEq.innerHTML = '';
+        for(let i = 0; i < 72; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'eq-bar';
+            mergeEq.appendChild(bar);
+        }
+    }
+    
     eqBars = Array.from(document.querySelectorAll('.eq-bar'));
     
     setupEventListeners();
@@ -143,16 +169,17 @@ async function initAudioContext() {
 
     // Silent synths for background rendering (export)
     recorder = new Tone.Recorder();
+    const mergeLimiter = new Tone.Limiter(-2).connect(recorder); // Limit at -2dB to prevent clipping
     silentSynths = {
-        synth: new Tone.PolySynth(Tone.Synth).connect(recorder),
-        amSynth: new Tone.PolySynth(Tone.AMSynth).connect(recorder),
-        fmSynth: new Tone.PolySynth(Tone.FMSynth).connect(recorder),
+        synth: new Tone.PolySynth(Tone.Synth).connect(mergeLimiter),
+        amSynth: new Tone.PolySynth(Tone.AMSynth).connect(mergeLimiter),
+        fmSynth: new Tone.PolySynth(Tone.FMSynth).connect(mergeLimiter),
         piano: new Tone.Sampler({
             urls: { "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3" },
             release: 1,
             baseUrl: "https://tonejs.github.io/audio/salamander/"
-        }).connect(recorder),
-        drums: createDrumKit(recorder)
+        }).connect(mergeLimiter),
+        drums: createDrumKit(mergeLimiter)
     };
 
     isAudioInitialized = true;
@@ -576,12 +603,13 @@ function renderEq() {
     const dataArray = new Uint8Array(bufferLength);
     fft.getByteFrequencyData(dataArray);
 
+    const numBarsPerEq = 72;
     for (let i = 0; i < eqBars.length; i++) {
-        // Map 72 bars across 128 frequency bins
-        const binIndex = Math.floor((i / eqBars.length) * bufferLength);
+        const localIndex = i % numBarsPerEq;
+        const binIndex = Math.floor((localIndex / numBarsPerEq) * bufferLength);
         const value = dataArray[binIndex]; // 0–255
         const normalized = value / 255;
-        const height = 4 + (normalized * 36);
+        const height = Math.round(4 + (normalized * 36));
         eqBars[i].style.height = `${height}px`;
     }
 
@@ -749,11 +777,16 @@ function openMergeModal() {
         const div = document.createElement('div');
         div.className = 'merge-track-item';
         div.innerHTML = `
-            <span class="name">${loop.name}</span>
-            <div class="meta">
-                <span><span class="material-icons">speed</span> ${loop.bpm}</span>
-                <span><span class="material-icons">piano</span> ${loop.instrument}</span>
-                <span><span class="material-icons">straighten</span> ${loop.steps} steps</span>
+            <div class="merge-track-item-header">
+                <span class="name">${loop.name}</span>
+                <div class="meta">
+                    <span><span class="material-icons">speed</span> ${loop.bpm}</span>
+                    <span><span class="material-icons">piano</span> ${loop.instrument}</span>
+                </div>
+            </div>
+            <div class="track-volume">
+                <span class="material-icons" style="font-size:16px;">volume_up</span>
+                <input type="range" class="merge-track-vol compact-slider" data-filename="${loop._filename}" min="0" max="2" step="0.05" value="1.0">
             </div>
         `;
         mergeTrackList.appendChild(div);
@@ -823,12 +856,21 @@ async function startPreview() {
     const masterStepNotes = {}; 
     for (let s = 0; s < maxSteps; s++) { masterStepNotes[s] = []; }
 
+    const trackVolumes = {};
+    document.querySelectorAll('.merge-track-vol').forEach(slider => {
+        trackVolumes[slider.dataset.filename] = parseFloat(slider.value);
+        slider.addEventListener('input', (e) => {
+            trackVolumes[slider.dataset.filename] = parseFloat(e.target.value);
+        });
+    });
+
     loopsToExport.forEach(loopData => {
         const loopLen = loopData.steps;
         const synthName = loopData.instrument;
         loopData.notes.forEach(n => {
             for (let targetStep = n.step; targetStep < maxSteps; targetStep += loopLen) {
                 masterStepNotes[targetStep].push({
+                    loopFilename: loopData._filename,
                     synthName: synthName,
                     note: n.note,
                     duration: n.duration || "8n",
@@ -846,7 +888,8 @@ async function startPreview() {
                 if (Math.random() <= n.chance) {
                     // Use regular synths for preview playback
                     const currentSynth = synths[n.synthName] || synths.piano;
-                    currentSynth.triggerAttackRelease(n.note, n.duration, time, n.velocity);
+                    const volMultiplier = trackVolumes[n.loopFilename] !== undefined ? trackVolumes[n.loopFilename] : 1.0;
+                    currentSynth.triggerAttackRelease(n.note, n.duration, time, n.velocity * volMultiplier);
                 }
             });
         }
@@ -856,8 +899,10 @@ async function startPreview() {
     
     Tone.Transport.start();
     isPreviewing = true;
-    if (mergePreviewIcon) mergePreviewIcon.innerText = 'pause';
-    if (btnMergePreview) btnMergePreview.classList.add('paused-state');
+    if (btnMergePreview) {
+        btnMergePreview.innerHTML = '<span class="material-icons" id="merge-preview-icon">pause</span> Pause';
+        btnMergePreview.classList.add('paused-state');
+    }
     
     // Resume EQ visualizer if present
     if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -872,8 +917,10 @@ function stopPreview() {
         previewSequence = null;
     }
     isPreviewing = false;
-    if (mergePreviewIcon) mergePreviewIcon.innerText = 'play_arrow';
-    if (btnMergePreview) btnMergePreview.classList.remove('paused-state');
+    if (btnMergePreview) {
+        btnMergePreview.innerHTML = '<span class="material-icons" id="merge-preview-icon">play_arrow</span> Preview';
+        btnMergePreview.classList.remove('paused-state');
+    }
     
     if (animFrameId) cancelAnimationFrame(animFrameId);
     eqBars.forEach(bar => bar.style.height = '4px');
@@ -908,12 +955,18 @@ async function mergeExportFromModal() {
     const masterStepNotes = {}; 
     for (let s = 0; s < maxSteps; s++) { masterStepNotes[s] = []; }
 
+    const trackVolumes = {};
+    document.querySelectorAll('.merge-track-vol').forEach(slider => {
+        trackVolumes[slider.dataset.filename] = parseFloat(slider.value);
+    });
+
     loopsToExport.forEach(loopData => {
         const loopLen = loopData.steps;
         const synthName = loopData.instrument;
         loopData.notes.forEach(n => {
             for (let targetStep = n.step; targetStep < maxSteps; targetStep += loopLen) {
                 masterStepNotes[targetStep].push({
+                    loopFilename: loopData._filename,
                     synthName: synthName,
                     note: n.note,
                     duration: n.duration || "8n",
@@ -931,7 +984,8 @@ async function mergeExportFromModal() {
                 if (Math.random() <= n.chance) {
                     // Use silentSynths for recording!
                     const currentSynth = silentSynths[n.synthName] || silentSynths.piano;
-                    currentSynth.triggerAttackRelease(n.note, n.duration, time, n.velocity);
+                    const volMultiplier = trackVolumes[n.loopFilename] !== undefined ? trackVolumes[n.loopFilename] : 1.0;
+                    currentSynth.triggerAttackRelease(n.note, n.duration, time, n.velocity * volMultiplier);
                 }
             });
         }
@@ -957,7 +1011,8 @@ async function mergeExportFromModal() {
         const url = URL.createObjectURL(recording);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "Merged_Loops.webm";
+        const generatedName = generatePoeticName().replace(/\s+/g, '_');
+        a.download = `${generatedName}.webm`;
         a.click();
         URL.revokeObjectURL(url);
         

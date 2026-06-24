@@ -1,0 +1,248 @@
+{
+    "name": "Intimate Felt Progressions",
+    "bpm": 95,
+    "instrument": "piano",
+    "steps": 64,
+    "notes": [
+        {
+            "step": 0,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 0,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 0,
+            "note": "A3",
+            "duration": "4n"
+        },
+        {
+            "step": 4,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 4,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 4,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 8,
+            "note": "F2",
+            "duration": "4n"
+        },
+        {
+            "step": 8,
+            "note": "A2",
+            "duration": "4n"
+        },
+        {
+            "step": 8,
+            "note": "C3",
+            "duration": "4n"
+        },
+        {
+            "step": 12,
+            "note": "C2",
+            "duration": "4n"
+        },
+        {
+            "step": 12,
+            "note": "E2",
+            "duration": "4n"
+        },
+        {
+            "step": 12,
+            "note": "G2",
+            "duration": "4n"
+        },
+        {
+            "step": 16,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 16,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 16,
+            "note": "A3",
+            "duration": "4n"
+        },
+        {
+            "step": 20,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 20,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 20,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 24,
+            "note": "G2",
+            "duration": "4n"
+        },
+        {
+            "step": 24,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 24,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 28,
+            "note": "A2",
+            "duration": "4n"
+        },
+        {
+            "step": 28,
+            "note": "C#3",
+            "duration": "4n"
+        },
+        {
+            "step": 28,
+            "note": "E3",
+            "duration": "4n"
+        },
+        {
+            "step": 32,
+            "note": "G2",
+            "duration": "4n"
+        },
+        {
+            "step": 32,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 32,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 36,
+            "note": "C2",
+            "duration": "4n"
+        },
+        {
+            "step": 36,
+            "note": "E2",
+            "duration": "4n"
+        },
+        {
+            "step": 36,
+            "note": "G2",
+            "duration": "4n"
+        },
+        {
+            "step": 40,
+            "note": "F2",
+            "duration": "4n"
+        },
+        {
+            "step": 40,
+            "note": "A2",
+            "duration": "4n"
+        },
+        {
+            "step": 40,
+            "note": "C3",
+            "duration": "4n"
+        },
+        {
+            "step": 44,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 44,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 44,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 48,
+            "note": "E2",
+            "duration": "4n"
+        },
+        {
+            "step": 48,
+            "note": "G2",
+            "duration": "4n"
+        },
+        {
+            "step": 48,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 52,
+            "note": "A2",
+            "duration": "4n"
+        },
+        {
+            "step": 52,
+            "note": "C#3",
+            "duration": "4n"
+        },
+        {
+            "step": 52,
+            "note": "E3",
+            "duration": "4n"
+        },
+        {
+            "step": 56,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 56,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 56,
+            "note": "A3",
+            "duration": "4n"
+        },
+        {
+            "step": 60,
+            "note": "C3",
+            "duration": "4n"
+        },
+        {
+            "step": 60,
+            "note": "E3",
+            "duration": "4n"
+        },
+        {
+            "step": 60,
+            "note": "G3",
+            "duration": "4n"
+        }
+    ]
+}

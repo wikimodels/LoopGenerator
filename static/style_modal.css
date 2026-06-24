@@ -115,3 +115,19 @@
 .modal-body strong {
     color: var(--text-main);
 }
+
+/* Merge Preview paused state */
+#btn-merge-preview.paused-state {
+    background-color: #eab308 !important;
+    border-color: #eab308 !important;
+    color: white !important;
+}
+
+#btn-merge-preview.paused-state:hover {
+    background-color: #ca8a04 !important;
+    border-color: #ca8a04 !important;
+}
+
+#merge-eq .eq-bar {
+    background-color: #e11d48; /* Dark pink (rose-600) */
+}
