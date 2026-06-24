@@ -67,7 +67,7 @@ function generatePoeticName() {
     const prep = poeticWords.prepositions[Math.floor(Math.random() * poeticWords.prepositions.length)];
     const place = poeticWords.places[Math.floor(Math.random() * poeticWords.places.length)];
     
-    return `${action} ${prep} ${place} Loop`;
+    return `${action} ${prep} ${place}`;
 }
 
 // --- Initialization ---
@@ -1087,7 +1087,7 @@ async function mergeExportFromModal() {
         const a = document.createElement("a");
         a.href = url;
         const generatedName = generatePoeticName().replace(/\s+/g, '_');
-        a.download = `${generatedName}.webm`;
+        a.download = `---Loop_${generatedName}.webm`;
         a.click();
         URL.revokeObjectURL(url);
         

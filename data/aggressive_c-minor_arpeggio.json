@@ -1,167 +1,167 @@
 {
-    "name": "Dusted Mood FM Bass",
-    "bpm": 95,
+    "name": "Aggressive C-Minor Arpeggio",
+    "bpm": 140,
     "instrument": "fmSynth",
-    "steps": 64,
+    "steps": 32,
     "notes": [
         {
             "step": 0,
-            "note": "D2",
-            "duration": "16n"
-        },
-        {
-            "step": 2,
-            "note": "D3",
-            "duration": "16n"
-        },
-        {
-            "step": 3,
-            "note": "F2",
-            "duration": "16n"
-        },
-        {
-            "step": 6,
-            "note": "G2",
-            "duration": "16n"
-        },
-        {
-            "step": 8,
-            "note": "D2",
-            "duration": "16n"
-        },
-        {
-            "step": 10,
-            "note": "Bb1",
-            "duration": "16n"
-        },
-        {
-            "step": 13,
-            "note": "C2",
-            "duration": "16n"
-        },
-        {
-            "step": 14,
-            "note": "A1",
-            "duration": "16n"
-        },
-        {
-            "step": 16,
-            "note": "D2",
-            "duration": "16n"
-        },
-        {
-            "step": 18,
-            "note": "D3",
-            "duration": "16n"
-        },
-        {
-            "step": 19,
-            "note": "F2",
-            "duration": "16n"
-        },
-        {
-            "step": 22,
-            "note": "G2",
-            "duration": "16n"
-        },
-        {
-            "step": 24,
-            "note": "A1",
-            "duration": "16n"
-        },
-        {
-            "step": 26,
-            "note": "Bb1",
-            "duration": "16n"
-        },
-        {
-            "step": 29,
-            "note": "C2",
-            "duration": "16n"
-        },
-        {
-            "step": 30,
             "note": "C3",
             "duration": "16n"
         },
         {
-            "step": 32,
-            "note": "G1",
+            "step": 1,
+            "note": "Eb3",
             "duration": "16n"
         },
         {
-            "step": 34,
-            "note": "G2",
+            "step": 2,
+            "note": "G3",
             "duration": "16n"
         },
         {
-            "step": 35,
-            "note": "Bb1",
+            "step": 3,
+            "note": "C4",
             "duration": "16n"
         },
         {
-            "step": 38,
-            "note": "C2",
+            "step": 4,
+            "note": "Eb4",
             "duration": "16n"
         },
         {
-            "step": 40,
-            "note": "F1",
+            "step": 5,
+            "note": "G4",
             "duration": "16n"
         },
         {
-            "step": 42,
-            "note": "F2",
+            "step": 6,
+            "note": "C5",
             "duration": "16n"
         },
         {
-            "step": 45,
-            "note": "A1",
+            "step": 7,
+            "note": "Bb4",
             "duration": "16n"
         },
         {
-            "step": 46,
-            "note": "A2",
+            "step": 8,
+            "note": "Ab4",
             "duration": "16n"
         },
         {
-            "step": 48,
-            "note": "Bb1",
+            "step": 9,
+            "note": "F4",
             "duration": "16n"
         },
         {
-            "step": 50,
-            "note": "Bb2",
+            "step": 10,
+            "note": "Eb4",
             "duration": "16n"
         },
         {
-            "step": 51,
-            "note": "D2",
+            "step": 11,
+            "note": "C4",
             "duration": "16n"
         },
         {
-            "step": 54,
-            "note": "G2",
+            "step": 12,
+            "note": "Bb3",
             "duration": "16n"
         },
         {
-            "step": 56,
-            "note": "A1",
+            "step": 13,
+            "note": "G3",
             "duration": "16n"
         },
         {
-            "step": 58,
-            "note": "C2",
+            "step": 14,
+            "note": "F3",
             "duration": "16n"
         },
         {
-            "step": 61,
-            "note": "E2",
+            "step": 15,
+            "note": "Eb3",
             "duration": "16n"
         },
         {
-            "step": 62,
-            "note": "A1",
+            "step": 16,
+            "note": "C3",
+            "duration": "16n"
+        },
+        {
+            "step": 17,
+            "note": "D3",
+            "duration": "16n"
+        },
+        {
+            "step": 18,
+            "note": "F3",
+            "duration": "16n"
+        },
+        {
+            "step": 19,
+            "note": "A3",
+            "duration": "16n"
+        },
+        {
+            "step": 20,
+            "note": "C4",
+            "duration": "16n"
+        },
+        {
+            "step": 21,
+            "note": "D4",
+            "duration": "16n"
+        },
+        {
+            "step": 22,
+            "note": "F4",
+            "duration": "16n"
+        },
+        {
+            "step": 23,
+            "note": "A4",
+            "duration": "16n"
+        },
+        {
+            "step": 24,
+            "note": "G4",
+            "duration": "16n"
+        },
+        {
+            "step": 25,
+            "note": "F4",
+            "duration": "16n"
+        },
+        {
+            "step": 26,
+            "note": "Eb4",
+            "duration": "16n"
+        },
+        {
+            "step": 27,
+            "note": "D4",
+            "duration": "16n"
+        },
+        {
+            "step": 28,
+            "note": "C4",
+            "duration": "16n"
+        },
+        {
+            "step": 29,
+            "note": "Bb3",
+            "duration": "16n"
+        },
+        {
+            "step": 30,
+            "note": "G3",
+            "duration": "16n"
+        },
+        {
+            "step": 31,
+            "note": "F3",
             "duration": "16n"
         }
     ]
