@@ -134,6 +134,7 @@
     color: #cbd5e1;
     min-width: 148px;
     transition: color 0.2s;
+    cursor: text;
 }
 
 .item-meta {
@@ -165,6 +166,15 @@
 
 .catalog-item .icon-btn .material-icons {
     font-size: 0.84rem;
+}
+
+.catalog-item .icon-btn.paused-state {
+    background-color: #eab308;
+    color: white;
+}
+
+.catalog-item .icon-btn.paused-state:hover {
+    background-color: #ca8a04;
 }
 
 /* Custom Checkbox */
@@ -384,4 +394,64 @@
     width: 0%;
     background-color: var(--success);
     transition: width 0.3s ease;
+}
+
+/* Merge Modal Styles */
+.merge-track-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+    padding-right: 0.5rem;
+}
+
+.merge-track-list::-webkit-scrollbar {
+    width: 6px;
+}
+.merge-track-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.merge-track-list::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 3px;
+}
+
+.merge-track-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-color);
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.merge-track-item .name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.merge-track-item .meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+.merge-track-item .meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+.merge-track-item .meta .material-icons {
+    font-size: 0.8rem;
+}
+
+.merge-bpm-control {
+    background-color: var(--bg-color);
+    padding: 0.8rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
 }

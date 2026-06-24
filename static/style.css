@@ -91,6 +91,24 @@ body {
     background-color: var(--border-color);
 }
 
+.btn.neutral {
+    background-color: #475569;
+    color: white;
+}
+
+.btn.neutral:hover {
+    background-color: #334155;
+}
+
+.btn.success {
+    background-color: var(--success);
+    color: white;
+}
+
+.btn.success:hover {
+    background-color: #16a34a;
+}
+
 .icon-btn {
     padding: 0.5rem;
     border-radius: 50%;

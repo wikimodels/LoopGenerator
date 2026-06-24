@@ -1,0 +1,63 @@
+{
+    "name": "Cyberpunk \u0414\u0435\u0440\u044c\u043c\u043e FM Bassline",
+    "bpm": 130,
+    "instrument": "fmSynth",
+    "steps": 16,
+    "notes": [
+        {
+            "step": 0,
+            "note": "A4",
+            "duration": "16n"
+        },
+        {
+            "step": 1,
+            "note": "A4",
+            "duration": "16n"
+        },
+        {
+            "step": 2,
+            "note": "A4",
+            "duration": "16n"
+        },
+        {
+            "step": 3,
+            "note": "C5",
+            "duration": "16n"
+        },
+        {
+            "step": 6,
+            "note": "A4",
+            "duration": "16n"
+        },
+        {
+            "step": 7,
+            "note": "D5",
+            "duration": "16n"
+        },
+        {
+            "step": 8,
+            "note": "E5",
+            "duration": "8n"
+        },
+        {
+            "step": 11,
+            "note": "C5",
+            "duration": "16n"
+        },
+        {
+            "step": 12,
+            "note": "A4",
+            "duration": "16n"
+        },
+        {
+            "step": 14,
+            "note": "G4",
+            "duration": "16n"
+        },
+        {
+            "step": 15,
+            "note": "A4",
+            "duration": "16n"
+        }
+    ]
+}

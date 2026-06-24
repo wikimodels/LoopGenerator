@@ -17,16 +17,35 @@ let fft = null;       // native AnalyserNode
 let eqBars = [];
 let animFrameId = null;
 
+// Modal specific state
+let isPreviewing = false;
+let previewSequence = null;
+
 // DOM Elements
 const catalogList = document.getElementById('catalog-list');
 const checkAll = document.getElementById('check-all');
 const selectedCount = document.getElementById('selected-count');
 const btnDownload = document.getElementById('btn-download-selected');
+const btnDownloadJson = document.getElementById('btn-download-json');
+const btnMergeDownload = document.getElementById('btn-merge-download');
 const btnDelete = document.getElementById('btn-delete-selected');
 const progressContainer = document.getElementById('progress-container');
 const progressText = document.getElementById('progress-text');
 const progressFill = document.getElementById('progress-fill');
 const toastEl = document.getElementById('toast');
+
+// Modal Elements
+const mergeModal = document.getElementById('merge-modal');
+const btnCloseMergeModal = document.getElementById('btn-close-merge-modal');
+const mergeTrackList = document.getElementById('merge-track-list');
+const mergeBpmSlider = document.getElementById('merge-bpm-slider');
+const mergeBpmVal = document.getElementById('merge-bpm-val');
+const btnMergePreview = document.getElementById('btn-merge-preview');
+const mergePreviewIcon = document.getElementById('merge-preview-icon');
+const btnMergeConfirmDownload = document.getElementById('btn-merge-confirm-download');
+const mergeProgressContainer = document.getElementById('merge-progress-container');
+const mergeProgressText = document.getElementById('merge-progress-text');
+const mergeProgressFill = document.getElementById('merge-progress-fill');
 
 // --- Initialization ---
 async function init() {
@@ -219,6 +238,64 @@ function renderCatalog() {
         const nameEl = document.createElement('div');
         nameEl.className = 'item-name';
         nameEl.textContent = loop.name;
+        nameEl.title = 'Click to edit name';
+
+        nameEl.addEventListener('click', (e) => {
+            if (nameEl.isContentEditable) return;
+            e.stopPropagation();
+            nameEl.contentEditable = 'true';
+            nameEl.focus();
+            const range = document.createRange();
+            range.selectNodeContents(nameEl);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        });
+
+        nameEl.addEventListener('blur', async () => {
+            nameEl.contentEditable = 'false';
+            const newName = nameEl.textContent.trim();
+            if (newName && newName !== loop.name) {
+                const oldFilename = loop._filename;
+                loop.name = newName;
+                try {
+                    const res = await fetch('/api/loops', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(loop)
+                    });
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        const newFilename = result.filename;
+                        if (newFilename !== oldFilename) {
+                            await fetch(`/api/loops/${oldFilename}`, { method: 'DELETE' });
+                            if (loopMeta[oldFilename]) {
+                                await fetch(`/api/meta/${newFilename}`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(loopMeta[oldFilename])
+                                });
+                            }
+                        }
+                        showToast("Name updated!");
+                        fetchLoops(); // Reload fully
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showToast("Error updating name");
+                    nameEl.textContent = loop.name;
+                }
+            } else {
+                nameEl.textContent = loop.name;
+            }
+        });
+
+        nameEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                nameEl.blur();
+            }
+        });
 
         const metaEl = document.createElement('div');
         metaEl.className = 'item-meta';
@@ -240,16 +317,10 @@ function renderCatalog() {
         const controls = document.createElement('div');
         controls.className = 'item-controls';
         
-        const btnPlay = document.createElement('button');
-        btnPlay.className = 'btn icon-btn play';
-        btnPlay.innerHTML = '<span class="material-icons">play_arrow</span>';
-        btnPlay.title = 'Play (3 times)';
-        
-        const btnPause = document.createElement('button');
-        btnPause.className = 'btn icon-btn secondary';
-        btnPause.innerHTML = '<span class="material-icons">pause</span>';
-        btnPause.disabled = true;
-        btnPause.title = 'Pause';
+        const btnPlayToggle = document.createElement('button');
+        btnPlayToggle.className = 'btn icon-btn play';
+        btnPlayToggle.innerHTML = '<span class="material-icons">play_arrow</span>';
+        btnPlayToggle.title = 'Play / Pause';
 
         const btnStop = document.createElement('button');
         btnStop.className = 'btn icon-btn stop';
@@ -257,12 +328,16 @@ function renderCatalog() {
         btnStop.disabled = true;
         btnStop.title = 'Stop';
 
-        btnPlay.addEventListener('click', () => playLoop(loop, btnPlay, btnPause, btnStop, div));
-        btnPause.addEventListener('click', () => pauseLoop(btnPlay, btnPause, div));
-        btnStop.addEventListener('click', () => stopLoop(btnPlay, btnPause, btnStop, div));
+        btnPlayToggle.addEventListener('click', () => {
+            if (activeSequence && activeLoopName === loop.name && Tone.Transport.state === 'started') {
+                pauseLoop(btnPlayToggle, div);
+            } else {
+                playLoop(loop, btnPlayToggle, btnStop, div);
+            }
+        });
+        btnStop.addEventListener('click', () => stopLoop(btnPlayToggle, btnStop, div));
 
-        controls.appendChild(btnPlay);
-        controls.appendChild(btnPause);
+        controls.appendChild(btnPlayToggle);
         controls.appendChild(btnStop);
 
         div.appendChild(chkWrapper);
@@ -277,6 +352,8 @@ function renderCatalog() {
 function updateSelection() {
     selectedCount.innerText = selectedLoops.size;
     btnDownload.disabled = selectedLoops.size === 0;
+    if (btnDownloadJson) btnDownloadJson.disabled = selectedLoops.size === 0;
+    if (btnMergeDownload) btnMergeDownload.disabled = selectedLoops.size === 0;
     btnDelete.disabled = selectedLoops.size === 0;
     
     if (filteredLoops.length === 0) {
@@ -330,6 +407,61 @@ function setupEventListeners() {
 
     btnDownload.addEventListener('click', batchExport);
     btnDelete.addEventListener('click', bulkDelete);
+
+    if (btnDownloadJson) {
+        btnDownloadJson.addEventListener('click', () => {
+            const loopsToExport = loopsData.filter(l => selectedLoops.has(l._filename));
+            if (loopsToExport.length === 0) return;
+
+            const cleanLoops = loopsToExport.map(l => {
+                const { _filename, ...rest } = l;
+                return rest;
+            });
+
+            const dataStr = JSON.stringify(cleanLoops, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "Selected_Loops.json";
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("JSON downloaded!");
+        });
+    }
+
+    if (btnMergeDownload) {
+        btnMergeDownload.addEventListener('click', openMergeModal);
+    }
+    
+    if (btnCloseMergeModal) {
+        btnCloseMergeModal.addEventListener('click', closeMergeModal);
+    }
+    
+    if (mergeModal) {
+        mergeModal.addEventListener('click', (e) => {
+            if (e.target === mergeModal) closeMergeModal();
+        });
+    }
+
+    if (mergeBpmSlider) {
+        mergeBpmSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            mergeBpmVal.innerText = val;
+            if (isPreviewing) {
+                Tone.Transport.bpm.value = parseInt(val);
+            }
+        });
+    }
+
+    if (btnMergePreview) {
+        btnMergePreview.addEventListener('click', togglePreview);
+    }
+
+    if (btnMergeConfirmDownload) {
+        btnMergeConfirmDownload.addEventListener('click', mergeExportFromModal);
+    }
 }
 
 // Helper: clear state classes from an item element
@@ -339,15 +471,15 @@ function clearItemState(el) {
 }
 
 // --- Playback Logic ---
-async function playLoop(loopData, btnPlay, btnPause, btnStop, itemEl) {
+async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
     await initAudioContext();
     if (Tone.context.state !== 'running') await Tone.start();
 
     // If resuming from pause on the same loop
     if (activeSequence && activeLoopName === loopData.name && Tone.Transport.state === 'paused') {
         Tone.Transport.start();
-        btnPlay.disabled = true;
-        btnPause.disabled = false;
+        btnPlayToggle.innerHTML = '<span class="material-icons">pause</span>';
+        btnPlayToggle.classList.add('paused-state');
         if (activeItemEl) {
             clearItemState(activeItemEl);
             activeItemEl.classList.add('is-playing');
@@ -361,8 +493,11 @@ async function playLoop(loopData, btnPlay, btnPause, btnStop, itemEl) {
         activeSequence.stop();
         activeSequence.dispose();
         clearItemState(activeItemEl);
-        document.querySelectorAll('.catalog-item .play').forEach(b => { b.disabled = false; });
-        document.querySelectorAll('.catalog-item .pause').forEach(b => { b.disabled = true; });
+        document.querySelectorAll('.catalog-item .play').forEach(b => { 
+            b.innerHTML = '<span class="material-icons">play_arrow</span>';
+            b.classList.remove('paused-state');
+            b.disabled = false; 
+        });
         document.querySelectorAll('.catalog-item .stop').forEach(b => { b.disabled = true; });
     }
 
@@ -371,9 +506,16 @@ async function playLoop(loopData, btnPlay, btnPause, btnStop, itemEl) {
     activeLoopName = loopData.name;
     clearItemState(itemEl);
     itemEl.classList.add('is-loading');
-    btnPlay.disabled = true;
-    btnPause.disabled = true;
-    btnStop.disabled = true;
+
+    document.querySelectorAll('.catalog-item .play').forEach(b => { 
+        b.innerHTML = '<span class="material-icons">play_arrow</span>';
+        b.classList.remove('paused-state');
+        b.disabled = false; 
+    });
+
+    btnPlayToggle.innerHTML = '<span class="material-icons">pause</span>';
+    btnPlayToggle.classList.add('paused-state');
+    btnStop.disabled = false;
 
     Tone.Transport.bpm.value = loopData.bpm || 120;
     Tone.Transport.swing = loopData.swing || 0.0;
@@ -385,8 +527,6 @@ async function playLoop(loopData, btnPlay, btnPause, btnStop, itemEl) {
     // Transition from loading → playing
     clearItemState(itemEl);
     itemEl.classList.add('is-playing');
-    btnPause.disabled = false;
-    btnStop.disabled = false;
     
     // Preserve full metadata for notes
     const stepNotes = {};
@@ -403,7 +543,7 @@ async function playLoop(loopData, btnPlay, btnPause, btnStop, itemEl) {
         // Stop automatically after 3 loops
         if (loopCounter > 3) {
             Tone.Transport.scheduleOnce(() => {
-                stopLoop(btnPlay, btnPause, btnStop);
+                stopLoop(btnPlayToggle, btnStop, itemEl);
             }, time);
             return;
         }
@@ -448,11 +588,11 @@ function renderEq() {
     animFrameId = requestAnimationFrame(renderEq);
 }
 
-function pauseLoop(btnPlay, btnPause, itemEl) {
+function pauseLoop(btnPlayToggle, itemEl) {
     if (activeSequence && Tone.Transport.state === 'started') {
         Tone.Transport.pause();
-        btnPlay.disabled = false;
-        btnPause.disabled = true;
+        btnPlayToggle.innerHTML = '<span class="material-icons">play_arrow</span>';
+        btnPlayToggle.classList.remove('paused-state');
         if (itemEl) {
             clearItemState(itemEl);
             itemEl.classList.add('is-paused');
@@ -460,7 +600,7 @@ function pauseLoop(btnPlay, btnPause, itemEl) {
     }
 }
 
-function stopLoop(btnPlay, btnPause, btnStop, itemEl) {
+function stopLoop(btnPlayToggle, btnStop, itemEl) {
     if (activeSequence) {
         Tone.Transport.stop();
         activeSequence.stop();
@@ -469,9 +609,19 @@ function stopLoop(btnPlay, btnPause, btnStop, itemEl) {
     }
     clearItemState(itemEl || activeItemEl);
     activeItemEl = null;
-    if (btnPlay) btnPlay.disabled = false;
-    if (btnPause) btnPause.disabled = true;
+    if (btnPlayToggle) {
+        btnPlayToggle.innerHTML = '<span class="material-icons">play_arrow</span>';
+        btnPlayToggle.classList.remove('paused-state');
+        btnPlayToggle.disabled = false;
+    }
     if (btnStop) btnStop.disabled = true;
+
+    document.querySelectorAll('.catalog-item .play').forEach(b => { 
+        b.innerHTML = '<span class="material-icons">play_arrow</span>';
+        b.classList.remove('paused-state');
+        b.disabled = false; 
+    });
+    document.querySelectorAll('.catalog-item .stop').forEach(b => { b.disabled = true; });
 
     // Stop eq
     if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -490,8 +640,11 @@ async function batchExport() {
         activeSequence.dispose();
         activeSequence = null;
     }
-    document.querySelectorAll('.catalog-item .play').forEach(b => { b.disabled = false; });
-    document.querySelectorAll('.catalog-item .pause').forEach(b => { b.disabled = true; });
+    document.querySelectorAll('.catalog-item .play').forEach(b => { 
+        b.innerHTML = '<span class="material-icons">play_arrow</span>';
+        b.classList.remove('paused-state');
+        b.disabled = false; 
+    });
     document.querySelectorAll('.catalog-item .stop').forEach(b => { b.disabled = true; });
 
     btnDownload.disabled = true;
@@ -582,6 +735,245 @@ function exportSingleLoopSilent(loopData) {
             resolve(recording);
         }, (durationSec + 1.5) * 1000); // Wait for sequence + tail
     });
+}
+
+// --- Merge Modal Logic ---
+
+function openMergeModal() {
+    const loopsToExport = loopsData.filter(l => selectedLoops.has(l._filename));
+    if (loopsToExport.length === 0) return;
+
+    // Populate track list
+    mergeTrackList.innerHTML = '';
+    loopsToExport.forEach(loop => {
+        const div = document.createElement('div');
+        div.className = 'merge-track-item';
+        div.innerHTML = `
+            <span class="name">${loop.name}</span>
+            <div class="meta">
+                <span><span class="material-icons">speed</span> ${loop.bpm}</span>
+                <span><span class="material-icons">piano</span> ${loop.instrument}</span>
+                <span><span class="material-icons">straighten</span> ${loop.steps} steps</span>
+            </div>
+        `;
+        mergeTrackList.appendChild(div);
+    });
+
+    // Default BPM to first track
+    const firstLoop = loopsToExport.find(l => l._filename === selectedLoops.values().next().value) || loopsToExport[0];
+    const defaultBpm = firstLoop.bpm || 120;
+    mergeBpmSlider.value = defaultBpm;
+    mergeBpmVal.innerText = defaultBpm;
+
+    mergeProgressContainer.classList.add('hidden');
+    mergeProgressFill.style.width = '0%';
+    btnMergeConfirmDownload.disabled = false;
+    
+    // Stop any existing playback in catalog
+    if (activeSequence) {
+        Tone.Transport.stop();
+        activeSequence.stop();
+        activeSequence.dispose();
+        activeSequence = null;
+    }
+    document.querySelectorAll('.catalog-item .play').forEach(b => { 
+        b.innerHTML = '<span class="material-icons">play_arrow</span>';
+        b.classList.remove('paused-state');
+        b.disabled = false; 
+    });
+    document.querySelectorAll('.catalog-item .stop').forEach(b => { b.disabled = true; });
+
+    mergeModal.classList.remove('hidden');
+}
+
+function closeMergeModal() {
+    stopPreview();
+    mergeModal.classList.add('hidden');
+}
+
+async function togglePreview() {
+    if (isPreviewing) {
+        stopPreview();
+    } else {
+        await startPreview();
+    }
+}
+
+async function startPreview() {
+    await initAudioContext();
+    if (Tone.context.state !== 'running') await Tone.start();
+
+    const loopsToExport = loopsData.filter(l => selectedLoops.has(l._filename));
+    if (loopsToExport.length === 0) return;
+
+    const targetBpm = parseInt(mergeBpmSlider.value);
+    const firstLoop = loopsToExport.find(l => l._filename === selectedLoops.values().next().value) || loopsToExport[0];
+    const targetSwing = firstLoop.swing || 0.0;
+
+    let maxSteps = 0;
+    loopsToExport.forEach(l => {
+        if (l.steps > maxSteps) maxSteps = l.steps;
+    });
+
+    Tone.Transport.bpm.value = targetBpm;
+    Tone.Transport.swing = targetSwing;
+    Tone.Transport.swingSubdivision = "8n";
+
+    const stepsArray = Array.from({length: maxSteps}, (_, i) => i);
+    const masterStepNotes = {}; 
+    for (let s = 0; s < maxSteps; s++) { masterStepNotes[s] = []; }
+
+    loopsToExport.forEach(loopData => {
+        const loopLen = loopData.steps;
+        const synthName = loopData.instrument;
+        loopData.notes.forEach(n => {
+            for (let targetStep = n.step; targetStep < maxSteps; targetStep += loopLen) {
+                masterStepNotes[targetStep].push({
+                    synthName: synthName,
+                    note: n.note,
+                    duration: n.duration || "8n",
+                    velocity: n.velocity !== undefined ? n.velocity : 1.0,
+                    chance: n.chance !== undefined ? n.chance : 1.0
+                });
+            }
+        });
+    });
+
+    previewSequence = new Tone.Sequence((time, step) => {
+        const notesToPlay = masterStepNotes[step];
+        if (notesToPlay) {
+            notesToPlay.forEach(n => {
+                if (Math.random() <= n.chance) {
+                    // Use regular synths for preview playback
+                    const currentSynth = synths[n.synthName] || synths.piano;
+                    currentSynth.triggerAttackRelease(n.note, n.duration, time, n.velocity);
+                }
+            });
+        }
+    }, stepsArray, "8n").start(0);
+
+    previewSequence.loop = true; // Loop endlessly for preview until stopped
+    
+    Tone.Transport.start();
+    isPreviewing = true;
+    if (mergePreviewIcon) mergePreviewIcon.innerText = 'pause';
+    if (btnMergePreview) btnMergePreview.classList.add('paused-state');
+    
+    // Resume EQ visualizer if present
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    renderEq();
+}
+
+function stopPreview() {
+    if (previewSequence) {
+        Tone.Transport.stop();
+        previewSequence.stop();
+        previewSequence.dispose();
+        previewSequence = null;
+    }
+    isPreviewing = false;
+    if (mergePreviewIcon) mergePreviewIcon.innerText = 'play_arrow';
+    if (btnMergePreview) btnMergePreview.classList.remove('paused-state');
+    
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    eqBars.forEach(bar => bar.style.height = '4px');
+}
+
+async function mergeExportFromModal() {
+    stopPreview();
+    
+    btnMergeConfirmDownload.disabled = true;
+    btnMergePreview.disabled = true;
+    btnCloseMergeModal.disabled = true;
+
+    mergeProgressContainer.classList.remove('hidden');
+    mergeProgressText.innerText = "Rendering Audio...";
+    mergeProgressFill.style.width = "50%";
+
+    const loopsToExport = loopsData.filter(l => selectedLoops.has(l._filename));
+    const targetBpm = parseInt(mergeBpmSlider.value);
+    const firstLoop = loopsToExport.find(l => l._filename === selectedLoops.values().next().value) || loopsToExport[0];
+    const targetSwing = firstLoop.swing || 0.0;
+
+    let maxSteps = 0;
+    loopsToExport.forEach(l => {
+        if (l.steps > maxSteps) maxSteps = l.steps;
+    });
+
+    Tone.Transport.bpm.value = targetBpm;
+    Tone.Transport.swing = targetSwing;
+    Tone.Transport.swingSubdivision = "8n";
+
+    const stepsArray = Array.from({length: maxSteps}, (_, i) => i);
+    const masterStepNotes = {}; 
+    for (let s = 0; s < maxSteps; s++) { masterStepNotes[s] = []; }
+
+    loopsToExport.forEach(loopData => {
+        const loopLen = loopData.steps;
+        const synthName = loopData.instrument;
+        loopData.notes.forEach(n => {
+            for (let targetStep = n.step; targetStep < maxSteps; targetStep += loopLen) {
+                masterStepNotes[targetStep].push({
+                    synthName: synthName,
+                    note: n.note,
+                    duration: n.duration || "8n",
+                    velocity: n.velocity !== undefined ? n.velocity : 1.0,
+                    chance: n.chance !== undefined ? n.chance : 1.0
+                });
+            }
+        });
+    });
+
+    const masterSequence = new Tone.Sequence((time, step) => {
+        const notesToPlay = masterStepNotes[step];
+        if (notesToPlay) {
+            notesToPlay.forEach(n => {
+                if (Math.random() <= n.chance) {
+                    // Use silentSynths for recording!
+                    const currentSynth = silentSynths[n.synthName] || silentSynths.piano;
+                    currentSynth.triggerAttackRelease(n.note, n.duration, time, n.velocity);
+                }
+            });
+        }
+    }, stepsArray, "8n").start(0);
+
+    masterSequence.loop = 1;
+
+    // 8n = 2 steps per beat
+    const beats = maxSteps / 2;
+    const durationSec = beats * (60 / targetBpm);
+
+    recorder.start();
+    Tone.Transport.start();
+
+    setTimeout(async () => {
+        Tone.Transport.stop();
+        masterSequence.stop();
+        masterSequence.dispose();
+        
+        const recording = await recorder.stop();
+        mergeProgressFill.style.width = "100%";
+        
+        const url = URL.createObjectURL(recording);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Merged_Loops.webm";
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        setTimeout(() => {
+            closeMergeModal();
+            updateSelection();
+            renderCatalog();
+            showToast("Merged audio downloaded!");
+            
+            // Restore UI state
+            btnMergeConfirmDownload.disabled = false;
+            btnMergePreview.disabled = false;
+            btnCloseMergeModal.disabled = false;
+        }, 1500);
+
+    }, (durationSec + 1.5) * 1000);
 }
 
 async function bulkDelete() {
