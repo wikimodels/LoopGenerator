@@ -1,0 +1,193 @@
+{
+    "name": "Intimate Jazz Progressions",
+    "bpm": 95,
+    "instrument": "piano",
+    "steps": 64,
+    "notes": [
+        {
+            "step": 0,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 0,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 0,
+            "note": "A3",
+            "duration": "4n"
+        },
+        {
+            "step": 0,
+            "note": "C4",
+            "duration": "4n"
+        },
+        {
+            "step": 0,
+            "note": "E4",
+            "duration": "4n"
+        },
+        {
+            "step": 8,
+            "note": "G2",
+            "duration": "4n"
+        },
+        {
+            "step": 8,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 8,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 8,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 8,
+            "note": "A3",
+            "duration": "4n"
+        },
+        {
+            "step": 16,
+            "note": "C3",
+            "duration": "4n"
+        },
+        {
+            "step": 16,
+            "note": "E3",
+            "duration": "4n"
+        },
+        {
+            "step": 16,
+            "note": "G3",
+            "duration": "4n"
+        },
+        {
+            "step": 16,
+            "note": "Bb3",
+            "duration": "4n"
+        },
+        {
+            "step": 16,
+            "note": "D4",
+            "duration": "4n"
+        },
+        {
+            "step": 24,
+            "note": "F2",
+            "duration": "4n"
+        },
+        {
+            "step": 24,
+            "note": "A2",
+            "duration": "4n"
+        },
+        {
+            "step": 24,
+            "note": "C3",
+            "duration": "4n"
+        },
+        {
+            "step": 24,
+            "note": "E3",
+            "duration": "4n"
+        },
+        {
+            "step": 24,
+            "note": "G3",
+            "duration": "4n"
+        },
+        {
+            "step": 32,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 32,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 32,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 32,
+            "note": "A3",
+            "duration": "4n"
+        },
+        {
+            "step": 32,
+            "note": "C4",
+            "duration": "4n"
+        },
+        {
+            "step": 40,
+            "note": "E2",
+            "duration": "4n"
+        },
+        {
+            "step": 40,
+            "note": "G2",
+            "duration": "4n"
+        },
+        {
+            "step": 40,
+            "note": "Bb2",
+            "duration": "4n"
+        },
+        {
+            "step": 40,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 48,
+            "note": "A2",
+            "duration": "4n"
+        },
+        {
+            "step": 48,
+            "note": "C3",
+            "duration": "4n"
+        },
+        {
+            "step": 48,
+            "note": "E3",
+            "duration": "4n"
+        },
+        {
+            "step": 48,
+            "note": "G3",
+            "duration": "4n"
+        },
+        {
+            "step": 56,
+            "note": "D3",
+            "duration": "4n"
+        },
+        {
+            "step": 56,
+            "note": "F3",
+            "duration": "4n"
+        },
+        {
+            "step": 56,
+            "note": "A3",
+            "duration": "4n"
+        },
+        {
+            "step": 56,
+            "note": "C4",
+            "duration": "4n"
+        }
+    ]
+}

@@ -16,6 +16,7 @@ let activeItemEl = null; // DOM element of the currently active catalog-item
 let fft = null;       // native AnalyserNode
 let eqBars = [];
 let animFrameId = null;
+let playbackId = 0;
 
 // Modal specific state
 let isPreviewing = false;
@@ -518,6 +519,23 @@ function setupEventListeners() {
         });
     }
 
+    // Global listener to stop playback when clicking away
+    document.addEventListener('mousedown', (e) => {
+        if (!activeSequence) return;
+        
+        // Ignore clicks within the currently playing track's item
+        if (activeItemEl && activeItemEl.contains(e.target)) return;
+        
+        // Ignore clicks on checkboxes (so user can select tracks while listening)
+        if (e.target.closest('.custom-checkbox-wrapper') || e.target.closest('input[type="checkbox"]')) return;
+        
+        // Ignore clicks on search input and stars
+        if (e.target.tagName.toLowerCase() === 'input' || e.target.closest('.star-filter')) return;
+
+        // Stop the track for any other click on the page (including disabled buttons)
+        stopLoop(null, null, activeItemEl);
+    });
+
     if (btnMergeDownload) {
         btnMergeDownload.addEventListener('click', openMergeModal);
     }
@@ -559,11 +577,22 @@ function clearItemState(el) {
 
 // --- Playback Logic ---
 async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
+    const isResuming = (activeSequence && activeLoopName === loopData.name && Tone.Transport.state === 'paused');
+
+    // Stop any existing loop and clear its state synchronously BEFORE any async gaps
+    if (!isResuming && activeSequence) {
+        stopLoop(null, null, activeItemEl);
+    }
+
+    const currentId = ++playbackId;
+
     await initAudioContext();
     if (Tone.context.state !== 'running') await Tone.start();
 
+    if (currentId !== playbackId) return; // Abort if another play was clicked
+
     // If resuming from pause on the same loop
-    if (activeSequence && activeLoopName === loopData.name && Tone.Transport.state === 'paused') {
+    if (isResuming) {
         Tone.Transport.start();
         btnPlayToggle.innerHTML = '<span class="material-icons">pause</span>';
         btnPlayToggle.classList.add('paused-state');
@@ -572,20 +601,6 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
             activeItemEl.classList.add('is-playing');
         }
         return;
-    }
-
-    // Stop any existing loop and clear its state
-    if (activeSequence) {
-        Tone.Transport.stop();
-        activeSequence.stop();
-        activeSequence.dispose();
-        clearItemState(activeItemEl);
-        document.querySelectorAll('.catalog-item .play').forEach(b => { 
-            b.innerHTML = '<span class="material-icons">play_arrow</span>';
-            b.classList.remove('paused-state');
-            b.disabled = false; 
-        });
-        document.querySelectorAll('.catalog-item .stop').forEach(b => { b.disabled = true; });
     }
 
     // Set loading state immediately

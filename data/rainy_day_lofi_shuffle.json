@@ -1,0 +1,228 @@
+{
+    "name": "Rainy Day Lofi Shuffle",
+    "bpm": 95,
+    "instrument": "drums",
+    "steps": 64,
+    "notes": [
+        {
+            "step": 0,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 0,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 2,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 4,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 6,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 8,
+            "note": "Snare",
+            "duration": "16n"
+        },
+        {
+            "step": 8,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 10,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 10,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 12,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 14,
+            "note": "OpenHat",
+            "duration": "8n"
+        },
+        {
+            "step": 16,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 16,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 18,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 20,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 22,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 22,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 24,
+            "note": "Snare",
+            "duration": "16n"
+        },
+        {
+            "step": 24,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 26,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 28,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 30,
+            "note": "OpenHat",
+            "duration": "8n"
+        },
+        {
+            "step": 32,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 32,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 34,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 36,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 38,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 40,
+            "note": "Snare",
+            "duration": "16n"
+        },
+        {
+            "step": 40,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 42,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 42,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 44,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 46,
+            "note": "OpenHat",
+            "duration": "8n"
+        },
+        {
+            "step": 48,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 48,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 50,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 52,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 54,
+            "note": "Kick",
+            "duration": "16n"
+        },
+        {
+            "step": 54,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 56,
+            "note": "Snare",
+            "duration": "16n"
+        },
+        {
+            "step": 56,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 58,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 60,
+            "note": "HiHat",
+            "duration": "16n"
+        },
+        {
+            "step": 62,
+            "note": "OpenHat",
+            "duration": "8n"
+        }
+    ]
+}
