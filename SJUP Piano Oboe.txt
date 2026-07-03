@@ -1,0 +1,22 @@
+﻿[
+  {
+    "songTitle": "Loop_Neoc_10_Piano",
+    "styles": "solo upright piano, major, lively folk neoclassical, bright chords, cheerful, vintage tape warmth, wooden room decay, instrumental, 110 bpm",
+    "lyrics": "[Instrumental]\n\n[Section 1]\n[110 BPM]\n[Solo Upright Piano Monophonic Melody]\n[Staccato Phrasing]\n\n[Section 2]\n[110 BPM]\n[Upper Register Piano Melody]\n[Bright Clear Attack]\n\n[Outro]\n[Graceful Solo Piano Ending]\n\n[End]"
+  },
+  {
+    "songTitle": "Loop_Neoc_10_Oboe",
+    "styles": "upright piano, lively folk neoclassical, major, bright chords, cheerful, vintage tape warmth, wooden room decay, instrumental, soft oboe d'amore, 120 bpm, fast",
+    "lyrics": "[Instrumental]\n\n[Section 1]\n[120 BPM]\n[Fast Tempo]\n[Soft Oboe d'amore Melody]\n[Upright Piano Accompaniment]\n\n[Section 2]\n[120 BPM]\n[Fast Piano Melody]\n[Oboe d'amore Counter-melody]\n\n[Outro]\n[Graceful Ending]\n[Piano and Oboe Slowing Down]\n\n[End]"
+  },
+  {
+    "songTitle": "Loop_Neoc_10_Lydian_Piano",
+    "styles": "neoclassical solo piano, bright Lydian mode, major key warmth, structural minimalism, baroque textures, rapid cascading patterns, clear pedal definition, pearly articulation, intimate acoustics, flat dynamics, no buildup, no crescendo, no climax, no synthesizer, no strings, no viola, no percussion, steady 105 BPM pulse, static energy",
+    "lyrics": "[Instrumental]\n\n[Section 1]\n[105 BPM]\n[Solo Upright Piano]\n[Continuous Cascading Arpeggios]\n[Flat Dynamics]\n\n[Section 2]\n[105 BPM]\n[Strict Mechanical Repetition]\n[Static Energy]\n\n[Graceful Ending]\n\n[End]"
+  },
+  {
+    "songTitle": "Loop_Neoc_10_Scherzo_Piano",
+    "styles": "solo upright piano, playful neoclassical, bright staccato, fast tempo, cheerful, wooden room decay, instrumental",
+    "lyrics": "[Instrumental]\n\n[Intro]\n[Solo Upright Piano]\n\n[Section: Playful Theme]\n[Bright Staccato Notes]\n[Wooden Room Decay]\n\n[Section: Dancing Keys]\n[Syncopated Key Repetition]\n[Mid Register Melodic Line]\n\n[Section: Joyful Leap]\n[High Register Ripples]\n[Piano Resonance Decay]\n\n[Outro]\n[Graceful Ending]\n\n[End]"
+  }
+]
