@@ -52,14 +52,6 @@
                     </div>
                 </div>
                 <div class="action-bar-content">
-                    <div class="selection-info">
-                        <label class="custom-checkbox-wrapper">
-                            <input type="checkbox" id="check-all">
-                            <span class="checkmark"></span>
-                            Select All
-                        </label>
-                        <span><span id="selected-count">0</span> selected</span>
-                    </div>
                     <div id="progress-container" class="progress-container hidden">
                         <div class="progress-text" id="progress-text">Exporting...</div>
                         <div class="progress-bar-bg">
@@ -90,6 +82,18 @@
                         <button id="btn-download-selected" class="btn primary" disabled>
                             <span class="material-icons">archive</span> Download ZIP
                         </button>
+                        <button id="btn-export-audio" class="btn accent" disabled>
+                            <span class="material-icons">audio_file</span> Export Audio
+                        </button>
+                    </div>
+
+                    <div class="selection-info">
+                        <label class="custom-checkbox-wrapper">
+                            <input type="checkbox" id="check-all">
+                            <span class="checkmark"></span>
+                            Select All
+                        </label>
+                        <span><span id="selected-count">0</span> selected</span>
                     </div>
                 </div>
             </div>
@@ -171,6 +175,28 @@
 
     <!-- Notification Toast -->
     <div id="toast" class="toast hidden">Message</div>
+
+    <!-- Export Audio Overlay -->
+    <div id="export-overlay" class="export-overlay hidden">
+        <div class="export-overlay-card">
+            <div class="export-overlay-header">
+                <span class="material-icons">audio_file</span>
+                <h3>Exporting Audio</h3>
+            </div>
+            <div class="export-eq-row" id="export-eq"></div>
+            <div class="export-current-track" id="export-current-track">Preparing...</div>
+            <div class="export-progress-wrap">
+                <div class="export-progress-bar-bg">
+                    <div class="export-progress-bar-fill" id="export-progress-fill"></div>
+                </div>
+                <span class="export-progress-pct" id="export-progress-pct">0%</span>
+            </div>
+            <div class="export-track-list" id="export-track-list"></div>
+            <button id="btn-cancel-export" class="btn danger">
+                <span class="material-icons">close</span> Cancel
+            </button>
+        </div>
+    </div>
 
     <script src="catalog.js"></script>
 </body>

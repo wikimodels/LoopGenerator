@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
@@ -9,7 +9,8 @@ app = FastAPI()
 
 # Directory to save loops
 DATA_DIR = "data"
-os.makedirs(DATA_DIR, exist_ok=True)
+LOOPS_DIR = os.path.join(DATA_DIR, "loops")
+os.makedirs(LOOPS_DIR, exist_ok=True)
 
 # Metadata file (ratings, notes, etc.)
 META_FILE = os.path.join(DATA_DIR, "_loop_meta.json")
@@ -45,11 +46,13 @@ class LoopMeta(BaseModel):
     notes: Optional[str] = ""
 
 @app.get("/api/loops")
-def get_loops():
+def get_loops(response: Response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     loops = []
-    for filename in os.listdir(DATA_DIR):
-        if filename.endswith(".json"):
-            filepath = os.path.join(DATA_DIR, filename)
+    meta_filename = os.path.basename(META_FILE)
+    for filename in os.listdir(LOOPS_DIR):
+        if filename.endswith(".json") and filename != meta_filename:
+            filepath = os.path.join(LOOPS_DIR, filename)
             try:
                 with open(filepath, "r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -63,8 +66,23 @@ def get_loops():
 def save_loop(loop: Loop):
     # simple sanitization
     safe_name = "".join([c for c in loop.name if c.isalnum() or c in (' ', '-', '_')]).rstrip()
+    if not safe_name:
+        import uuid
+        safe_name = f"loop_{uuid.uuid4().hex[:8]}"
+        
     filename = f"{safe_name.replace(' ', '_').lower()}.json"
-    filepath = os.path.join(DATA_DIR, filename)
+    
+    if filename == os.path.basename(META_FILE):
+        raise HTTPException(status_code=400, detail="Reserved filename")
+        
+    base_name = safe_name.replace(' ', '_').lower()
+    filepath = os.path.join(LOOPS_DIR, filename)
+    counter = 1
+    while os.path.exists(filepath):
+        counter += 1
+        filename = f"{base_name}_{counter}.json"
+        filepath = os.path.join(LOOPS_DIR, filename)
+        
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(loop.dict(), f, indent=4)
     return {"status": "success", "filename": filename}
@@ -73,7 +91,10 @@ def save_loop(loop: Loop):
 def delete_loop(filename: str):
     # secure delete
     safe_filename = os.path.basename(filename)
-    filepath = os.path.join(DATA_DIR, safe_filename)
+    if safe_filename == os.path.basename(META_FILE):
+        raise HTTPException(status_code=400, detail="Cannot delete metadata file")
+        
+    filepath = os.path.join(LOOPS_DIR, safe_filename)
     if os.path.exists(filepath):
         os.remove(filepath)
         # Clean up metadata too

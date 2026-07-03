@@ -17,6 +17,8 @@ let fft = null;       // native AnalyserNode
 let eqBars = [];
 let animFrameId = null;
 let playbackId = 0;
+let loopBpmMap = {};      // { filename: bpmValue } — per-track BPM override
+let exportCancelled = false;
 
 // Modal specific state
 let isPreviewing = false;
@@ -35,6 +37,15 @@ const progressContainer = document.getElementById('progress-container');
 const progressText = document.getElementById('progress-text');
 const progressFill = document.getElementById('progress-fill');
 const toastEl = document.getElementById('toast');
+
+// Export Audio Overlay Elements
+const btnExportAudio = document.getElementById('btn-export-audio');
+const exportOverlay = document.getElementById('export-overlay');
+const exportCurrentTrack = document.getElementById('export-current-track');
+const exportProgressFill = document.getElementById('export-progress-fill');
+const exportProgressPct = document.getElementById('export-progress-pct');
+const exportTrackList = document.getElementById('export-track-list');
+const btnCancelExport = document.getElementById('btn-cancel-export');
 
 // Modal Elements
 const mergeModal = document.getElementById('merge-modal');
@@ -95,6 +106,21 @@ async function init() {
     }
     
     eqBars = Array.from(document.querySelectorAll('.eq-bar'));
+
+    // Generate overlay EQ bars (CSS-animated, independent of audio)
+    const exportEqEl = document.getElementById('export-eq');
+    if (exportEqEl) {
+        exportEqEl.innerHTML = '';
+        const barHeights = [8,18,26,14,28,10,22,16,28,12,24,20,8,26,18,28,14,22,10,24,16,28,12,20];
+        const barDurs   = [0.5,0.7,0.4,0.85,0.6,0.9,0.45,0.65,0.55,0.75,0.5,0.8,0.6,0.4,0.7,0.5,0.85,0.65,0.75,0.45,0.6,0.8,0.55,0.7];
+        barHeights.forEach((h, i) => {
+            const bar = document.createElement('div');
+            bar.className = 'export-eq-bar';
+            bar.style.setProperty('--h', `${h}px`);
+            bar.style.setProperty('--dur', `${barDurs[i]}s`);
+            exportEqEl.appendChild(bar);
+        });
+    }
     
     setupEventListeners();
 }
@@ -223,7 +249,7 @@ function showToast(msg) {
 // --- Data Fetching & Rendering ---
 async function fetchLoops() {
     try {
-        const res = await fetch('/api/loops');
+        const res = await fetch(`/api/loops?t=${Date.now()}`);
         loopsData = await res.json();
         renderCatalog();
     } catch (e) {
@@ -346,7 +372,6 @@ function renderCatalog() {
 
         info.appendChild(nameEl);
         info.appendChild(metaEl);
-        info.appendChild(stars);
 
         // Controls
         const controls = document.createElement('div');
@@ -375,9 +400,40 @@ function renderCatalog() {
         controls.appendChild(btnPlayToggle);
         controls.appendChild(btnStop);
 
-        div.appendChild(chkWrapper);
+        // BPM Control — same pattern as Merge Modal BPM slider
+        const bpmControl = document.createElement('div');
+        bpmControl.className = 'item-bpm-control';
+        const currentBpm = loopBpmMap[loop._filename] !== undefined ? loopBpmMap[loop._filename] : (loop.bpm || 120);
+        bpmControl.innerHTML = `
+            <span class="material-icons icon-label" title="Export BPM">speed</span>
+            <input type="range" min="60" max="240" value="${currentBpm}"
+                   class="slider compact-slider item-bpm-slider"
+                   data-filename="${loop._filename}">
+            <span class="val-display item-bpm-val">${currentBpm}</span>
+        `;
+        const bpmSliderEl = bpmControl.querySelector('.item-bpm-slider');
+        const bpmValEl    = bpmControl.querySelector('.item-bpm-val');
+        bpmSliderEl.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            loopBpmMap[loop._filename] = val;
+            bpmValEl.textContent = val;
+            // Live-update transport if this exact track is currently playing
+            if (activeLoopName === loop.name && Tone.Transport.state === 'started') {
+                Tone.Transport.bpm.value = val;
+            }
+        });
+        bpmSliderEl.addEventListener('click', (e) => e.stopPropagation());
+
+        // State indicator dot (left side)
+        const indicator = document.createElement('div');
+        indicator.className = 'track-indicator';
+
+        div.appendChild(indicator);
         div.appendChild(info);
         div.appendChild(controls);
+        div.appendChild(stars);
+        div.appendChild(bpmControl);
+        div.appendChild(chkWrapper);
 
         catalogList.appendChild(div);
     });
@@ -389,6 +445,7 @@ function updateSelection() {
     btnDownload.disabled = selectedLoops.size === 0;
     if (btnDownloadJson) btnDownloadJson.disabled = selectedLoops.size === 0;
     if (btnMergeDownload) btnMergeDownload.disabled = selectedLoops.size === 0;
+    if (btnExportAudio) btnExportAudio.disabled = selectedLoops.size === 0;
     btnDelete.disabled = selectedLoops.size === 0;
     
     if (filteredLoops.length === 0) {
@@ -442,6 +499,8 @@ function setupEventListeners() {
 
     btnDownload.addEventListener('click', batchExport);
     btnDelete.addEventListener('click', bulkDelete);
+    if (btnExportAudio) btnExportAudio.addEventListener('click', bulkExportAudio);
+    if (btnCancelExport) btnCancelExport.addEventListener('click', () => { exportCancelled = true; });
 
     if (btnDownloadJson) {
         btnDownloadJson.addEventListener('click', () => {
@@ -532,6 +591,9 @@ function setupEventListeners() {
         // Ignore clicks on search input and stars
         if (e.target.tagName.toLowerCase() === 'input' || e.target.closest('.star-filter')) return;
 
+        // Ignore clicks on play/stop buttons of other tracks, let their click handlers manage switching
+        if (e.target.closest('.item-controls')) return;
+
         // Stop the track for any other click on the page (including disabled buttons)
         stopLoop(null, null, activeItemEl);
     });
@@ -619,7 +681,7 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
     btnPlayToggle.classList.add('paused-state');
     btnStop.disabled = false;
 
-    Tone.Transport.bpm.value = loopData.bpm || 120;
+    Tone.Transport.bpm.value = (loopBpmMap[loopData._filename] !== undefined ? loopBpmMap[loopData._filename] : (loopData.bpm || 120));
     Tone.Transport.swing = loopData.swing || 0.0;
     Tone.Transport.swingSubdivision = "8n";
 
@@ -794,10 +856,122 @@ async function batchExport() {
     }, 1500);
 }
 
-function exportSingleLoopSilent(loopData) {
+// --- Bulk Audio Export (individual files, one by one) ---
+async function bulkExportAudio() {
+    await initAudioContext();
+    if (Tone.context.state !== 'running') await Tone.start();
+
+    // Stop any playing loop
+    if (activeSequence) {
+        Tone.Transport.stop();
+        activeSequence.stop();
+        activeSequence.dispose();
+        activeSequence = null;
+    }
+    document.querySelectorAll('.catalog-item .play').forEach(b => { 
+        b.innerHTML = '<span class="material-icons">play_arrow</span>';
+        b.classList.remove('paused-state');
+        b.disabled = false; 
+    });
+    document.querySelectorAll('.catalog-item .stop').forEach(b => { b.disabled = true; });
+
+    const loopsToExport = loopsData.filter(l => selectedLoops.has(l._filename));
+    if (loopsToExport.length === 0) return;
+
+    exportCancelled = false;
+
+    // Populate track list in overlay
+    exportTrackList.innerHTML = '';
+    loopsToExport.forEach((loop, idx) => {
+        const bpm = loopBpmMap[loop._filename] !== undefined ? loopBpmMap[loop._filename] : (loop.bpm || 120);
+        const item = document.createElement('div');
+        item.className = 'export-track-item';
+        item.id = `export-track-item-${idx}`;
+        item.innerHTML = `
+            <span class="export-track-status material-icons">radio_button_unchecked</span>
+            <span class="export-track-name">${loop.name}</span>
+            <span class="export-track-bpm">${bpm} BPM</span>
+        `;
+        exportTrackList.appendChild(item);
+    });
+
+    // Reset progress
+    exportProgressFill.style.width = '0%';
+    exportProgressPct.textContent = `0% (0/${loopsToExport.length})`;
+    exportCurrentTrack.textContent = 'Preparing...';
+
+    // Show overlay
+    exportOverlay.classList.remove('hidden');
+
+    const total = loopsToExport.length;
+
+    for (let i = 0; i < total; i++) {
+        if (exportCancelled) break;
+
+        const loop = loopsToExport[i];
+        const overrideBpm = loopBpmMap[loop._filename] !== undefined ? loopBpmMap[loop._filename] : (loop.bpm || 120);
+
+        exportCurrentTrack.textContent = loop.name;
+
+        // Mark as in-progress
+        const trackItem = document.getElementById(`export-track-item-${i}`);
+        if (trackItem) {
+            trackItem.querySelector('.export-track-status').textContent = 'hourglass_empty';
+            trackItem.classList.add('in-progress');
+            trackItem.scrollIntoView({ block: 'nearest' });
+        }
+
+        const blob = await exportSingleLoopSilent(loop, overrideBpm);
+
+        if (exportCancelled || blob === null) break;
+
+        // Download immediately
+        const cleanName = loop.name.replace(/[^a-zA-Z0-9_-]/g, '_') || 'loop';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${cleanName}.webm`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+        // Mark as done
+        if (trackItem) {
+            trackItem.querySelector('.export-track-status').textContent = 'check_circle';
+            trackItem.classList.remove('in-progress');
+            trackItem.classList.add('done');
+        }
+
+        // Update progress
+        const percent = Math.round(((i + 1) / total) * 100);
+        exportProgressFill.style.width = `${percent}%`;
+        exportProgressPct.textContent = `${percent}% (${i + 1}/${total})`;
+    }
+
+    if (exportCancelled) {
+        exportCurrentTrack.textContent = 'Cancelled.';
+        setTimeout(() => {
+            exportOverlay.classList.add('hidden');
+            showToast('Export cancelled.');
+            alert('Export cancelled by user.');
+        }, 800);
+    } else {
+        exportCurrentTrack.textContent = 'Done! \u2713';
+        setTimeout(() => {
+            exportOverlay.classList.add('hidden');
+            showToast(`Exported ${total} track(s) successfully!`);
+            alert(`✓ Export complete!\n${total} file(s) downloaded successfully.`);
+            selectedLoops.clear();
+            updateSelection();
+            renderCatalog();
+        }, 800);
+    }
+}
+
+function exportSingleLoopSilent(loopData, overrideBpm) {
     return new Promise(async (resolve) => {
         const currentSynth = silentSynths[loopData.instrument] || silentSynths.piano;
-        Tone.Transport.bpm.value = loopData.bpm || 120;
+        const bpm = overrideBpm || loopData.bpm || 120;
+        Tone.Transport.bpm.value = bpm;
         Tone.Transport.swing = loopData.swing || 0.0;
         Tone.Transport.swingSubdivision = "8n";
         
@@ -810,7 +984,7 @@ function exportSingleLoopSilent(loopData) {
 
         // 8n = 2 steps per beat
         const beats = loopData.steps / 2;
-        const durationSec = beats * (60 / loopData.bpm);
+        const durationSec = beats * (60 / bpm);
 
         const tempSequence = new Tone.Sequence((time, step) => {
             if (stepNotes[step]) {
@@ -829,7 +1003,21 @@ function exportSingleLoopSilent(loopData) {
         recorder.start();
         Tone.Transport.start();
 
-        setTimeout(async () => {
+        // Allow cancel to abort mid-render
+        let exportTimeoutId;
+        const cancelWatcher = setInterval(() => {
+            if (exportCancelled) {
+                clearInterval(cancelWatcher);
+                clearTimeout(exportTimeoutId);
+                Tone.Transport.stop();
+                tempSequence.stop();
+                tempSequence.dispose();
+                recorder.stop().then(() => resolve(null)).catch(() => resolve(null));
+            }
+        }, 250);
+
+        exportTimeoutId = setTimeout(async () => {
+            clearInterval(cancelWatcher);
             Tone.Transport.stop();
             tempSequence.stop();
             tempSequence.dispose();

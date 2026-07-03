@@ -701,7 +701,7 @@ function loadLoopData(data) {
 
 async function fetchLoops() {
     try {
-        const res = await fetch('/api/loops');
+        const res = await fetch(`/api/loops?t=${Date.now()}`);
         catalogLoops = await res.json();
         renderCatalog();
     } catch (e) {

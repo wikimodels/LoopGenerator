@@ -53,3 +53,4 @@ server.log
 
 # Temporary/test generated loops
 test_loop_*.json
+data/
