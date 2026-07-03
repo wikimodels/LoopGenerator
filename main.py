@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 import json
 import os
+import uuid
+
+from melodies_generator import generate_loop as _ml_generate, STYLE_META
 
 app = FastAPI()
 
@@ -86,6 +89,62 @@ def save_loop(loop: Loop):
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(loop.dict(), f, indent=4)
     return {"status": "success", "filename": filename}
+
+
+# -----------------------------------------------------------------
+# STYLE-BASED GENERATION via melodies_generator
+# -----------------------------------------------------------------
+VALID_KEYS = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
+
+class GenerateRequest(BaseModel):
+    style: str
+    key: str
+    bpm: int = 100
+    steps: int = 64
+    seed: Optional[int] = None
+    name: Optional[str] = None
+
+@app.get("/api/styles")
+def get_styles():
+    """Return list of available generation styles."""
+    return list(STYLE_META.keys())
+
+@app.post("/api/generate")
+def generate_loop_endpoint(req: GenerateRequest):
+    """Generate a loop with melodies_generator and save it to the loops directory."""
+    if req.style not in STYLE_META:
+        raise HTTPException(status_code=400, detail=f"Unknown style '{req.style}'")
+    if req.key not in VALID_KEYS:
+        raise HTTPException(status_code=400, detail=f"Invalid key '{req.key}'")
+    if not (40 <= req.bpm <= 240):
+        raise HTTPException(status_code=400, detail="BPM must be 40–240")
+
+    try:
+        loop = _ml_generate(
+            req.style, req.key,
+            name=req.name if req.name and req.name.strip() else None,
+            bpm=req.bpm,
+            steps=req.steps,
+            seed=req.seed,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    # Persist to disk
+    safe = "".join(c for c in loop["name"] if c.isalnum() or c in " -_").strip()
+    base = safe.replace(" ", "_").lower() or f"loop_{uuid.uuid4().hex[:8]}"
+    filename = f"{base}.json"
+    filepath = os.path.join(LOOPS_DIR, filename)
+    ctr = 1
+    while os.path.exists(filepath):
+        ctr += 1
+        filename = f"{base}_{ctr}.json"
+        filepath = os.path.join(LOOPS_DIR, filename)
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(loop, f, indent=4, ensure_ascii=False)
+
+    return {"status": "success", "filename": filename, "loop": loop}
 
 @app.delete("/api/loops/{filename}")
 def delete_loop(filename: str):

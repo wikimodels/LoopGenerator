@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Loop - LoopGenerator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        body { overflow: auto; }
+        .gen-main { flex:1; overflow-y:auto; display:flex; justify-content:center; padding:2rem 1rem 3rem; }
+        .gen-container { width:100%; max-width:860px; display:flex; flex-direction:column; gap:1.25rem; }
+        .gen-card { background:var(--panel-bg); border:1px solid var(--border-color); border-radius:10px; padding:1.25rem 1.5rem; }
+        .gen-card h3 { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:1rem; }
+        .style-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:.6rem; }
+        .style-card { display:flex; flex-direction:column; gap:.2rem; padding:.75rem .9rem; border-radius:8px; border:1.5px solid var(--border-color); background:var(--bg-color); cursor:pointer; transition:border-color .15s,background .15s; user-select:none; }
+        .style-card:hover { border-color:var(--primary); background:#1a2540; }
+        .style-card.selected { border-color:var(--primary); background:rgba(59,130,246,.12); }
+        .style-card .sc-icon { font-size:1.2rem; margin-bottom:.1rem; }
+        .style-card .sc-name { font-size:.78rem; font-weight:600; color:var(--text-main); line-height:1.2; }
+        .style-card .sc-desc { font-size:.68rem; color:var(--text-muted); line-height:1.3; }
+        .style-card.selected .sc-name { color:#93c5fd; }
+        .params-row { display:flex; gap:1.5rem; flex-wrap:wrap; align-items:flex-end; }
+        .param-group { display:flex; flex-direction:column; gap:.4rem; }
+        .param-group label { font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); }
+        .param-group select,.param-group input[type=number] { background:var(--bg-color); border:1px solid var(--border-color); color:var(--text-main); padding:.45rem .6rem; border-radius:6px; font-size:.85rem; font-family:Inter,sans-serif; outline:none; transition:border-color .15s; min-width:120px; }
+        .param-group select:focus,.param-group input[type=number]:focus { border-color:var(--primary); }
+        .bpm-row { display:flex; align-items:center; gap:.6rem; }
+        .bpm-row input[type=range] { accent-color:var(--primary); width:130px; }
+        .bpm-row input[type=number] { width:70px; text-align:center; }
+        .seed-row { margin-top:1rem; display:flex; align-items:center; gap:.75rem; padding-top:1rem; border-top:1px solid var(--border-color); flex-wrap:wrap; }
+        .seed-row label { display:flex; align-items:center; gap:.4rem; font-size:.8rem; color:var(--text-muted); cursor:pointer; user-select:none; }
+        .seed-row input[type=checkbox] { accent-color:var(--primary); width:14px; height:14px; }
+        #seed-value { background:var(--bg-color); border:1px solid var(--border-color); color:var(--text-main); padding:.35rem .6rem; border-radius:6px; font-size:.8rem; font-family:Inter,sans-serif; width:100px; outline:none; transition:border-color .15s,opacity .2s; }
+        #seed-value:disabled { opacity:.35; cursor:default; }
+        #seed-value:focus { border-color:var(--primary); }
+        #btn-random-seed { background:var(--bg-color); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px; padding:.35rem .6rem; font-size:.95rem; cursor:pointer; transition:background .15s,opacity .2s; }
+        #btn-random-seed:hover { background:var(--border-color); }
+        #btn-random-seed:disabled { opacity:.35; cursor:default; }
+        .seed-hint { font-size:.72rem; color:var(--text-muted); }
+        .name-row { display:flex; gap:.6rem; align-items:center; }
+        #name-input { flex:1; background:var(--bg-color); border:1px solid var(--border-color); color:var(--text-main); padding:.5rem .75rem; border-radius:6px; font-size:.9rem; font-family:Inter,sans-serif; font-weight:500; outline:none; transition:border-color .15s; }
+        #name-input:focus { border-color:var(--primary); }
+        #btn-reset-name { background:transparent; border:1px solid var(--border-color); color:var(--text-muted); border-radius:6px; padding:.45rem .7rem; font-size:.75rem; cursor:pointer; white-space:nowrap; transition:background .15s,color .15s; }
+        #btn-reset-name:hover { background:var(--border-color); color:var(--text-main); }
+        .generate-btn { padding:.85rem 2rem; font-size:.95rem; font-weight:600; border-radius:8px; justify-content:center; gap:.5rem; transition:background .2s,transform .1s,opacity .2s; }
+        .generate-btn:active { transform:scale(.98); }
+        .generate-btn:disabled { opacity:.5; cursor:not-allowed; }
+        .gen-result-card { background:var(--panel-bg); border:1.5px solid var(--success); border-radius:10px; padding:1.25rem 1.5rem; display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap; }
+        .gen-result-card.error { border-color:var(--danger); }
+        .result-icon { font-size:2rem; flex-shrink:0; }
+        .result-details { flex:1; min-width:180px; }
+        .result-details h4 { font-size:.9rem; font-weight:600; margin-bottom:.3rem; }
+        .result-meta { font-size:.75rem; color:var(--text-muted); line-height:1.6; }
+        .result-actions { display:flex; gap:.6rem; flex-wrap:wrap; }
+        .result-actions a,.result-actions button { font-size:.8rem; padding:.45rem .9rem; }
+        .hidden { display:none !important; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="top-bar">
+        <div class="logo">
+            <span class="material-icons">auto_awesome</span>
+            Generate Loop
+        </div>
+        <div class="header-actions">
+            <a href="catalog.html" class="btn secondary">
+                <span class="material-icons">library_music</span> Catalog
+            </a>
+            <a href="index.html" class="btn secondary">
+                <span class="material-icons">piano</span> Editor
+            </a>
+        </div>
+    </header>
+    <main class="gen-main">
+        <div class="gen-container">
+            <div class="gen-card">
+                <h3>Style</h3>
+                <div class="style-grid" id="style-grid"></div>
+            </div>
+            <div class="gen-card">
+                <h3>Parameters</h3>
+                <div class="params-row">
+                    <div class="param-group">
+                        <label>Key</label>
+                        <select id="sel-key">
+                            <option>C</option><option>C#</option><option>D</option><option>D#</option>
+                            <option>E</option><option>F</option><option>F#</option><option>G</option>
+                            <option>G#</option><option selected>A</option><option>A#</option><option>B</option>
+                        </select>
+                    </div>
+                    <div class="param-group">
+                        <label>BPM</label>
+                        <div class="bpm-row">
+                            <input type="range" id="bpm-slider" min="40" max="240" value="100">
+                            <input type="number" id="bpm-number" min="40" max="240" value="100">
+                        </div>
+                    </div>
+                    <div class="param-group">
+                        <label>Length</label>
+                        <select id="sel-steps">
+                            <option value="16">16 steps — 1 bar</option>
+                            <option value="32">32 steps — 2 bars</option>
+                            <option value="48">48 steps — 3 bars</option>
+                            <option value="64" selected>64 steps — 4 bars</option>
+                            <option value="80">80 steps — 5 bars</option>
+                            <option value="96">96 steps — 6 bars</option>
+                            <option value="128">128 steps — 8 bars</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="seed-row">
+                    <label>
+                        <input type="checkbox" id="seed-enable">
+                        Fixed seed
+                    </label>
+                    <input type="number" id="seed-value" min="0" max="99999" value="42" disabled>
+                    <button id="btn-random-seed" disabled title="Random seed">dice</button>
+                    <span class="seed-hint">Same seed + same params = identical loop every time</span>
+                </div>
+            </div>
+            <div class="gen-card">
+                <h3>Name</h3>
+                <div class="name-row">
+                    <input type="text" id="name-input" placeholder="Leave blank for auto-name">
+                    <button id="btn-reset-name">Auto</button>
+                </div>
+            </div>
+            <button id="btn-generate" class="btn primary generate-btn">
+                <span class="material-icons">bolt</span>
+                Generate &amp; Save
+            </button>
+            <div id="gen-result" class="gen-result-card hidden">
+                <div class="result-icon" id="result-icon"></div>
+                <div class="result-details">
+                    <h4 id="result-title"></h4>
+                    <div class="result-meta" id="result-meta"></div>
+                </div>
+                <div class="result-actions">
+                    <a id="result-catalog-link" href="catalog.html" class="btn success">
+                        <span class="material-icons">library_music</span> Open Catalog
+                    </a>
+                    <button id="btn-generate-another" class="btn secondary">Generate another</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="generate.js"></script>
+</body>
+</html>
