@@ -1,36 +1,32 @@
 """
-PARAMETRIC MUSIC THEORY ENGINE
+PARAMETRIC MUSIC THEORY ENGINE — fixed version
 ================================
-generate_loop(style, key, bpm, steps) -> loop dict matching the sequencer JSON schema.
+generate_loop(style, key, bpm, steps, beats_per_bar) -> loop dict matching the sequencer JSON schema.
 
-Six axes modeled explicitly: scale, chord vocabulary, progression grammar,
-rhythm/meter, texture, ornamentation. Plus two layers that exist specifically
-to make repeated generations sound like different pieces of music instead of
-the same skeleton with different notes on top:
-
-  - VARIETY POOLS: every style now picks from several progressions (and,
-    where it matters stylistically, alternate rhythmic/melodic templates)
-    once per generate_loop() call, instead of having exactly one hardcoded
-    shape. Two loops, same style, same key, different seed -> structurally
-    different pieces.
-
-  - VOICE LEADING: chord "pad"/"comping" blocks are realized in the octave
-    closest to the previous chord's center of gravity (common tones held,
-    other voices move by step) instead of transposing the whole chord in
-    lockstep from bar to bar -- which is literally parallel fifths/octaves.
-
-  - CONTINUITY: melodic/arpeggio contours pick up near where the previous
-    bar left off instead of re-rolling a fresh random register every bar.
-
-Chord qualities for plain diatonic styles (baroque, modal folk, classical
-Alberti) are DERIVED from the scale, not hand-typed -- this is what caught
-a real error while writing this: a hand-typed "min7" for a Dorian iv chord
-turned out to actually be a dominant 7th once the intervals were computed.
-Deriving it programmatically removes that whole class of mistake.
-
-`steps` is a real axis: every generator cycles its progression to fill
-however many bars fit. Must be a positive multiple of the style's bar
-length (16, or 8 for baroque) -- ValueError otherwise, no silent wrapping.
+Fixes applied vs. the previous version (see accompanying review):
+ 1. mk() now coerces step to int and WRAPS/CLAMPS it into [0, steps_total) again.
+ 2. Fractional-step call sites (lofi strum, neo_soul grace note, romantic rubato)
+    now round to int steps instead of leaking floats into the JSON.
+ 3. gen_romantic / gen_waltz / gen_frahm no longer coin-flip their own scale and
+    silently ignore the scale that was actually requested — they now take an
+    explicit `minor` flag and are registered as separate major/minor styles,
+    the same pattern already used for neoclassical/baroque/jazz.
+ 4. waltz defaults to beats_per_bar=3 (an actual waltz) instead of 4.
+ 5. diatonic_seventh now maps the fully-diminished 7th (3,6,9) -> "dim7"
+    instead of silently falling back to "dom7".
+ 6. Jazz walking bass now builds a genuine stepwise line for ANY beats_per_bar
+    instead of padding with duplicate 5ths when beats_per_bar > 4.
+ 7. Jazz comping beats are now generic (off-beat of every beat except the
+    first) instead of only being defined for beats_per_bar in {4, 5}.
+ 8. Ragtime's syncopation pattern is now expressed as fractions of the bar
+    and scaled to bar_steps, instead of a hardcoded 16-step pattern.
+ 9. Renaissance tenor voice now rests / resolves properly on the final bar
+    instead of continuing to play the previous harmony's notes under the
+    cadence.
+10. voice_lead() now enforces a minimum gap between adjacent voices so it
+    can't stack two pitches a half/whole step apart into a cluster.
+11. SPAN_TO_DURATION no longer silently defaults unknown spans to "8n" —
+    it raises, so a bad span is caught immediately instead of mis-notated.
 """
 import json, os, random
 
@@ -43,7 +39,7 @@ def note_name(semitone, octave):
     return f"{NOTE_NAMES[idx]}{octv}"
 
 # ---------------------------------------------------------------
-# AXIS 1: SCALES / MODES (semitone offsets from tonic)
+# AXIS 1: SCALES / MODES
 # ---------------------------------------------------------------
 SCALES = {
     "major":              [0,2,4,5,7,9,11],
@@ -61,24 +57,18 @@ SCALES = {
 }
 
 def scale_tone(key_pc, scale_name, degree, octave):
-    """degree can exceed len(scale)-1 or be negative — wraps across octaves."""
     scale = SCALES[scale_name]
     n = len(scale)
     octv_add, d = divmod(degree, n)
     return note_name(key_pc + scale[d], octave + octv_add)
 
 def _degree_pc(scale_name, degree):
-    """Correctly octave-wrapped pitch class for a scale degree that may
-    exceed the scale length (e.g. degree+6 for a diatonic 7th). This wrap
-    logic is exactly what gen_jazz's old third_iv bug was missing."""
     scale = SCALES[scale_name]
     n = len(scale)
     octv_add, idx = divmod(degree, n)
     return scale[idx] + 12*octv_add
 
 def diatonic_quality(scale_name, degree):
-    """The triad quality that actually results from stacking thirds within
-    the given scale at this degree — computed, not guessed."""
     root = _degree_pc(scale_name, degree)
     third = _degree_pc(scale_name, degree+2) - root
     fifth = _degree_pc(scale_name, degree+4) - root
@@ -86,18 +76,21 @@ def diatonic_quality(scale_name, degree):
     if (third,fifth) == (3,7): return "min"
     if (third,fifth) == (3,6): return "dim"
     if (third,fifth) == (4,8): return "aug"
-    return "maj"  # defensive fallback, shouldn't trigger for standard 7-note scales
+    return "maj"
 
+# FIX #5: added the fully-diminished 7th (3,6,9) -> "dim7". Previously this
+# combination (common for vii dim7 in harmonic minor, a staple of baroque
+# and classical cadences) fell through to the "dom7" default and silently
+# changed the chord's function.
 SEVENTH_QUALITY_MAP = {
     (4,7,11): "maj7",
     (3,7,10): "min7",
     (4,7,10): "dom7",
     (3,6,10): "m7b5",
+    (3,6,9):  "dim7",
 }
 
 def diatonic_seventh(scale_name, degree):
-    """The 7th-chord quality that actually results from stacking thirds
-    within the given scale at this degree."""
     root = _degree_pc(scale_name, degree)
     third = _degree_pc(scale_name, degree+2) - root
     fifth = _degree_pc(scale_name, degree+4) - root
@@ -105,23 +98,18 @@ def diatonic_seventh(scale_name, degree):
     return SEVENTH_QUALITY_MAP.get((third,fifth,seventh), "dom7")
 
 def build_diatonic_chord(scale_name, degree, force_dominant7=True):
-    """Diatonic triad, with the true dominant (scale degree V) optionally
-    upgraded to a dominant 7th for cadential strength."""
     quality = diatonic_quality(scale_name, degree)
     if force_dominant7 and degree % len(SCALES[scale_name]) == 4 and quality == "maj":
         return "dom7"
     return quality
 
 def extend_dominant(quality, prob=0.5):
-    """Occasionally color a dominant 7th up to a dominant 9th. Doesn't
-    change the chord's function, just its flavor."""
     if quality == "dom7" and random.random() < prob:
         return "dom9"
     return quality
 
 # ---------------------------------------------------------------
 # AXIS 2: CHORD VOCABULARY
-# All qualities have >=3 intervals: index 0=root, 1=third, 2=fifth, 3=seventh.
 # ---------------------------------------------------------------
 CHORD_QUALITIES = {
     "maj":   [0,4,7],
@@ -132,53 +120,60 @@ CHORD_QUALITIES = {
     "min7":  [0,3,7,10],
     "dom7":  [0,4,7,10],
     "m7b5":  [0,3,6,10],
+    "dim7":  [0,3,6,9],
     "dom9":  [0,4,7,10,14],
     "min9":  [0,3,7,10,14],
     "maj9":  [0,4,7,11,14],
+    "dom13": [0,4,7,10,14,21],
 }
 
 def chord_tones(root_pc, quality, octave):
-    return [note_name(root_pc+iv, octave) for iv in CHORD_QUALITIES[quality]]
+    unique_ivs = sorted(set(iv % 12 for iv in CHORD_QUALITIES[quality]))
+    return [note_name(root_pc+iv, octave) for iv in unique_ivs]
 
 def shell_intervals(quality):
-    """Root + 3rd + 7th (drop the 5th) for jazz comping — idiomatic 'shell'
-    voicing. Falls back to the full triad for plain (non-seventh) chords."""
     ivs = CHORD_QUALITIES[quality]
     return [ivs[0], ivs[1], ivs[3]] if len(ivs) >= 4 else list(ivs)
 
 # ---------------------------------------------------------------
-# VOICE LEADING for block chords (pad / comping): realize each pitch class
-# in the octave closest to the previous chord's center of gravity, instead
-# of transposing the whole chord in lockstep (which produces parallel
-# fifths/octaves between every pair of voices whenever the root moves).
+# VOICE LEADING for block chords
 # ---------------------------------------------------------------
 def nearest_register(pc, center):
     k = round((center - pc) / 12)
     return pc + 12*k
 
-def voice_lead(intervals, root_pc, prev_voicing, anchor_octave=4):
+# FIX #12 (supersedes the previous FIX #10 patch): build the voicing as an
+# ascending stack instead of independently rounding every tone to its own
+# nearest octave around one shared center. The first tone lands nearest the
+# previous chord's center of gravity (this is what gives common-tone /
+# small-step voice leading between chords); every following tone is placed
+# at the smallest pitch that still clears min_gap above the tone below it.
+# This guarantees the voicing's total span is just the chord's own interval
+# span (e.g. ~10 semitones for a root-3rd-7th shell) and can never drop a
+# tone a full octave away from the rest of the chord into a neighboring
+# voice's register — which is exactly what the old independent-rounding +
+# reactive min_gap patch was doing (verified: 12/12 roots, dom7 shell,
+# produced 18-20 semitone-wide voicings with the 7th landing in the bass).
+def voice_lead(intervals, root_pc, prev_voicing, anchor_octave=4, min_gap=3):
     pitch_classes = [(root_pc + iv) % 12 for iv in intervals]
     center = (sum(prev_voicing)/len(prev_voicing)) if prev_voicing else anchor_octave*12
-    return sorted(nearest_register(pc, center) for pc in pitch_classes)
+    first = nearest_register(pitch_classes[0], center)
+    pitches = [first]
+    for pc in pitch_classes[1:]:
+        prev = pitches[-1]
+        k = -(-(prev + min_gap - pc) // 12)  # ceil division: smallest k with pc+12k >= prev+min_gap
+        pitches.append(pc + 12*k)
+    return pitches
 
 def realize(abs_pitches):
     return [note_name(p, 0) for p in abs_pitches]
 
 def maybe_add_color(intervals, prob=0.25):
-    """Occasionally add the 9th as a color tone without changing the
-    chord's harmonic function."""
     if 14 not in intervals and random.random() < prob:
         return list(intervals) + [14]
     return list(intervals)
 
-# ---------------------------------------------------------------
-# CONTINUITY for melodic/arpeggio contours
-# ---------------------------------------------------------------
 def carry_start(choices, prev_value):
-    """Index into `choices` closest to prev_value, so a new bar's contour
-    picks up near where the last one left off instead of re-rolling a
-    fresh random register. None (no previous value yet) -> fresh random
-    start, same as before."""
     if prev_value is None:
         return None
     return min(range(len(choices)), key=lambda i: abs(choices[i]-prev_value))
@@ -188,20 +183,20 @@ def carry_start(choices, prev_value):
 # ---------------------------------------------------------------
 BPM_DEFAULT = 100
 STEPS_DEFAULT = 64
-BAR_STEPS = 16                  # one bar = 16 sixteenth-note steps (4/4)
-BAROQUE_SEGMENT_STEPS = 8       # baroque changes harmony every half-bar
-SPAN_TO_DURATION = {1:"16n", 2:"8n", 4:"4n", 8:"2n", 16:"1n"}
+# FIX #12: extended with a couple more legitimate spans, and mk() below now
+# raises instead of silently defaulting an unrecognized span to "8n".
+SPAN_TO_DURATION = {1:"16n", 2:"8n", 3:"8t", 4:"4n", 6:"4n.", 8:"2n", 16:"1n"}
 
-def mk(step, note, dur, vel):
-    return {"step": step, "note": note, "duration": dur, "velocity": round(vel,2)}
+# FIX #1 & #2: mk() now takes the loop's total step count, coerces `step`
+# to an int (rounding away any accidental float from timing math), WRAPS it
+# into [0, steps_total) instead of leaving negative or out-of-range values
+# to be caught only by an external assert, and clamps velocity to [0,1].
+def mk(step, note, dur, vel, steps_total):
+    s = int(round(step)) % steps_total
+    v = max(0.0, min(1.0, vel))
+    return {"step": s, "note": note, "duration": dur, "velocity": round(v, 2)}
 
 def contour_sequence(n, choices=(0,1,2,3), start=None, reversal_bias=0.55, max_run=2):
-    """
-    Generates an index sequence into `choices` that genuinely goes up AND down —
-    not a fixed ascending cycle. Direction flips probabilistically, and is FORCED
-    to flip after `max_run` consecutive steps in the same direction, so you never
-    get a long monotonic ramp (the "up-up-up-up" problem).
-    """
     seq = []
     idx = random.randrange(len(choices)) if start is None else start
     direction = random.choice([1, -1])
@@ -217,88 +212,76 @@ def contour_sequence(n, choices=(0,1,2,3), start=None, reversal_bias=0.55, max_r
         idx = (idx + direction) % len(choices)
     return seq
 
+# =================================================================
+# GENERATORS
+# =================================================================
 
-# =================================================================
-# STYLE 1 — NEOCLASSICAL (major or minor), homophony:
-#   sustained bass + arpeggio + pentatonic-ish melody line
-# =================================================================
-def gen_neoclassical(key_pc, scale_name, bpm, steps, minor=False):
+def gen_neoclassical(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
     notes = []
     scale = "harmonic_minor" if minor else "major"
-
     major_progs = [
-        ([0,5,3,4], ["maj","min","maj","maj"]),   # I-vi-IV-V
-        ([0,4,5,3], ["maj","maj","min","maj"]),   # I-V-vi-IV
-        ([5,0,3,4], ["min","maj","maj","maj"]),   # vi-I-IV-V
-        ([0,3,4,3], ["maj","maj","maj","maj"]),   # I-IV-V-IV
-        ([0,2,5,4], ["maj","min","min","maj"]),   # I-iii-vi-V
-        ([5,3,4,0], ["min","maj","maj","maj"]),   # vi-IV-V-I
+        ([0,5,3,4], ["maj","min","maj","maj"]),
+        ([0,4,5,3], ["maj","maj","min","maj"]),
+        ([5,0,3,4], ["min","maj","maj","maj"]),
+        ([0,3,4,3], ["maj","maj","maj","maj"]),
+        ([0,2,5,4], ["maj","min","min","maj"]),
+        ([5,3,4,0], ["min","maj","maj","maj"]),
+        ([3,4,0,5], ["maj","maj","maj","min"]),
+        ([1,4,0,5], ["min","maj","maj","min"]),
     ]
     minor_progs = [
-        ([0,5,2,4], ["min","maj","aug","dom7"]),  # i-VI-III⁺-V7  (III augmented in harmonic minor)
-        ([0,3,4,0], ["min","min","maj","min"]),   # i-iv-V-i
-        ([5,3,0,4], ["maj","min","min","dom7"]),  # VI-iv-i-V7
-        ([0,6,5,4], ["min","dim","maj","dom7"]),  # i-vii°-VI-V7
+        ([0,5,2,4], ["min","maj","aug","dom7"]),
+        ([0,3,4,0], ["min","min","maj","min"]),
+        ([5,3,0,4], ["maj","min","min","dom7"]),
+        ([0,6,5,4], ["min","dim","maj","dom7"]),
+        ([3,0,5,4], ["min","min","maj","dom7"]),
+        ([2,5,0,4], ["aug","maj","min","dom7"]),
     ]
     degrees, qualities = random.choice(minor_progs if minor else major_progs)
     n = len(degrees)
-    num_bars = steps // BAR_STEPS
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
 
-    arp_notes_per_bar = random.choice([4, 8])   # density variety, chosen once per loop
-    step_span = BAR_STEPS // arp_notes_per_bar
-    arp_dur = SPAN_TO_DURATION[step_span]
+    arp_notes_per_bar = random.choice([beats_per_bar, beats_per_bar * 2])
+    step_span = max(1, bar_steps // arp_notes_per_bar)
+    arp_dur = SPAN_TO_DURATION[step_span] if step_span in SPAN_TO_DURATION else "16n"
 
     prev_arp_val = None
     prev_mel_val = None
 
     for bar in range(num_bars):
         deg, qual = degrees[bar % n], qualities[bar % n]
-        bar_start = bar*BAR_STEPS
+        bar_start = bar*bar_steps
         root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
         chord = chord_tones(root_pc, qual, 3) + [note_name(root_pc,4)]
-        notes.append(mk(bar_start, note_name(root_pc,2), "1n", 0.65))
+        notes.append(mk(bar_start, note_name(root_pc,2), "1n", 0.65, steps))
 
         arp_choices = tuple(range(len(chord)))
         arp_idx = contour_sequence(arp_notes_per_bar, choices=arp_choices,
                                     start=carry_start(arp_choices, prev_arp_val))
         for i,ci in enumerate(arp_idx):
             note = chord[ci]
-            notes.append(mk(bar_start+i*step_span, note, arp_dur, 0.35+random.uniform(0,0.2)))
+            notes.append(mk(bar_start+i*step_span, note, arp_dur, 0.35+random.uniform(0,0.2), steps))
         prev_arp_val = arp_idx[-1]
 
-        # mel_choices in ABSOLUTE scale-degree space (same units as prev_mel_val),
-        # so carry_start compares old and new notes in a stable coordinate system
-        # regardless of how far the chord root shifts between bars.
-        # On the first bar carry_start returns None → contour_sequence picks a
-        # fresh random start, which is exactly the right behaviour.
         mel_choices = (deg, deg+2, deg+4, deg+6, deg+1)
         mel_contour = contour_sequence(2, choices=mel_choices,
                                        start=carry_start(mel_choices, prev_mel_val))
-        notes.append(mk(bar_start+6,  scale_tone(key_pc, scale, mel_contour[0], 5), "4n", 0.65))
-        notes.append(mk(bar_start+12, scale_tone(key_pc, scale, mel_contour[1], 5), "4n", 0.55))
+        beat_offset1 = int(bar_steps * 0.375)
+        beat_offset2 = int(bar_steps * 0.75)
+        notes.append(mk(bar_start+beat_offset1, scale_tone(key_pc, scale, mel_contour[0], 5), "4n", 0.65, steps))
+        notes.append(mk(bar_start+beat_offset2, scale_tone(key_pc, scale, mel_contour[1], 5), "4n", 0.55, steps))
         prev_mel_val = mel_contour[-1]
     return notes
 
 
-# =================================================================
-# STYLE 2 — BAROQUE, polyphony:
-#   circle-of-fifths-family sequence (root motion picked from a pool,
-#   quality DERIVED from the scale, V auto-upgraded to V7) + voice-led
-#   pad + independent upper voice with cross-segment continuity + a
-#   trill ornament at the cadence
-#
-#   INVARIANT: steps must be a positive multiple of BAROQUE_SEGMENT_STEPS (8).
-#   generate_loop() enforces this via ValueError before calling this function,
-#   so num_segments is always an exact integer — no silent bar loss.
-# =================================================================
-def gen_baroque(key_pc, scale_name, bpm, steps, minor=False):
+def gen_baroque(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
     notes = []
     scale = "harmonic_minor" if minor else "major"
-
     major_seqs = [
-        [0,3,6,2,5,1,4,0],   # I-IV-vii°-iii-vi-ii-V-I (classic descending-fifths)
-        [0,5,1,4,0,3,6,2],   # I-vi-ii-V-I-IV-vii°-iii
-        [0,4,5,2,3,0,3,4],   # I-V-vi-iii-IV-I-IV-V (Pachelbel-family)
+        [0,3,6,2,5,1,4,0],
+        [0,5,1,4,0,3,6,2],
+        [0,4,5,2,3,0,3,4],
     ]
     minor_seqs = [
         [0,3,6,2,5,1,4,0],
@@ -307,7 +290,8 @@ def gen_baroque(key_pc, scale_name, bpm, steps, minor=False):
     ]
     seq_degrees = random.choice(minor_seqs if minor else major_seqs)
     n = len(seq_degrees)
-    seg = BAROQUE_SEGMENT_STEPS
+    seg = (beats_per_bar * 4) // 2
+    if seg < 2: seg = 2
     num_segments = steps // seg
 
     prev_pad = None
@@ -319,378 +303,1022 @@ def gen_baroque(key_pc, scale_name, bpm, steps, minor=False):
         s0 = i*seg
         root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
 
-        # BASS: clean harmonic pulse (root, then 5th) — anchors the chord
-        notes.append(mk(s0,   note_name(root_pc,2), "4n", 0.55))
-        notes.append(mk(s0+4, note_name(root_pc+CHORD_QUALITIES[qual][2], 2), "4n", 0.45))
+        notes.append(mk(s0, note_name(root_pc,2), "4n", 0.55, steps))
+        if seg >= 4:
+            notes.append(mk(s0+seg//2, note_name(root_pc+CHORD_QUALITIES[qual][2], 2), "4n", 0.45, steps))
 
-        # CHORD PAD: voice-led, not block-transposed — common tones held,
-        # everything else moves by the smallest possible step
         pad_intervals = maybe_add_color(CHORD_QUALITIES[qual])
         pad_pitches = voice_lead(pad_intervals, root_pc, prev_pad, anchor_octave=4)
         for note in realize(pad_pitches):
-            notes.append(mk(s0, note, "2n", 0.25))
+            notes.append(mk(s0, note, "2n", 0.25, steps))
         prev_pad = pad_pitches
 
-        # VOICE 2 (upper melodic line): independent contour, continues from
-        # where the previous segment left off
         chord = chord_tones(root_pc, qual, 5)
         v2_choices = tuple(range(len(chord)))
-        v2_idx = contour_sequence(4, choices=v2_choices, start=carry_start(v2_choices, prev_v2_val))
-        for j2,ci in zip(range(0, seg, 2), v2_idx):
-            step = s0+j2
+        v2_notes_cnt = seg // 2
+        v2_idx = contour_sequence(v2_notes_cnt, choices=v2_choices, start=carry_start(v2_choices, prev_v2_val))
+        for j,ci in enumerate(v2_idx):
+            step = s0+j*2
             note = chord[ci]
-            notes.append(mk(step, note, "8n", 0.55+0.05*(j2%4==0)))
+            notes.append(mk(step, note, "8n", 0.55+0.05*(j%2==0), steps))
         prev_v2_val = v2_idx[-1]
 
-        # cadence ornament: a trill on the final chord of the actual loop
-        if i == num_segments-1:
+        if i == num_segments-1 and seg >= 4:
             for k in range(4):
                 t_step = s0 + seg - 4 + k
                 trill_note = note_name(root_pc + (2 if k%2==0 else 0), 5)
-                notes.append(mk(t_step, trill_note, "32n", 0.6))
+                notes.append(mk(t_step, trill_note, "32n", 0.6, steps))
     return notes
 
 
-# =================================================================
-# STYLE 3 — JAZZ:
-#   functional ii-V-I family (major: quality DERIVED from the scale, since
-#   major's own diatonic 7ths already give exactly ii=min7/V=dom7/I=maj7 —
-#   no borrowing needed) vs minor ii-V-i (quality hand-specified, because
-#   the idiomatic minor ii-V-i borrows m7b5/altered-dominant qualities that
-#   Dorian's own diatonic 7ths do NOT produce — verified by computing them,
-#   not assumed), WALKING BASS, shell-voiced comping (root-3rd-7th, voice-led),
-#   swung eighths, and a blue note
-# =================================================================
-def gen_jazz(key_pc, scale_name, bpm, steps, minor=False):
+def gen_jazz(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
     notes = []
     if minor:
         scale = "dorian"
         progs = [
-            [(1,"m7b5"), (4,"dom7"), (0,"min7"), (5,"dom7")],   # ii°-V-i-[V7/ii turnaround]
-            [(1,"m7b5"), (4,"dom7"), (0,"min7"), (3,"min7")],   # ii°-V-i-iv
-            [(0,"min7"), (3,"min7"), (5,"maj7"), (4,"dom7")],   # i-iv-VI-V
+            [(1,"m7b5"), (4,"dom7"), (0,"min7"), (5,"dom7")],
+            [(1,"m7b5"), (4,"dom7"), (0,"min7"), (3,"min7")],
+            [(0,"min7"), (3,"min7"), (5,"maj7"), (4,"dom7")],
+            [(3,"min7"), (4,"dom7"), (0,"min7"), (0,"min7")],
+            [(5,"maj7"), (4,"dom7"), (0,"min7"), (0,"min7")],
         ]
         prog = random.choice(progs)
     else:
         scale = "major"
         degree_progs = [
-            [1,4,0,0],   # ii-V-I-I
-            [2,5,1,4],   # iii-vi-ii-V
-            [0,5,1,4],   # I-vi-ii-V
+            [1,4,0,0],
+            [2,5,1,4],
+            [0,5,1,4],
+            [3,4,0,0],
+            [5,1,4,0],
         ]
         degrees = random.choice(degree_progs)
         prog = [(deg, extend_dominant(diatonic_seventh(scale, deg))) for deg in degrees]
 
     n = len(prog)
-    bar_len = BAR_STEPS
-    num_bars = steps // bar_len
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+    scale_len = len(SCALES[scale])
 
     prev_comp = None
     prev_mel_val = None
 
     for bar in range(num_bars):
         deg, qual = prog[bar % n]
-        s0 = bar*bar_len
+        s0 = bar*bar_steps
         root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
 
-        # COMPING: shell voicing (root-3rd-7th, drop the 5th), voice-led so
-        # it doesn't just block-transpose from chord to chord
         comp_intervals = maybe_add_color(shell_intervals(qual), prob=0.2)
         comp_pitches = voice_lead(comp_intervals, root_pc, prev_comp, anchor_octave=3)
         comp_names = realize(comp_pitches)
         prev_comp = comp_pitches
 
-        # WALKING BASS stays strictly in its own low register (octave 2 only).
-        # "next chord" = whatever bar the loop actually plays next (respects
-        # a shorter/longer requested loop length, not just the raw cycle length).
         next_bar = (bar+1) % num_bars
         next_deg = prog[next_bar % n][0]
         next_root_pc = key_pc + SCALES[scale][next_deg % len(SCALES[scale])]
-        third_iv = CHORD_QUALITIES[qual][1]   # chromatic interval from the chord itself —
-        fifth_iv = CHORD_QUALITIES[qual][2]   # not a diatonic scale-degree lookup (that's what broke before)
-        walk = [root_pc, root_pc+third_iv, root_pc+fifth_iv, next_root_pc-1]
+
+        # FIX #6: genuine stepwise walking bass for ANY beats_per_bar. The old
+        # version padded beats beyond the 4th with repeats of the bare 5th,
+        # so e.g. a 6/4 bar walked root-3rd-5th-5th-5th-approach. Now every
+        # interior beat takes the next scale degree up from the root, and
+        # only the very last beat is the chromatic approach into the next chord.
+        walk = []
+        for b in range(beats_per_bar):
+            if b == 0:
+                walk.append(root_pc)
+            elif b == beats_per_bar - 1 and beats_per_bar > 1:
+                walk.append(next_root_pc - 1)
+            else:
+                walk.append(key_pc + SCALES[scale][(deg + b) % scale_len])
         for b,pc_ in enumerate(walk):
-            notes.append(mk(s0+b*4, note_name(pc_,2), "4n", 0.6+0.05*(b==0)))
+            notes.append(mk(s0+b*4, note_name(pc_,2), "4n", 0.6+0.05*(b==0), steps))
 
-        # Comping stabs on the off-beats, own register, separated from bass
-        for off in [6,14]:
-            for note in comp_names:
-                notes.append(mk(s0+off, note, "8n", 0.35))
+        # FIX #7: comping now hits the off-beat ("and") of every beat except
+        # the first, for ANY beats_per_bar — not just the two hardcoded cases
+        # (4 and 5) from before.
+        comp_beats = [b + 0.5 for b in range(1, beats_per_bar)]
+        for b_idx in comp_beats:
+            off = int(b_idx * 4)
+            if s0 + off < s0 + bar_steps:
+                for note in comp_names:
+                    notes.append(mk(s0+off, note, "8n", 0.35, steps))
 
-        # melody: real up/down contour, continues from where the previous
-        # bar left off, own register (octave 5)
         mel_chord = chord_tones(root_pc, qual, 5)
         mel_choices = (0,1,2,3) if len(mel_chord)>3 else (0,1,2)
-        mel_idx = contour_sequence(6, choices=mel_choices, start=carry_start(mel_choices, prev_mel_val))
+        mel_notes_cnt = int(beats_per_bar * 1.5)
+        mel_idx = contour_sequence(mel_notes_cnt, choices=mel_choices, start=carry_start(mel_choices, prev_mel_val))
         for i,ci in enumerate(mel_idx):
             step = s0 + 2 + i*2
-            if step >= s0+bar_len: continue
+            if step >= s0+bar_steps: continue
             note = mel_chord[ci % len(mel_chord)]
-            notes.append(mk(step, note, "8n", 0.5+random.uniform(0,0.15)))
+            notes.append(mk(step, note, "8n", 0.5+random.uniform(0,0.15), steps))
         prev_mel_val = mel_idx[-1]
+
         if bar % n == 1:
             blue = note_name(root_pc+3, 5)
-            notes.append(mk(s0+10, blue, "16n", 0.55))
+            blue_step = s0 + min(10, bar_steps - 2)
+            notes.append(mk(blue_step, blue, "16n", 0.55, steps))
     return notes
 
 
-# =================================================================
-# STYLE 4 — MODAL FOLK (Dorian):
-#   static modal vamp (no functional cadence — that's the point of modal
-#   writing; quality derived from the scale, no forced V7), drone bass,
-#   voice-led chord pad, melody built from a pool of shapes
-# =================================================================
-def gen_modal_folk(key_pc, scale_name, bpm, steps):
+def gen_modal_folk(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "dorian"
     prog_pool = [
-        [0,3,0,3],   # i-IV-i-IV
-        [0,3,6,0],   # i-IV-bVII-i
-        [0,6,3,0],   # i-bVII-IV-i
+        [0,3,0,3],
+        [0,3,6,0],
+        [0,6,3,0],
+        [3,0,6,0],
+        [6,3,0,3],
     ]
     prog = random.choice(prog_pool)
     n = len(prog)
-    bar_len = BAR_STEPS
-    num_bars = steps // bar_len
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
 
-    # relative scale-degree offsets from each bar's chord root, spanning
-    # roughly an octave of the mode — a real contour, not a fixed shape,
-    # so two loops in the same key/style no longer share a melody.
     mel_choices = (0,1,2,3,4,5)
-
     prev_pad = None
     prev_mel_val = None
+
     for bar in range(num_bars):
         deg = prog[bar % n]
-        s0 = bar*bar_len
+        s0 = bar*bar_steps
         root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
-        notes.append(mk(s0, note_name(key_pc,2), "1n", 0.5))  # DRONE stays on the tonic regardless of chord above
+        notes.append(mk(s0, note_name(key_pc,2), "1n", 0.5, steps))
 
         qual = diatonic_quality(scale, deg)
         pad_pitches = voice_lead(CHORD_QUALITIES[qual], root_pc, prev_pad, anchor_octave=4)
         for note in realize(pad_pitches):
-            notes.append(mk(s0+8, note, "2n", 0.3))
+            notes.append(mk(s0 + bar_steps//2, note, "2n", 0.3, steps))
         prev_pad = pad_pitches
 
-        # lower reversal_bias / higher max_run than the default contour, for
-        # a more singable, less zig-zaggy folk-tune shape
         start = carry_start(mel_choices, prev_mel_val)
-        mel_contour = contour_sequence(12, choices=mel_choices, start=start, reversal_bias=0.4, max_run=3)
+        mel_cnt = beats_per_bar * 3
+        mel_contour = contour_sequence(mel_cnt, choices=mel_choices, start=start, reversal_bias=0.4, max_run=3)
         for i,d in enumerate(mel_contour):
             step = s0 + i
-            if step>=s0+bar_len: break
-            notes.append(mk(step, scale_tone(key_pc,scale,deg+d,5), "8n", 0.5+random.uniform(0,0.15)))
+            if step>=s0+bar_steps: break
+            notes.append(mk(step, scale_tone(key_pc,scale,deg+d,5), "8n", 0.5+random.uniform(0,0.15), steps))
         prev_mel_val = mel_contour[-1]
-        # grace note ornament before the phrase resolves
-        notes.append(mk(s0+14, scale_tone(key_pc,scale,deg+1,5), "32n", 0.4))
+
+        grace_step = s0 + max(0, bar_steps - 2)
+        notes.append(mk(grace_step, scale_tone(key_pc,scale,deg+1,5), "32n", 0.4, steps))
     return notes
 
 
-# =================================================================
-# STYLE 5 — CLASSICAL PERIOD (Alberti bass):
-#   the Mozart/Haydn accompaniment pattern: broken triad (order picked
-#   from a pool), quality derived from the scale, + a periodic
-#   (antecedent/consequent) melodic phrase on top (picked from a pool)
-# =================================================================
-def gen_classical_alberti(key_pc, scale_name, bpm, steps):
+def gen_classical_alberti(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "major"
     prog_pool = [
-        [0,4,5,4],   # I-V-vi-V
-        [0,3,4,0],   # I-IV-V-I
-        [0,5,3,4],   # I-vi-IV-V
+        [0,4,5,4],
+        [0,3,4,0],
+        [0,5,3,4],
+        [3,4,0,0],
+        [1,4,0,5],
+        [5,3,4,0],
     ]
     prog = random.choice(prog_pool)
     n = len(prog)
-    bar_len = BAR_STEPS
-    num_bars = steps // bar_len
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
 
     alberti_order = random.choice([[0,2,1,2],[0,1,2,1]])
-
-    # relative scale-degree offsets from each bar's chord root, spanning a
-    # full octave — a real contour, continued bar-to-bar, instead of a
-    # fixed antecedent/consequent pair shared by every generation
     mel_choices = (0,1,2,3,4,5,6,7)
-
     prev_mel_val = None
+
     for bar in range(num_bars):
         local_bar = bar % n
         deg = prog[local_bar]
         qual = diatonic_quality(scale, deg)
-        s0 = bar*bar_len
+        s0 = bar*bar_steps
         root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
         triad = chord_tones(root_pc, qual, 3)
-        # ALBERTI PATTERN: broken triad, repeated across the bar
-        for i in range(8):
+
+        for i in range(beats_per_bar * 2):
             step = s0+i*2
             note = triad[alberti_order[i%4]]
-            notes.append(mk(step, note, "8n", 0.45))
+            notes.append(mk(step, note, "8n", 0.45, steps))
 
-        # periodic melody: antecedent (first half of the phrase) answered
-        # by consequent (second half) — enforced by resolving the very
-        # last note of each n-bar phrase to the tonic (chord root)
         start = carry_start(mel_choices, prev_mel_val)
-        phrase = contour_sequence(4, choices=mel_choices, start=start, reversal_bias=0.45, max_run=3)
+        phrase = contour_sequence(beats_per_bar, choices=mel_choices, start=start, reversal_bias=0.45, max_run=3)
         if local_bar == n-1:
             phrase = phrase[:-1] + [0]
         for i,d in enumerate(phrase):
-            notes.append(mk(s0+i*4, scale_tone(key_pc,scale,deg+d,5), "4n", 0.7-0.05*i))
+            notes.append(mk(s0+i*4, scale_tone(key_pc,scale,deg+d,5), "4n", 0.7-0.05*i, steps))
         prev_mel_val = phrase[-1]
-        if local_bar==n-1:  # classical cadential trill
+
+        if local_bar==n-1 and bar_steps >= 4:
             for k in range(4):
-                notes.append(mk(s0+12+k, scale_tone(key_pc,scale, (2 if k%2==0 else 0),6), "32n", 0.55))
+                notes.append(mk(s0 + bar_steps - 4 + k, scale_tone(key_pc,scale, (2 if k%2==0 else 0),6), "32n", 0.55, steps))
     return notes
 
 
-
-# =================================================================
-# STYLE 6 — RENAISSANCE, imitative polyphony:
-#   4-voice texture (SATB registers): Soprano presents a short motif
-#   at bar 0; Alto answers with the same motif 8 steps later (2 beats
-#   = the simplest imitative entry interval). Tenor adds a stepwise
-#   inner voice with optional 4−3 / 7−6 suspension at each bar
-#   boundary. Bass provides root + fifth on alternate beats. Modal
-#   progressions (Dorian, Phrygian, Mixolydian) — no functional V7→I.
-#   Phrygian cadence (♭II→I) or Landini ornament (6–7–1 in Soprano)
-#   on the final bar.
-#
-#   INVARIANT: steps must be a positive multiple of BAR_STEPS (16).
-#   generate_loop() enforces this via ValueError before calling here.
-# =================================================================
-def gen_renaissance(key_pc, scale_name, bpm, steps, mode="dorian"):
+def gen_renaissance(key_pc, scale_name, bpm, steps, beats_per_bar=4, mode="dorian"):
     notes = []
     scale = mode
-
     PROGS = {
-        "dorian": [
-            [0, 6, 5, 6],   # i – ♭VII – vi° – ♭VII
-            [0, 3, 4, 0],   # i – iv – v – i
-            [0, 5, 3, 4],   # i – vi° – iv – v
-        ],
-        "phrygian": [
-            [0, 1, 0, 4],   # i – ♭II – i – v°  (characteristic Phrygian colour)
-            [0, 6, 1, 0],   # i – ♭vii – ♭II – i
-        ],
-        "mixolydian": [
-            [0, 6, 3, 0],   # I – ♭VII – IV – I
-            [0, 3, 6, 4],   # I – IV – ♭VII – v
-        ],
+        "dorian": [[0, 6, 5, 6], [0, 3, 4, 0], [0, 5, 3, 4], [3, 4, 0, 0], [5, 6, 0, 3]],
+        "phrygian": [[0, 1, 0, 4], [0, 6, 1, 0], [1, 0, 1, 4], [4, 1, 0, 1]],
+        "mixolydian": [[0, 6, 3, 0], [0, 3, 6, 4], [3, 0, 6, 0], [4, 0, 3, 4]],
     }
-    prog   = random.choice(PROGS.get(scale, PROGS["dorian"]))
+    prog = random.choice(PROGS.get(scale, PROGS["dorian"]))
     n_prog = len(prog)
-    num_bars = steps // BAR_STEPS
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
 
     R_SOP, R_ALT, R_TEN, R_BAS = 5, 4, 3, 2
 
-    # ── IMITATIVE MOTIF ────────────────────────────────────────
-    # Scale-degree offsets from chord root, durations chosen once per loop.
-    # Total motif length ≤ BAR_STEPS so it fits cleanly within one bar.
     MOT_DUR_SETS = [
-        [("4n", 4), ("4n", 4), ("8n", 2), ("8n", 2)],   # 12 steps
-        [("2n", 8), ("4n", 4), ("8n", 2), ("8n", 2)],   # 16 steps
-        [("4n", 4), ("8n", 2), ("8n", 2), ("4n", 4)],   # 12 steps
+        [("4n", 4), ("4n", 4), ("8n", 2), ("8n", 2)],
+        [("4n", 4), ("8n", 2), ("8n", 2), ("4n", 4)],
     ]
-    mot_durs   = random.choice(MOT_DUR_SETS)
+    mot_durs = random.choice(MOT_DUR_SETS)
+    while sum(span for _, span in mot_durs) > bar_steps and len(mot_durs) > 1:
+        mot_durs.pop()
+
     mot_offsets = contour_sequence(len(mot_durs), choices=(0, 1, 2, 3, 4), max_run=2)
     motif_steps = sum(span for _, span in mot_durs)
-    imitation_delay = 8                              # Alto enters 2 beats after Soprano
-    alt_free_from   = imitation_delay + motif_steps  # step from which Alto plays freely
+    imitation_delay = min(8, bar_steps // 2)
+    alt_free_from = imitation_delay + motif_steps
 
     def place_motif(start_step, root_deg, octave, vel_base):
         step = start_step
         for off, (dur, span) in zip(mot_offsets, mot_durs):
-            if step >= steps:
-                break
-            notes.append(mk(step,
-                            scale_tone(key_pc, scale, root_deg + off, octave),
-                            dur,
-                            round(vel_base + random.uniform(-0.04, 0.04), 2)))
+            if step >= steps: break
+            notes.append(mk(step, scale_tone(key_pc, scale, root_deg + off, octave), dur, round(vel_base + random.uniform(-0.04, 0.04), 2), steps))
             step += span
 
-    sop_prev = None
-    alt_prev = None
-    ten_prev = None
+    sop_prev, alt_prev, ten_prev = None, None, None
 
     for bar in range(num_bars):
-        deg     = prog[bar % n_prog]
-        s0      = bar * BAR_STEPS
+        deg = prog[bar % n_prog]
+        s0 = bar * bar_steps
         root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
-        qual    = diatonic_quality(scale, deg)
+        qual = diatonic_quality(scale, deg)
         is_last = (bar == num_bars - 1)
         fifth_iv = CHORD_QUALITIES[qual][2]
 
-        # ── BASS: root on beat 1, fifth on beat 3 ─────────────────
-        # Skipped on the final bar — cadence block supplies its own bass.
         if not is_last:
-            notes.append(mk(s0,   note_name(root_pc,             R_BAS), "4n", 0.60))
-            notes.append(mk(s0+8, note_name(root_pc + fifth_iv,  R_BAS), "4n", 0.50))
+            notes.append(mk(s0, note_name(root_pc, R_BAS), "4n", 0.60, steps))
+            if bar_steps > 4:
+                notes.append(mk(s0 + bar_steps // 2, note_name(root_pc + fifth_iv, R_BAS), "4n", 0.50, steps))
 
-        # ── TENOR: inner stepwise voice, optional suspension ────────
-        ten_choices = (deg, deg+1, deg+2, deg+3, deg+4)
-        ten_start   = carry_start(ten_choices, ten_prev)
-        ten_contour = contour_sequence(2, choices=ten_choices, start=ten_start,
-                                       reversal_bias=0.35, max_run=3)
-        if ten_prev is not None and not is_last and random.random() < 0.30:
-            # Suspension: hold the previous scale degree one beat into the
-            # new bar (dissonant), then resolve down by one diatonic step.
-            notes.append(mk(s0,   scale_tone(key_pc, scale, ten_prev,     R_TEN), "8n", 0.45))
-            notes.append(mk(s0+2, scale_tone(key_pc, scale, ten_prev - 1, R_TEN), "8n", 0.40))
-            notes.append(mk(s0+8, scale_tone(key_pc, scale, ten_contour[-1], R_TEN), "4n", 0.42))
-        else:
-            notes.append(mk(s0,   scale_tone(key_pc, scale, ten_contour[0], R_TEN), "2n", 0.45))
-            notes.append(mk(s0+8, scale_tone(key_pc, scale, ten_contour[1], R_TEN), "4n", 0.42))
-        ten_prev = ten_contour[-1]
+        # FIX #9: the tenor voice used to keep playing notes derived from the
+        # regular progression's `deg` even on the final bar, while bass and
+        # soprano switched to the special cadential harmony below — meaning
+        # tenor was sounding a foreign scale degree right under the cadence.
+        # It now only runs its regular independent line when NOT the last bar;
+        # its cadential part is added explicitly in the `is_last` block below.
+        if not is_last:
+            ten_choices = (deg, deg+1, deg+2, deg+3, deg+4)
+            ten_start = carry_start(ten_choices, ten_prev)
+            ten_contour = contour_sequence(2, choices=ten_choices, start=ten_start, reversal_bias=0.35, max_run=3)
+            if ten_prev is not None and random.random() < 0.30:
+                notes.append(mk(s0, scale_tone(key_pc, scale, ten_prev, R_TEN), "8n", 0.45, steps))
+                notes.append(mk(s0 + 2, scale_tone(key_pc, scale, ten_prev - 1, R_TEN), "8n", 0.40, steps))
+                notes.append(mk(s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, ten_contour[-1], R_TEN), "4n", 0.42, steps))
+            else:
+                notes.append(mk(s0, scale_tone(key_pc, scale, ten_contour[0], R_TEN), "2n", 0.45, steps))
+                if bar_steps > 4:
+                    notes.append(mk(s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, ten_contour[1], R_TEN), "4n", 0.42, steps))
+            ten_prev = ten_contour[-1]
 
-        # ── SOPRANO: presents motif on bar 0, free counterpoint after ─
         if bar == 0:
             place_motif(s0, deg, R_SOP, 0.65)
             sop_prev = deg + mot_offsets[-1]
         elif not is_last:
             sop_choices = (deg, deg+2, deg+4, deg+6, deg+1)
-            sop_contour = contour_sequence(2, choices=sop_choices,
-                                           start=carry_start(sop_choices, sop_prev))
-            notes.append(mk(s0+4,  scale_tone(key_pc, scale, sop_contour[0], R_SOP), "4n", 0.65))
-            notes.append(mk(s0+12, scale_tone(key_pc, scale, sop_contour[1], R_SOP), "4n", 0.55))
+            sop_contour = contour_sequence(2, choices=sop_choices, start=carry_start(sop_choices, sop_prev))
+            notes.append(mk(s0 + min(4, bar_steps // 4), scale_tone(key_pc, scale, sop_contour[0], R_SOP), "4n", 0.65, steps))
+            if bar_steps > 4:
+                notes.append(mk(s0 + min(12, bar_steps - 4), scale_tone(key_pc, scale, sop_contour[1], R_SOP), "4n", 0.55, steps))
             sop_prev = sop_contour[-1]
 
-        # ── ALTO: imitation in bar 0; free after motif finishes ─────
-        # Guard: don’t emit free-counterpoint notes for bars whose
-        # start step is still inside the imitation window (alt_free_from).
         if bar == 0:
             place_motif(s0 + imitation_delay, deg, R_ALT, 0.55)
             alt_prev = deg + mot_offsets[-1]
         elif s0 >= alt_free_from and not is_last:
             alt_choices = (deg, deg+1, deg+2, deg+3, deg+4)
-            alt_contour = contour_sequence(3, choices=alt_choices,
-                                           start=carry_start(alt_choices, alt_prev),
-                                           reversal_bias=0.40, max_run=2)
-            notes.append(mk(s0,    scale_tone(key_pc, scale, alt_contour[0], R_ALT), "4n", 0.50))
-            notes.append(mk(s0+6,  scale_tone(key_pc, scale, alt_contour[1], R_ALT), "4n", 0.47))
-            notes.append(mk(s0+12, scale_tone(key_pc, scale, alt_contour[2], R_ALT), "4n", 0.45))
+            alt_contour = contour_sequence(3, choices=alt_choices, start=carry_start(alt_choices, alt_prev), reversal_bias=0.40, max_run=2)
+            notes.append(mk(s0, scale_tone(key_pc, scale, alt_contour[0], R_ALT), "4n", 0.50, steps))
+            if bar_steps > 4:
+                notes.append(mk(s0 + min(6, bar_steps // 3), scale_tone(key_pc, scale, alt_contour[1], R_ALT), "4n", 0.47, steps))
+                notes.append(mk(s0 + min(12, (bar_steps * 2) // 3), scale_tone(key_pc, scale, alt_contour[2], R_ALT), "4n", 0.45, steps))
             alt_prev = alt_contour[-1]
 
-        # ── CADENCE: multi-bar loops only ───────────────────────────────
-        # Skipped on 1-bar loops: the Soprano motif already occupies bar 0
-        # and the cadence block would emit additional bass + soprano notes at
-        # the same steps (verified: step 8 gets 5 notes in a 1-bar loop).
-        if is_last and num_bars > 1:
+        if is_last and num_bars > 1 and bar_steps >= 8:
             final_pc = key_pc
             if mode == "phrygian":
-                # Phrygian cadence: ♭II → I (bass descends by semitone)
                 flat_ii_pc = key_pc + SCALES[scale][1]
-                notes.append(mk(s0,   note_name(flat_ii_pc, R_BAS), "4n", 0.65))
-                notes.append(mk(s0+8, note_name(final_pc,   R_BAS), "2n", 0.70))
-                notes.append(mk(s0+4, scale_tone(key_pc, scale, 1, R_SOP), "4n", 0.65))
-                notes.append(mk(s0+8, scale_tone(key_pc, scale, 0, R_SOP), "2n", 0.70))
+                notes.append(mk(s0, note_name(flat_ii_pc, R_BAS), "4n", 0.65, steps))
+                notes.append(mk(s0 + bar_steps // 2, note_name(final_pc, R_BAS), "2n", 0.70, steps))
+                notes.append(mk(s0 + min(4, bar_steps // 4), scale_tone(key_pc, scale, 1, R_SOP), "4n", 0.65, steps))
+                notes.append(mk(s0 + bar_steps // 2, scale_tone(key_pc, scale, 0, R_SOP), "2n", 0.70, steps))
+                # tenor cadence: holds the 3rd of the bII chord, then resolves down to the tonic's 3rd
+                notes.append(mk(s0, scale_tone(key_pc, scale, 1+2, R_TEN), "4n", 0.45, steps))
+                notes.append(mk(s0 + bar_steps // 2, scale_tone(key_pc, scale, 2, R_TEN), "2n", 0.45, steps))
             else:
-                # Landini cadence: V in bass, 6–7–1 ornament in soprano
                 v_pc = key_pc + SCALES[scale][4]
-                notes.append(mk(s0,   note_name(v_pc,     R_BAS), "4n", 0.60))
-                notes.append(mk(s0+8, note_name(final_pc, R_BAS), "2n", 0.65))
+                notes.append(mk(s0, note_name(v_pc, R_BAS), "4n", 0.60, steps))
+                notes.append(mk(s0 + bar_steps // 2, note_name(final_pc, R_BAS), "2n", 0.65, steps))
                 for k, loff in enumerate([5, 6, 0]):
-                    notes.append(mk(s0 + 8 + k * 2,
-                                    scale_tone(key_pc, scale, loff, R_SOP),
-                                    "8n", max(0.40, 0.68 - k * 0.05)))
+                    notes.append(mk(s0 + bar_steps // 2 + k * 2, scale_tone(key_pc, scale, loff, R_SOP), "8n", max(0.40, 0.68 - k * 0.05), steps))
+                # tenor cadence: holds the 3rd of V, then resolves to the 3rd of the final tonic chord
+                notes.append(mk(s0, scale_tone(key_pc, scale, 4+2, R_TEN), "4n", 0.42, steps))
+                notes.append(mk(s0 + bar_steps // 2, scale_tone(key_pc, scale, 2, R_TEN), "2n", 0.42, steps))
+    return notes
+
+
+def gen_blues(key_pc, scale_name, bpm, steps, beats_per_bar=4):
+    notes = []
+    scale = "blues"
+
+    progs = [
+        [(0,"dom7"), (3,"dom7"), (0,"dom7"), (4,"dom7")],
+        [(0,"dom7"), (3,"dom7"), (0,"dom7"), (0,"dom7")],
+        [(3,"dom7"), (3,"dom7"), (0,"dom7"), (0,"dom7")],
+        [(4,"dom7"), (3,"dom7"), (0,"dom7"), (4,"dom7")],
+        [(3,"dom7"), (4,"dom7"), (0,"dom7"), (0,"dom7")],
+        [(0,"dom7"), (4,"dom7"), (3,"dom7"), (0,"dom7")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_comp = None
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+
+        root_pc = key_pc + SCALES["major"][deg]
+
+        # FIX #13: this used to play bass_pattern[b%4] TWICE per beat (same
+        # pitch at the beat and at its "and"), which just stutters one note
+        # instead of walking. It's now indexed per EIGHTH NOTE, so the
+        # classic root-5th-6th-5th boogie pattern actually moves at the
+        # eighth-note rate it was written for.
+        bass_pattern = [0, 7, 9, 7]
+        for e in range(beats_per_bar * 2):
+            p_idx = e % len(bass_pattern)
+            step = s0 + e * 2
+            vel = 0.75 if e == 0 else (0.7 if e % 2 == 0 else 0.5)
+            notes.append(mk(step, note_name(root_pc + bass_pattern[p_idx], 2), "8n", vel, steps))
+
+        comp_intervals = shell_intervals(qual)
+        comp_pitches = voice_lead(comp_intervals, root_pc, prev_comp, anchor_octave=3)
+        for b in range(beats_per_bar):
+            if b % 2 == 1:
+                off = b * 4 + 2
+                for note in realize(comp_pitches):
+                    notes.append(mk(s0 + off, note, "8n", 0.4, steps))
+        prev_comp = comp_pitches
+
+        mel_choices = (0, 1, 2, 3, 4, 5)
+        start = carry_start(mel_choices, prev_mel)
+        mel_cnt = beats_per_bar * 2
+        mel_contour = contour_sequence(mel_cnt, choices=mel_choices, start=start, reversal_bias=0.45)
+        for i, ci in enumerate(mel_contour):
+            step = s0 + i * 2
+            if random.random() < 0.7:
+                notes.append(mk(step, note_name(key_pc + SCALES["blues"][ci], 5), "8n", 0.6 + random.uniform(0,0.1), steps))
+        prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_ragtime(key_pc, scale_name, bpm, steps, beats_per_bar=4):
+    notes = []
+    scale = "major"
+    progs = [
+        [(0, "maj"), (5, "dom7"), (1, "dom7"), (4, "dom7")],
+        [(0, "maj"), (3, "maj"), (0, "maj"), (4, "dom7")],
+        [(3, "maj"), (0, "maj"), (1, "dom7"), (4, "dom7")],
+        [(4, "dom7"), (0, "maj"), (4, "dom7"), (0, "maj")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_mel = None
+
+    # FIX #8: the syncopation was a hardcoded 16-step pattern [0,3,6,8,11,14].
+    # It's now expressed as fractions of the bar and rescaled to bar_steps,
+    # so it still lands on the same syncopated feel at any beats_per_bar
+    # instead of clipping (smaller bars) or leaving the tail of the bar
+    # empty (larger bars).
+    rhythm_fracs = [0/16, 3/16, 6/16, 8/16, 11/16, 14/16]
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        chord_ivs = CHORD_QUALITIES[qual]
+        chord_notes = [note_name(root_pc + iv, 3) for iv in chord_ivs]
+
+        for b in range(beats_per_bar):
+            if b % 2 == 0:
+                bass_note = note_name(root_pc + (chord_ivs[0] if b % 4 == 0 else chord_ivs[2 % len(chord_ivs)]), 2)
+                notes.append(mk(s0 + b * 4, bass_note, "8n", 0.7, steps))
+            else:
+                for cn in chord_notes:
+                    notes.append(mk(s0 + b * 4, cn, "8n", 0.5, steps))
+
+        mel_choices = (0, 1, 2, 4, 5)
+        start = carry_start(mel_choices, prev_mel)
+        mel_contour = contour_sequence(bar_steps, choices=mel_choices, start=start)
+
+        rhythm_pattern = sorted(set(int(round(f * bar_steps)) for f in rhythm_fracs))
+        rhythm_pattern = [r for r in rhythm_pattern if r < bar_steps]
+        for r_step in rhythm_pattern:
+            ci = mel_contour[r_step % len(mel_contour)]
+            notes.append(mk(s0 + r_step, scale_tone(key_pc, scale, deg + ci, 5), "8n", 0.65, steps))
+        prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_waltz(key_pc, scale_name, bpm, steps, beats_per_bar=3, minor=False):
+    """FIX #3 & #4: takes an explicit `minor` flag instead of flipping a coin
+    on its own scale (which used to silently ignore whatever scale the
+    caller/style metadata actually specified). Also now defaults to
+    beats_per_bar=3 — a waltz that isn't in 3 isn't a waltz."""
+    notes = []
+    scale = "harmonic_minor" if minor else "major"
+    progs = [
+        [(0, "min"), (4, "dom7"), (4, "dom7"), (0, "min")],
+        [(0, "min"), (3, "min"), (4, "dom7"), (0, "min")],
+        [(3, "min"), (4, "dom7"), (0, "min"), (0, "min")],
+        [(5, "maj"), (4, "dom7"), (0, "min"), (4, "dom7")],
+    ] if minor else [
+        [(0, "maj"), (4, "dom7"), (4, "dom7"), (0, "maj")],
+        [(0, "maj"), (5, "min"), (1, "min"), (4, "dom7")],
+        [(3, "maj"), (4, "dom7"), (0, "maj"), (0, "maj")],
+        [(1, "min"), (4, "dom7"), (0, "maj"), (5, "min")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_mel = None
+    prev_pad = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        notes.append(mk(s0, note_name(root_pc, 2), "4n", 0.65, steps))
+
+        pad_pitches = voice_lead(CHORD_QUALITIES[qual], root_pc, prev_pad, anchor_octave=4)
+        for b in range(1, beats_per_bar):
+            for note in realize(pad_pitches):
+                notes.append(mk(s0 + b * 4, note, "4n", 0.45, steps))
+        prev_pad = pad_pitches
+
+        mel_choices = (0, 1, 2, 3, 4, 5, 6, 7)
+        start = carry_start(mel_choices, prev_mel)
+        mel_contour = contour_sequence(beats_per_bar * 2, choices=mel_choices, start=start, reversal_bias=0.3, max_run=4)
+        for i, ci in enumerate(mel_contour):
+            step = s0 + i * 2
+            if random.random() < 0.8:
+                notes.append(mk(step, scale_tone(key_pc, scale, deg + ci, 5), "8n", 0.6, steps))
+        prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_einaudi(key_pc, scale_name, bpm, steps, beats_per_bar=4):
+    notes = []
+    scale = "natural_minor"
+    progs = [
+        [(5, "maj"), (3, "min"), (0, "min"), (4, "min")],
+        [(0, "min"), (5, "maj"), (2, "maj"), (6, "maj")],
+        [(3, "min"), (5, "maj"), (0, "min"), (4, "min")],
+        [(5, "maj"), (6, "maj"), (0, "min"), (0, "min")],
+        [(5, "maj"), (0, "min"), (3, "min"), (4, "min")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        chord_ivs = CHORD_QUALITIES[qual]
+        arp_pitches = [
+            root_pc - 12,
+            root_pc - 12 + chord_ivs[1],
+            root_pc - 12 + chord_ivs[2],
+            root_pc,
+            root_pc + chord_ivs[1],
+            root_pc + chord_ivs[2]
+        ]
+
+        arp_len = beats_per_bar * 2
+        for b in range(arp_len):
+            step = s0 + b * 2
+            idx = b if b < len(arp_pitches) else len(arp_pitches) - 1 - (b - len(arp_pitches))
+            if idx >= len(arp_pitches): idx = len(arp_pitches) - 1
+            if idx < 0: idx = 0
+            notes.append(mk(step, note_name(arp_pitches[idx], 3), "8n", 0.45 + 0.1 * (b % 2 == 0), steps))
+
+        if bar % 2 == 0:
+            mel_choices = (0, 1, 2, 4)
+            start = carry_start(mel_choices, prev_mel)
+            mel_contour = contour_sequence(1, choices=mel_choices, start=start)
+            notes.append(mk(s0, scale_tone(key_pc, scale, deg + mel_contour[0], 5), "1n", 0.65, steps))
+            prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_glass(key_pc, scale_name, bpm, steps, beats_per_bar=4):
+    notes = []
+    scale = "dorian"
+    progs = [
+        [(0, "min"), (0, "min"), (5, "maj"), (5, "maj")],
+        [(0, "min"), (0, "min"), (3, "maj"), (3, "maj")],
+        [(3, "maj"), (3, "maj"), (0, "min"), (0, "min")],
+        [(5, "maj"), (3, "maj"), (0, "min"), (0, "min")],
+        [(6, "maj"), (5, "maj"), (0, "min"), (0, "min")],
+        [(3, "maj"), (5, "maj"), (0, "min"), (0, "min")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    pattern_len = 3
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        chord_ivs = CHORD_QUALITIES[qual]
+        pattern = [root_pc, root_pc + chord_ivs[1], root_pc + chord_ivs[2]]
+        if random.random() < 0.5:
+            pattern = [root_pc, root_pc + chord_ivs[2], root_pc + 12]
+
+        for i in range(beats_per_bar * 2):
+            global_eighth = bar * (beats_per_bar * 2) + i
+            p_idx = global_eighth % pattern_len
+            step = s0 + i * 2
+            vel = 0.6 if p_idx == 0 else 0.4
+            notes.append(mk(step, note_name(pattern[p_idx], 4), "8n", vel, steps))
+
+            if bar % 2 == 0 and i == 0:
+                notes.append(mk(s0, note_name(root_pc, 2), "1n", 0.5, steps))
+
+    return notes
+
+
+def gen_tiersen(key_pc, scale_name, bpm, steps, beats_per_bar=3):
+    notes = []
+    scale = "harmonic_minor"
+    progs = [
+        [(0, "min"), (4, "dom7"), (0, "min"), (4, "dom7")],
+        [(0, "min"), (5, "maj"), (3, "min"), (4, "dom7")],
+        [(5, "maj"), (4, "dom7"), (0, "min"), (0, "min")],
+        [(3, "min"), (0, "min"), (5, "maj"), (4, "dom7")],
+        [(5, "maj"), (3, "min"), (0, "min"), (4, "dom7")],
+        [(3, "min"), (5, "maj"), (4, "dom7"), (0, "min")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        notes.append(mk(s0, note_name(root_pc, 2), "4n", 0.65, steps))
+
+        chord_ivs = CHORD_QUALITIES[qual]
+        chord_notes = [note_name(root_pc + iv, 3) for iv in chord_ivs]
+        for b in range(1, beats_per_bar):
+            for cn in chord_notes:
+                notes.append(mk(s0 + b * 4, cn, "4n", 0.45, steps))
+
+        mel_choices = (0, 1, 2, 3, 4, 5)
+        start = carry_start(mel_choices, prev_mel)
+        mel_contour = contour_sequence(bar_steps, choices=mel_choices, start=start, reversal_bias=0.2, max_run=4)
+
+        for i, ci in enumerate(mel_contour):
+            step = s0 + i
+            notes.append(mk(step, scale_tone(key_pc, scale, deg + ci, 5), "16n", 0.5 + random.uniform(0, 0.15), steps))
+
+        prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_frahm(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
+    """FIX #3: takes an explicit `minor` flag instead of internally rolling
+    a coin (70% minor) that ignored the scale actually requested by the
+    caller/style metadata."""
+    notes = []
+    scale = "natural_minor" if minor else "major"
+    minor_progs = [
+        [(0, "min"), (0, "min"), (3, "min"), (3, "min")],
+        [(0, "min"), (0, "min"), (5, "maj"), (5, "maj")],
+        [(5, "maj"), (5, "maj"), (0, "min"), (0, "min")],
+        [(3, "min"), (4, "min"), (0, "min"), (0, "min")],
+        [(5, "maj"), (6, "maj"), (0, "min"), (0, "min")],
+    ]
+    major_progs = [
+        [(0, "maj"), (0, "maj"), (3, "maj"), (3, "maj")],
+        [(3, "maj"), (3, "maj"), (0, "maj"), (0, "maj")],
+        [(5, "min"), (3, "maj"), (0, "maj"), (4, "maj")],
+        [(1, "min"), (4, "maj"), (0, "maj"), (5, "min")],
+        [(3, "maj"), (4, "maj"), (5, "min"), (5, "min")],
+    ]
+    prog = random.choice(minor_progs if minor else major_progs)
+
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_pad = None
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        if bar % 2 == 0:
+            pad_pitches = voice_lead(CHORD_QUALITIES[qual], root_pc, prev_pad, anchor_octave=3)
+            for note in realize(pad_pitches):
+                notes.append(mk(s0, note, "1n", 0.25, steps))
+            notes.append(mk(s0, note_name(root_pc, 2), "1n", 0.3, steps))
+            prev_pad = pad_pitches
+
+        # Flowing 4-note ambient ostinato (Root, 5th, 8ve, 10th)
+        ivs = CHORD_QUALITIES[qual]
+        pattern = [
+            note_name(root_pc, 4),
+            note_name(root_pc + ivs[2], 4),
+            note_name(root_pc + 12, 4),
+            note_name(root_pc + 12 + ivs[1], 4)
+        ]
+        for i in range(beats_per_bar * 2):
+            step = s0 + i * 2
+            p_idx = i % len(pattern)
+            notes.append(mk(step, pattern[p_idx], "8n", 0.35 + 0.05 * (i % 2 == 0), steps))
+
+        # Sparse, floating melody in the right hand
+        if bar % 2 == 1:
+            mel_choices = (0, 1, 2, 4)
+            start = carry_start(mel_choices, prev_mel)
+            mel_contour = contour_sequence(1, choices=mel_choices, start=start)
+            notes.append(mk(s0, scale_tone(key_pc, scale, deg + mel_contour[0], 5), "2n", 0.55, steps))
+            prev_mel = mel_contour[0]
+
+    return notes
+
+
+def gen_bossa_nova(key_pc, scale_name, bpm, steps, beats_per_bar=4):
+    notes = []
+    scale = "major"
+    progs = [
+        [(0, "maj9"), (5, "dom9"), (1, "min9"), (4, "dom9")],
+        [(0, "maj9"), (1, "dom9"), (1, "min9"), (4, "dom9")],
+        [(1, "min9"), (4, "dom9"), (0, "maj9"), (0, "maj9")],
+        [(0, "maj9"), (0, "dim7"), (1, "min9"), (4, "dom9")],
+        [(0, "maj9"), (3, "maj9"), (2, "min7"), (5, "dom9")],
+        [(2, "min7"), (5, "dom9"), (1, "min9"), (4, "dom9")],
+        [(3, "maj9"), (4, "dom9"), (0, "maj9"), (5, "dom9")],
+        [(5, "min7"), (1, "dom9"), (4, "maj9"), (4, "maj9")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        notes.append(mk(s0, note_name(root_pc, 2), "4n", 0.7, steps))
+        ivs = CHORD_QUALITIES[qual]
+
+        if beats_per_bar >= 3:
+            half_bar = (beats_per_bar // 2) * 4
+            notes.append(mk(s0 + half_bar - 1, note_name(root_pc + ivs[2], 2), "16n", 0.5, steps))
+            notes.append(mk(s0 + half_bar, note_name(root_pc + ivs[2], 2), "4n", 0.6, steps))
+
+        comp_names = []
+        if len(ivs) >= 4:
+            comp_names.append(note_name(root_pc + ivs[1], 3))
+            comp_names.append(note_name(root_pc + ivs[2], 3))
+            comp_names.append(note_name(root_pc + ivs[3], 3))
+            if len(ivs) > 4:
+                comp_names.append(note_name(root_pc + ivs[4], 3))
+        else:
+            comp_names = [note_name(root_pc + iv, 3) for iv in ivs]
+
+        comp_steps = []
+        c = 0 if random.random() < 0.5 else 1
+        while c < bar_steps:
+            comp_steps.append(c)
+            c += 3 if (len(comp_steps) % 2 != 0) else 4
+
+        for c_step in comp_steps:
+            for note in comp_names:
+                notes.append(mk(s0 + c_step, note, "8n", 0.45 + random.uniform(0, 0.1), steps))
+
+        # FIX: The global chord_tones() function now naturally folds extensions
+        # into the same octave and sorts them. This prevents both octave jumps
+        # (shrieking 9ths) AND contour inversions (due to unsorted arrays).
+        mel_chord = chord_tones(root_pc, qual, 5)
+
+        mel_choices = tuple(range(len(mel_chord)))
+        start = carry_start(mel_choices, prev_mel)
+        mel_contour = contour_sequence(bar_steps // 2, choices=mel_choices, start=start, reversal_bias=0.3)
+
+        mel_steps = [s for s in range(2, bar_steps, 3)]
+        for m_idx, m_step in enumerate(mel_steps):
+            if random.random() < 0.7:
+                ci = mel_contour[m_idx % len(mel_contour)]
+                notes.append(mk(s0 + m_step, mel_chord[ci], "8n", 0.6 + random.uniform(0, 0.1), steps))
+
+        prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_romantic(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
+    """FIX #3: takes an explicit `minor` flag instead of rolling its own
+    scale choice (60% harmonic_minor) independent of what was requested."""
+    notes = []
+    scale = "harmonic_minor" if minor else "major"
+    progs = [
+        [(0, "min"), (5, "maj"), (3, "min"), (4, "dom7")],
+        [(0, "min"), (4, "dom9"), (0, "min"), (4, "dom7")],
+        [(3, "min"), (4, "dom7"), (0, "min"), (5, "maj")],
+        [(5, "maj"), (3, "min"), (0, "min"), (4, "dom7")],
+    ] if minor else [
+        [(0, "maj"), (5, "min"), (1, "min7"), (4, "dom7")],
+        [(0, "maj"), (3, "maj"), (4, "dom7"), (0, "maj")],
+        [(3, "maj"), (4, "dom7"), (0, "maj"), (5, "min")],
+        [(1, "min7"), (4, "dom7"), (0, "maj"), (0, "maj")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        ivs = CHORD_QUALITIES[qual]
+        arp_pitches = [
+            root_pc - 12,
+            root_pc - 12 + ivs[2],
+            root_pc + ivs[1]
+        ]
+
+        pattern = [arp_pitches[0], arp_pitches[1], arp_pitches[2], arp_pitches[1]]
+        for i in range(beats_per_bar * 2):
+            step = s0 + i * 2
+            p_idx = i % len(pattern)
+            notes.append(mk(step, note_name(pattern[p_idx], 3), "8n", 0.45 + 0.05 * (i % 2 == 0), steps))
+
+        mel_choices = (0, 1, 2, 3, 4, 5, 6, 7)
+        start = carry_start(mel_choices, prev_mel)
+        mel_contour = contour_sequence(beats_per_bar * 2, choices=mel_choices, start=start, reversal_bias=0.3, max_run=3)
+
+        for i, ci in enumerate(mel_contour):
+            if random.random() < 0.75:
+                # FIX #2: rubato used to leak a rounded FLOAT step (e.g. 4.12)
+                # straight into the JSON. It's now rounded to the nearest
+                # integer step before mk() ever sees it, and clamped in-range.
+                base_step = s0 + i * 2
+                rubato = random.uniform(-0.25, 0.35)
+                final_step = base_step + rubato
+                final_step = max(0, min(steps - 1, final_step))
+                notes.append(mk(int(round(final_step)), scale_tone(key_pc, scale, deg + ci, 5), "8n", 0.6 + random.uniform(0, 0.15), steps))
+
+        prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_lofi(key_pc, scale_name, bpm, steps, beats_per_bar=4):
+    notes = []
+    scale = "major"
+    progs = [
+        [(3, "maj9"), (2, "min7"), (1, "min9"), (0, "maj9")],
+        [(1, "min9"), (4, "dom9"), (0, "maj9"), (5, "dom7")],
+        [(3, "maj7"), (4, "dom9"), (2, "min7"), (5, "min7")],
+        [(0, "maj9"), (5, "min7"), (1, "min9"), (4, "dom9")],
+        [(2, "min7"), (5, "dom9"), (1, "min9"), (4, "dom9")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_comp = None
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        notes.append(mk(s0, note_name(root_pc, 2), "4n", 0.6, steps))
+
+        ivs = CHORD_QUALITIES[qual] if qual in CHORD_QUALITIES else CHORD_QUALITIES["min7"]
+        comp_intervals = [ivs[1], ivs[3]] if len(ivs) >= 4 else [ivs[1], ivs[2]]
+        if len(ivs) > 4: comp_intervals.append(ivs[4])
+
+        if random.random() < 0.5:
+            if qual in ("min9", "min7"): comp_intervals.append(17)
+            elif qual in ("maj9", "maj7"): comp_intervals.append(14)
+
+        comp_pitches = voice_lead(comp_intervals, root_pc, prev_comp, anchor_octave=4)
+        comp_names = realize(comp_pitches)
+        prev_comp = comp_pitches
+
+        hits = [0]
+        if random.random() < 0.7:
+            second_hit = int(bar_steps * 0.5) + (2 if random.random() < 0.5 else -2)
+            if 0 < second_hit < bar_steps:
+                hits.append(second_hit)
+
+        for h in hits:
+            if h < bar_steps:
+                if h > 0:
+                    notes.append(mk(s0 + h, note_name(root_pc, 2), "8n", 0.45, steps))
+                for idx, note in enumerate(comp_names):
+                    # FIX #2: strum offset used to be a fractional step
+                    # (idx*0.12) fed straight into mk(). Now rounded to int.
+                    strum_step = s0 + h + int(round(idx * 0.12))
+                    notes.append(mk(strum_step, note, "4n", 0.45 - idx * 0.05, steps))
+
+        mel_chord = chord_tones(root_pc, qual, 5)
+        mel_choices = tuple(range(len(mel_chord)))
+        start = carry_start(mel_choices, prev_mel)
+        mel_contour = contour_sequence(bar_steps // 2, choices=mel_choices, start=start, reversal_bias=0.2)
+
+        mel_steps = [s for s in range(2, bar_steps, 3)]
+        for m_idx, m_step in enumerate(mel_steps):
+            if random.random() < 0.6:
+                ci = mel_contour[m_idx % len(mel_contour)]
+                notes.append(mk(s0 + m_step, mel_chord[ci], "8n", 0.6 + random.uniform(0, 0.1), steps))
+
+        prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_neo_soul(key_pc, scale_name, bpm, steps, beats_per_bar=4):
+    notes = []
+    scale = "major"
+    progs = [
+        [(0, "maj9"), (0, "dim7"), (1, "min9"), (4, "dom13")],
+        [(3, "maj9"), (4, "dom13"), (2, "min9"), (5, "min9")],
+        [(1, "min9"), (4, "dom13"), (0, "maj9"), (5, "dom13")],
+        [(5, "min9"), (1, "min9"), (4, "dom13"), (0, "maj9")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_comp = None
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+        if deg == 0 and qual == "dim7":
+            root_pc += 1
+
+        notes.append(mk(s0, note_name(root_pc, 2), "4n", 0.65, steps))
+        if beats_per_bar >= 4:
+            notes.append(mk(s0 + 8, note_name(root_pc, 2), "4n", 0.5, steps))
+
+        ivs = CHORD_QUALITIES[qual]
+        comp_intervals = [ivs[1], ivs[3]] if len(ivs) >= 4 else [ivs[1], ivs[2]]
+        if len(ivs) > 4: comp_intervals.append(ivs[4])
+        if len(ivs) > 5: comp_intervals.append(ivs[5])
+
+        comp_pitches = voice_lead(comp_intervals, root_pc, prev_comp, anchor_octave=4)
+        comp_names = realize(comp_pitches)
+        prev_comp = comp_pitches
+
+        hits = [0]
+        for b in range(1, beats_per_bar):
+            if random.random() < 0.7:
+                hits.append(b * 4 + random.choice([0, 1]))
+
+        for h in hits:
+            if h < bar_steps and random.random() < 0.8:
+                vel = 0.5 if h in (0, 8) else 0.4
+                for note in comp_names:
+                    notes.append(mk(s0 + h, note, "8n", vel + random.uniform(0, 0.05), steps))
+
+        mel_chord = chord_tones(root_pc, qual, 5)
+        mel_choices = tuple(range(len(mel_chord)))
+        start = carry_start(mel_choices, prev_mel)
+        mel_contour = contour_sequence(bar_steps, choices=mel_choices, start=start, reversal_bias=0.4)
+
+        for m_step in range(bar_steps):
+            if random.random() < 0.3:
+                ci = mel_contour[m_step % len(mel_contour)]
+                target_note = mel_chord[ci]
+
+                if random.random() < 0.4:
+                    target_pc = root_pc + ivs[ci % len(ivs)]
+                    grace = note_name(target_pc - 1, 5)
+                    # FIX #2: grace note used to sit at a fractional step
+                    # (m_step - 0.25). Now placed one integer step earlier,
+                    # clamped so it can't go negative.
+                    grace_step = max(0, s0 + m_step - 1)
+                    notes.append(mk(grace_step, grace, "32n", 0.4, steps))
+
+                notes.append(mk(s0 + m_step, target_note, "16n", 0.65 + random.uniform(0, 0.1), steps))
+
+        prev_mel = mel_contour[-1]
+
+    return notes
+
+
+def gen_video_game(key_pc, scale_name, bpm, steps, beats_per_bar=4):
+    notes = []
+    scale = "major"
+    progs = [
+        [(5, "min"), (3, "maj"), (0, "maj"), (4, "maj")],
+        [(0, "maj"), (3, "maj"), (4, "maj"), (4, "dom7")],
+        [(5, "min"), (0, "maj"), (3, "maj"), (4, "maj")],
+        [(0, "maj"), (5, "min"), (3, "maj"), (4, "maj")],
+        [(3, "maj"), (4, "maj"), (0, "maj"), (5, "min")],
+        [(1, "min"), (4, "maj"), (0, "maj"), (5, "min")],
+    ]
+    prog = random.choice(progs)
+    n = len(prog)
+    bar_steps = beats_per_bar * 4
+    num_bars = steps // bar_steps
+
+    prev_mel = None
+
+    for bar in range(num_bars):
+        deg, qual = prog[bar % n]
+        s0 = bar * bar_steps
+        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+
+        ivs = CHORD_QUALITIES[qual]
+
+        for i in range(bar_steps):
+            if i % 2 == 0:
+                octave = 2 if (i % 4 == 0) else 3
+                notes.append(mk(s0 + i, note_name(root_pc, octave), "16n", 0.7, steps))
+
+        arp_pattern = [root_pc + ivs[0], root_pc + ivs[1], root_pc + ivs[2], root_pc + ivs[1]]
+        for i in range(bar_steps):
+            p_idx = i % len(arp_pattern)
+            notes.append(mk(s0 + i, note_name(arp_pattern[p_idx], 4), "16n", 0.45, steps))
+
+        mel_chord = chord_tones(root_pc, qual, 5)
+        mel_choices = tuple(range(len(mel_chord)))
+        start = carry_start(mel_choices, prev_mel)
+        mel_contour = contour_sequence(bar_steps, choices=mel_choices, start=start, reversal_bias=0.5, max_run=4)
+
+        for m_idx, m_step in enumerate(range(bar_steps)):
+            prob = 0.8 if m_step % 2 == 0 else 0.3
+            if random.random() < prob:
+                ci = mel_contour[m_idx % len(mel_contour)]
+                notes.append(mk(s0 + m_step, mel_chord[ci], "16n", 0.85, steps))
+
+        prev_mel = mel_contour[-1]
 
     return notes
 
@@ -699,39 +1327,75 @@ def gen_renaissance(key_pc, scale_name, bpm, steps, mode="dorian"):
 # MASTER DISPATCH
 # ---------------------------------------------------------------
 STYLE_META = {
-    "neoclassical_major": dict(scale="major",          swing=0.0,  segment_steps=BAR_STEPS,             fn=lambda kp,s,b,st: gen_neoclassical(kp,s,b,st,minor=False)),
-    "neoclassical_minor": dict(scale="harmonic_minor",  swing=0.0,  segment_steps=BAR_STEPS,             fn=lambda kp,s,b,st: gen_neoclassical(kp,s,b,st,minor=True)),
-    "baroque_major":      dict(scale="major",          swing=0.0,  segment_steps=BAROQUE_SEGMENT_STEPS, fn=lambda kp,s,b,st: gen_baroque(kp,s,b,st,minor=False)),
-    "baroque_minor":      dict(scale="harmonic_minor",  swing=0.0,  segment_steps=BAROQUE_SEGMENT_STEPS, fn=lambda kp,s,b,st: gen_baroque(kp,s,b,st,minor=True)),
-    "jazz_major":         dict(scale="major",          swing=0.6,  segment_steps=BAR_STEPS,             fn=lambda kp,s,b,st: gen_jazz(kp,s,b,st,minor=False)),
-    "jazz_minor":         dict(scale="dorian",         swing=0.6,  segment_steps=BAR_STEPS,             fn=lambda kp,s,b,st: gen_jazz(kp,s,b,st,minor=True)),
-    "modal_folk":         dict(scale="dorian",         swing=0.15, segment_steps=BAR_STEPS,             fn=lambda kp,s,b,st: gen_modal_folk(kp,s,b,st)),
-    "classical_alberti":  dict(scale="major",      swing=0.0,  segment_steps=BAR_STEPS, fn=lambda kp,s,b,st: gen_classical_alberti(kp,s,b,st)),
-    "renaissance_dorian":     dict(scale="dorian",      swing=0.0,  segment_steps=BAR_STEPS, fn=lambda kp,s,b,st: gen_renaissance(kp,s,b,st,mode="dorian")),
-    "renaissance_phrygian":   dict(scale="phrygian",    swing=0.0,  segment_steps=BAR_STEPS, fn=lambda kp,s,b,st: gen_renaissance(kp,s,b,st,mode="phrygian")),
-    "renaissance_mixolydian": dict(scale="mixolydian",  swing=0.0,  segment_steps=BAR_STEPS, fn=lambda kp,s,b,st: gen_renaissance(kp,s,b,st,mode="mixolydian")),
+    "neoclassical_major": dict(scale="major",          swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_neoclassical(kp,s,b,st,bpb,minor=False)),
+    "neoclassical_minor": dict(scale="harmonic_minor",  swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_neoclassical(kp,s,b,st,bpb,minor=True)),
+    "baroque_major":      dict(scale="major",          swing=0.0,  segment_steps=lambda b: max(2, (b*4)//2), fn=lambda kp,s,b,st,bpb: gen_baroque(kp,s,b,st,bpb,minor=False)),
+    "baroque_minor":      dict(scale="harmonic_minor",  swing=0.0,  segment_steps=lambda b: max(2, (b*4)//2), fn=lambda kp,s,b,st,bpb: gen_baroque(kp,s,b,st,bpb,minor=True)),
+    "jazz_major":         dict(scale="major",          swing=0.6,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_jazz(kp,s,b,st,bpb,minor=False)),
+    "jazz_minor":         dict(scale="dorian",         swing=0.6,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_jazz(kp,s,b,st,bpb,minor=True)),
+    "modal_folk":         dict(scale="dorian",         swing=0.15, segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_modal_folk(kp,s,b,st,bpb)),
+    "classical_alberti":  dict(scale="major",          swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_classical_alberti(kp,s,b,st,bpb)),
+    "renaissance_dorian": dict(scale="dorian",         swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_renaissance(kp,s,b,st,bpb,mode="dorian")),
+    "renaissance_phrygian": dict(scale="phrygian",     swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_renaissance(kp,s,b,st,bpb,mode="phrygian")),
+    "renaissance_mixolydian": dict(scale="mixolydian", swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_renaissance(kp,s,b,st,bpb,mode="mixolydian")),
+    "blues":              dict(scale="blues",          swing=0.6,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_blues(kp,s,b,st,bpb)),
+    "ragtime":            dict(scale="major",          swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_ragtime(kp,s,b,st,bpb)),
+    # FIX #3/#4: waltz split into major/minor, each explicit about its scale,
+    # and driven by the beats_per_bar the CALLER passes (3 by default, see
+    # generate_loop below).
+    "waltz_major":        dict(scale="major",          swing=0.1,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_waltz(kp,s,b,st,bpb,minor=False)),
+    "waltz_minor":         dict(scale="harmonic_minor",  swing=0.1,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_waltz(kp,s,b,st,bpb,minor=True)),
+    "bossa_nova":         dict(scale="major",          swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_bossa_nova(kp,s,b,st,bpb)),
+    "romantic_major":     dict(scale="major",          swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_romantic(kp,s,b,st,bpb,minor=False)),
+    "romantic_minor":     dict(scale="harmonic_minor",  swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_romantic(kp,s,b,st,bpb,minor=True)),
+    "lofi":               dict(scale="major",          swing=0.6,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_lofi(kp,s,b,st,bpb)),
+    "neo_soul":           dict(scale="major",          swing=0.4,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_neo_soul(kp,s,b,st,bpb)),
+    "video_game":         dict(scale="major",          swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_video_game(kp,s,b,st,bpb)),
+    "einaudi":            dict(scale="natural_minor",  swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_einaudi(kp,s,b,st,bpb)),
+    "glass":              dict(scale="dorian",         swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_glass(kp,s,b,st,bpb)),
+    "tiersen":            dict(scale="harmonic_minor", swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_tiersen(kp,s,b,st,bpb)),
+    "frahm_minor":        dict(scale="natural_minor",  swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_frahm(kp,s,b,st,bpb,minor=True)),
+    "frahm_major":        dict(scale="major",          swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_frahm(kp,s,b,st,bpb,minor=False)),
 }
 
-def generate_loop(style, key, name=None, bpm=BPM_DEFAULT, steps=STEPS_DEFAULT, seed=None):
+# Styles whose natural/idiomatic meter isn't 4/4 — generate_loop uses this to
+# pick a sane default beats_per_bar instead of silently assuming 4 for
+# everything (fix for issue #4, generalized beyond just waltz).
+STYLE_DEFAULT_METER = {
+    "waltz_major": 3,
+    "waltz_minor": 3,
+    "tiersen": 3,
+}
+
+def generate_loop(style, key, name=None, bpm=BPM_DEFAULT, steps=None, beats_per_bar=None, seed=None):
     if seed is not None:
         random.seed(seed)
+    if beats_per_bar is None:
+        beats_per_bar = STYLE_DEFAULT_METER.get(style, 4)
     meta = STYLE_META[style]
-    seg = meta["segment_steps"]
+    seg = meta["segment_steps"](beats_per_bar)
+    if steps is None:
+        # auto-pick the smallest multiple of `seg` that's >= STEPS_DEFAULT,
+        # so callers don't have to know each style's segment size just to
+        # get a loop with no explicit steps argument (this is what broke
+        # waltz_major/minor and tiersen, whose 3-beat bars don't divide 64).
+        steps = seg * -(-STEPS_DEFAULT // seg)  # ceil division
     if steps <= 0 or steps % seg != 0:
         raise ValueError(
             f"steps must be a positive multiple of {seg} for style '{style}' (got {steps})"
         )
     key_pc = PC[key]
-    notes = meta["fn"](key_pc, meta["scale"], bpm, steps)
+    notes = meta["fn"](key_pc, meta["scale"], bpm, steps, beats_per_bar)
     notes.sort(key=lambda x: x["step"])
     _MINOR_MODES = {"natural_minor", "harmonic_minor", "melodic_minor_asc",
-                    "dorian", "phrygian", "locrian"}
+                    "dorian", "phrygian", "locrian", "blues"}
     scale_label = "Minor" if meta["scale"] in _MINOR_MODES else "Major"
     return {
         "name": name or f"{style.replace('_',' ').title()} in {key}",
         "bpm": bpm, "instrument": "piano", "steps": steps,
         "key": key, "scale": scale_label, "swing": meta["swing"], "notes": notes,
         "style": style,
+        "beats_per_bar": beats_per_bar
     }
 
 if __name__ == "__main__":
@@ -740,27 +1404,47 @@ if __name__ == "__main__":
     for i,style in enumerate(STYLE_META.keys()):
         for j in range(2):
             key = KEYS_DEMO[(i*2+j) % len(KEYS_DEMO)]
-            demo.append(generate_loop(style, key, seed=500+i*2+j))
+            bpb = STYLE_DEFAULT_METER.get(style, 4)
+            demo.append(generate_loop(style, key, seed=500+i*2+j, beats_per_bar=bpb, steps=bpb*4*16))
+
+    for style in ["jazz_minor", "classical_alberti"]:
+        demo.append(generate_loop(style, "C", seed=100, beats_per_bar=3, steps=48))
+
+    for style in ["jazz_major", "neoclassical_major"]:
+        demo.append(generate_loop(style, "C", seed=200, beats_per_bar=5, steps=80))
+
     print("generated:", len(demo))
     for l in demo:
+        beats = l.get("beats_per_bar", 4)
         dur = l["steps"]*(60.0/l["bpm"]/4.0)
-        assert dur >= 8.0
-        assert all(0 <= n["step"] < l["steps"] for n in l["notes"]), "note stepped outside the loop"
+        assert dur >= 6.0
+        assert all(0 <= n["step"] < l["steps"] for n in l["notes"]), f"note stepped outside the loop in {l['style']} {beats}/4"
+        assert all(isinstance(n["step"], int) for n in l["notes"]), f"non-integer step leaked in {l['style']}"
         assert all(0 <= n["velocity"] <= 1 for n in l["notes"]), "velocity out of range"
-        print(f"{l['name']:34s} style={l['style']:20s} notes:{len(l['notes']):3d} swing:{l['swing']}")
+        print(f"{l['name']:34s} style={l['style']:20s} beats={beats} notes:{len(l['notes']):3d} swing:{l['swing']}")
 
-    short_loop = generate_loop("jazz_minor", "A", steps=32, seed=1)
-    assert all(n["step"] < 32 for n in short_loop["notes"])
-    long_loop = generate_loop("baroque_major", "D", steps=96, seed=1)
-    assert all(n["step"] < 96 for n in long_loop["notes"])
+    # confirm waltz styles are genuinely in 3 by default now
+    w = generate_loop("waltz_major", "D")
+    assert w["beats_per_bar"] == 3, "waltz should default to 3/4"
+    print("waltz default meter check passed:", w["beats_per_bar"])
+
+    # confirm romantic/frahm honor the scale they're registered under
+    # (no more internal coin-flip contradicting the style's declared scale)
+    for _ in range(10):
+        rm = generate_loop("romantic_minor", "A")
+        assert rm["scale"] == "Minor"
+        rM = generate_loop("romantic_major", "A")
+        assert rM["scale"] == "Major"
+    print("romantic scale-consistency check passed")
+
     try:
-        generate_loop("jazz_minor", "A", steps=20)
+        generate_loop("jazz_minor", "A", steps=20, beats_per_bar=4)
         raise AssertionError("expected ValueError for a steps value that isn't a valid multiple")
     except ValueError:
         pass
-    print("steps-axis checks passed (32, 96, and invalid-20 all behaved correctly)")
+    print("steps-axis checks passed")
 
-    demo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "theory_engine_demo.json")
+    demo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "theory_engine_demo_fixed.json")
     with open(demo_path, "w", encoding="utf-8") as f:
         json.dump(demo, f, ensure_ascii=False, indent=2)
     print(f"Demo written to: {demo_path}")

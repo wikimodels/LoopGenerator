@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // generate.js — Loop Generator UI logic
 // ============================================================
 
@@ -14,6 +14,21 @@ const STYLES = [
     { id: "renaissance_dorian",   icon: "🏰", name: "Renaissance · Dorian",       desc: "4-voice imitation, Phrygian cadence" },
     { id: "renaissance_phrygian", icon: "🏰", name: "Renaissance · Phrygian",     desc: "4-voice imitation, Phrygian mode" },
     { id: "renaissance_mixolydian", icon: "🏰", name: "Renaissance · Mixolydian", desc: "4-voice imitation, Landini cadence" },
+    { id: "bossa_nova",           icon: "🌴", name: "Bossa Nova",                 desc: "Clave syncopation, complex jazz chords" },
+    { id: "lofi",                 icon: "🎧", name: "Lo-Fi Hip Hop",              desc: "Lazy arpeggiato, heavy swing, maj9 chords" },
+    { id: "neo_soul",             icon: "⛪", name: "Neo-Soul / Gospel",          desc: "Passing diminished chords, grace notes" },
+    { id: "video_game",           icon: "👾", name: "Video Game / 8-bit",         desc: "Fast arpeggios, driving 8th bass, heroic melodies" },
+    { id: "romantic_major",       icon: "🌹", name: "Romantic · Major",           desc: "Wide arpeggios, rubato melody" },
+    { id: "romantic_minor",       icon: "🌹", name: "Romantic · Minor",           desc: "Wide arpeggios, rubato melody in minor" },
+    { id: "blues",                icon: "🎸", name: "Blues",                      desc: "12-bar feel, shuffle bass, blues scale" },
+    { id: "ragtime",              icon: "🎹", name: "Ragtime",                    desc: "Syncopated melody, oom-pah bass" },
+    { id: "waltz_major",          icon: "🎻", name: "Waltz · Major",              desc: "Classical waltz pattern, 3/4 time" },
+    { id: "waltz_minor",          icon: "🎻", name: "Waltz · Minor",              desc: "Classical waltz pattern, 3/4 time in minor" },
+    { id: "einaudi",              icon: "🌊", name: "Neoclassical · Einaudi",     desc: "Cinematic, sweeping arpeggios, sparse melody" },
+    { id: "glass",                icon: "📐", name: "Minimalist · Glass",         desc: "Mathematical arpeggios, shifting accents" },
+    { id: "tiersen",              icon: "🎠", name: "Cinematic · Tiersen",        desc: "Fast waltz, rapid scalar melodies" },
+    { id: "frahm_major",          icon: "🌫️", name: "Ambient · Major",            desc: "Pulsing ostinato, soft sustained chords" },
+    { id: "frahm_minor",          icon: "🌫️", name: "Ambient · Minor",            desc: "Pulsing ostinato, soft sustained chords in minor" },
 ];
 
 let selectedStyle = STYLES[0].id;
@@ -34,6 +49,10 @@ STYLES.forEach(s => {
         document.querySelectorAll(".style-card").forEach(c => c.classList.remove("selected"));
         card.classList.add("selected");
         selectedStyle = s.id;
+        if (s.id === "waltz" || s.id === "tiersen") {
+            const meterEl = document.getElementById("sel-meter");
+            if (meterEl) meterEl.value = "3";
+        }
         if (!nameOverride) syncName();
     });
     grid.appendChild(card);
@@ -99,9 +118,11 @@ btnGenerate.addEventListener("click", async () => {
     const key   = document.getElementById("sel-key").value;
     const bpm   = parseInt(bpmNumber.value);
     const steps = parseInt(document.getElementById("sel-steps").value);
+    const meterEl = document.getElementById("sel-meter");
+    const beats_per_bar = meterEl ? parseInt(meterEl.value) : 4;
     const seed  = seedEnable.checked ? parseInt(seedValue.value) : null;
 
-    const payload = { style: selectedStyle, key, bpm, steps };
+    const payload = { style: selectedStyle, key, bpm, steps, beats_per_bar };
     if (name) payload.name = name;
     if (seed !== null && !isNaN(seed)) payload.seed = seed;
 

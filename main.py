@@ -101,6 +101,7 @@ class GenerateRequest(BaseModel):
     key: str
     bpm: int = 100
     steps: int = 64
+    beats_per_bar: int = 4
     seed: Optional[int] = None
     name: Optional[str] = None
 
@@ -125,6 +126,7 @@ def generate_loop_endpoint(req: GenerateRequest):
             name=req.name if req.name and req.name.strip() else None,
             bpm=req.bpm,
             steps=req.steps,
+            beats_per_bar=req.beats_per_bar,
             seed=req.seed,
         )
     except ValueError as exc:
