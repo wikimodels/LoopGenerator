@@ -1,9 +1,20 @@
 """
-PARAMETRIC MUSIC THEORY ENGINE — fixed version
+PARAMETRIC MUSIC THEORY ENGINE — fixed version 2
 ================================
 generate_loop(style, key, bpm, steps, beats_per_bar) -> loop dict matching the sequencer JSON schema.
 
-Fixes applied vs. the previous version (see accompanying review):
+This revision adds one fix on top of the previous "fixed version":
+
+12. gen_renaissance() no longer overwrites the `mode` argument passed in by
+    the caller with its own random choice of dorian/phrygian/mixolydian.
+    Previously EVERY call — regardless of which of "renaissance_dorian",
+    "renaissance_phrygian", or "renaissance_mixolydian" was requested via
+    STYLE_META — rerolled the mode internally, so all three styles were
+    indistinguishable at runtime (each one just played a random mode from
+    the same 3-way roulette). The function now honors the `mode` argument
+    directly, defaulting to "dorian" only when the caller doesn't specify one.
+
+Fixes retained from the previous version (see original review):
  1. mk() now coerces step to int and WRAPS/CLAMPS it into [0, steps_total) again.
  2. Fractional-step call sites (lofi strum, neo_soul grace note, romantic rubato)
     now round to int steps instead of leaking floats into the JSON.
@@ -136,6 +147,48 @@ def shell_intervals(quality):
     return [ivs[0], ivs[1], ivs[3]] if len(ivs) >= 4 else list(ivs)
 
 # ---------------------------------------------------------------
+# DYNAMIC HARMONY GENERATOR (Markov Chain)
+# ---------------------------------------------------------------
+def generate_harmony(scale_type, length=4, start_degree=None):
+    # 0: I, 1: ii, 2: iii, 3: IV, 4: V, 5: vi, 6: vii°
+    major_transitions = {
+        0: [0, 1, 2, 3, 4, 5, 6], # I can go anywhere
+        1: [4, 6],                # ii -> V, vii°
+        2: [5, 3],                # iii -> vi, IV
+        3: [4, 0, 1, 5],          # IV -> V, I, ii, vi
+        4: [0, 5],                # V -> I, vi
+        5: [3, 1, 4],             # vi -> IV, ii, V
+        6: [0, 2],                # vii° -> I, iii
+    }
+    
+    # 0: i, 1: ii°, 2: III, 3: iv, 4: v/V, 5: VI, 6: VII/vii°
+    minor_transitions = {
+        0: [0, 1, 2, 3, 4, 5, 6], # i can go anywhere
+        1: [4, 6],                # ii° -> V, vii°
+        2: [5, 3, 6],             # III -> VI, iv, VII
+        3: [4, 0, 1, 5],          # iv -> V, i, ii°, VI
+        4: [0, 5],                # V -> i, VI
+        5: [3, 1, 4, 2],          # VI -> iv, ii°, V, III
+        6: [2, 0],                # VII -> III, i
+    }
+    
+    transitions = minor_transitions if "minor" in scale_type or scale_type in ["dorian", "phrygian", "aeolian"] else major_transitions
+    
+    if start_degree is not None:
+        current = start_degree
+    else:
+        # Weighted start degrees for better musicality
+        current = random.choices([0, 5, 3, 1], weights=[50, 20, 15, 15], k=1)[0]
+        
+    prog = [current]
+    for _ in range(length - 1):
+        options = transitions.get(current, [0])
+        current = random.choice(options)
+        prog.append(current)
+        
+    return prog
+
+# ---------------------------------------------------------------
 # VOICE LEADING for block chords
 # ---------------------------------------------------------------
 def nearest_register(pc, center):
@@ -219,25 +272,12 @@ def contour_sequence(n, choices=(0,1,2,3), start=None, reversal_bias=0.55, max_r
 def gen_neoclassical(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
     notes = []
     scale = "harmonic_minor" if minor else "major"
-    major_progs = [
-        ([0,5,3,4], ["maj","min","maj","maj"]),
-        ([0,4,5,3], ["maj","maj","min","maj"]),
-        ([5,0,3,4], ["min","maj","maj","maj"]),
-        ([0,3,4,3], ["maj","maj","maj","maj"]),
-        ([0,2,5,4], ["maj","min","min","maj"]),
-        ([5,3,4,0], ["min","maj","maj","maj"]),
-        ([3,4,0,5], ["maj","maj","maj","min"]),
-        ([1,4,0,5], ["min","maj","maj","min"]),
-    ]
-    minor_progs = [
-        ([0,5,2,4], ["min","maj","aug","dom7"]),
-        ([0,3,4,0], ["min","min","maj","min"]),
-        ([5,3,0,4], ["maj","min","min","dom7"]),
-        ([0,6,5,4], ["min","dim","maj","dom7"]),
-        ([3,0,5,4], ["min","min","maj","dom7"]),
-        ([2,5,0,4], ["aug","maj","min","dom7"]),
-    ]
-    degrees, qualities = random.choice(minor_progs if minor else major_progs)
+    degrees = generate_harmony(scale, length=4)
+    def get_qual(d):
+        if minor:
+            return {0:"min", 1:"dim", 2:"aug", 3:"min", 4:"dom7", 5:"maj", 6:"dim"}.get(d, "min")
+        return {0:"maj", 1:"min", 2:"min", 3:"maj", 4:"maj", 5:"min", 6:"dim"}.get(d, "maj")
+    qualities = [get_qual(d) for d in degrees]
     n = len(degrees)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -278,17 +318,7 @@ def gen_neoclassical(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=Fals
 def gen_baroque(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
     notes = []
     scale = "harmonic_minor" if minor else "major"
-    major_seqs = [
-        [0,3,6,2,5,1,4,0],
-        [0,5,1,4,0,3,6,2],
-        [0,4,5,2,3,0,3,4],
-    ]
-    minor_seqs = [
-        [0,3,6,2,5,1,4,0],
-        [0,4,0,3,6,1,4,0],
-        [5,3,0,4,0,3,4,0],
-    ]
-    seq_degrees = random.choice(minor_seqs if minor else major_seqs)
+    seq_degrees = generate_harmony(scale, length=8)
     n = len(seq_degrees)
     seg = (beats_per_bar * 4) // 2
     if seg < 2: seg = 2
@@ -333,28 +363,11 @@ def gen_baroque(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
 
 def gen_jazz(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
     notes = []
-    if minor:
-        scale = "dorian"
-        progs = [
-            [(1,"m7b5"), (4,"dom7"), (0,"min7"), (5,"dom7")],
-            [(1,"m7b5"), (4,"dom7"), (0,"min7"), (3,"min7")],
-            [(0,"min7"), (3,"min7"), (5,"maj7"), (4,"dom7")],
-            [(3,"min7"), (4,"dom7"), (0,"min7"), (0,"min7")],
-            [(5,"maj7"), (4,"dom7"), (0,"min7"), (0,"min7")],
-        ]
-        prog = random.choice(progs)
-    else:
-        scale = "major"
-        degree_progs = [
-            [1,4,0,0],
-            [2,5,1,4],
-            [0,5,1,4],
-            [3,4,0,0],
-            [5,1,4,0],
-        ]
-        degrees = random.choice(degree_progs)
-        prog = [(deg, extend_dominant(diatonic_seventh(scale, deg))) for deg in degrees]
-
+    scale = "dorian" if minor else "major"
+    degrees = generate_harmony(scale, length=4)
+    def map_jazz_quality(deg):
+        return extend_dominant(diatonic_seventh(scale, deg))
+    prog = [(deg, map_jazz_quality(deg)) for deg in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -424,14 +437,8 @@ def gen_jazz(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
 def gen_modal_folk(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "dorian"
-    prog_pool = [
-        [0,3,0,3],
-        [0,3,6,0],
-        [0,6,3,0],
-        [3,0,6,0],
-        [6,3,0,3],
-    ]
-    prog = random.choice(prog_pool)
+    degrees = generate_harmony(scale, length=4)
+    prog = degrees
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -469,15 +476,8 @@ def gen_modal_folk(key_pc, scale_name, bpm, steps, beats_per_bar=4):
 def gen_classical_alberti(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "major"
-    prog_pool = [
-        [0,4,5,4],
-        [0,3,4,0],
-        [0,5,3,4],
-        [3,4,0,0],
-        [1,4,0,5],
-        [5,3,4,0],
-    ]
-    prog = random.choice(prog_pool)
+    degrees = generate_harmony(scale, length=4)
+    prog = degrees
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -515,13 +515,15 @@ def gen_classical_alberti(key_pc, scale_name, bpm, steps, beats_per_bar=4):
 
 def gen_renaissance(key_pc, scale_name, bpm, steps, beats_per_bar=4, mode="dorian"):
     notes = []
+    # FIX #12: previously this line unconditionally overwrote whatever `mode`
+    # the caller passed in with a fresh random choice, so
+    # "renaissance_dorian" / "renaissance_phrygian" / "renaissance_mixolydian"
+    # all played the exact same 3-way random roulette instead of the mode
+    # the style name promised. The function now simply uses the `mode` it
+    # was given (defaulting to "dorian" only when the caller doesn't specify
+    # one, matching the function signature's own default).
     scale = mode
-    PROGS = {
-        "dorian": [[0, 6, 5, 6], [0, 3, 4, 0], [0, 5, 3, 4], [3, 4, 0, 0], [5, 6, 0, 3]],
-        "phrygian": [[0, 1, 0, 4], [0, 6, 1, 0], [1, 0, 1, 4], [4, 1, 0, 1]],
-        "mixolydian": [[0, 6, 3, 0], [0, 3, 6, 4], [3, 0, 6, 0], [4, 0, 3, 4]],
-    }
-    prog = random.choice(PROGS.get(scale, PROGS["dorian"]))
+    prog = generate_harmony(scale, length=4)
     n_prog = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -633,15 +635,8 @@ def gen_blues(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "blues"
 
-    progs = [
-        [(0,"dom7"), (3,"dom7"), (0,"dom7"), (4,"dom7")],
-        [(0,"dom7"), (3,"dom7"), (0,"dom7"), (0,"dom7")],
-        [(3,"dom7"), (3,"dom7"), (0,"dom7"), (0,"dom7")],
-        [(4,"dom7"), (3,"dom7"), (0,"dom7"), (4,"dom7")],
-        [(3,"dom7"), (4,"dom7"), (0,"dom7"), (0,"dom7")],
-        [(0,"dom7"), (4,"dom7"), (3,"dom7"), (0,"dom7")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony("major", length=4)
+    prog = [(d, "dom7") for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -692,13 +687,10 @@ def gen_blues(key_pc, scale_name, bpm, steps, beats_per_bar=4):
 def gen_ragtime(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "major"
-    progs = [
-        [(0, "maj"), (5, "dom7"), (1, "dom7"), (4, "dom7")],
-        [(0, "maj"), (3, "maj"), (0, "maj"), (4, "dom7")],
-        [(3, "maj"), (0, "maj"), (1, "dom7"), (4, "dom7")],
-        [(4, "dom7"), (0, "maj"), (4, "dom7"), (0, "maj")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_ragtime(d):
+        return "dom7" if d in (1,4,5,6) else ("min" if d in (2,) else "maj")
+    prog = [(d, map_ragtime(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -749,18 +741,12 @@ def gen_waltz(key_pc, scale_name, bpm, steps, beats_per_bar=3, minor=False):
     beats_per_bar=3 — a waltz that isn't in 3 isn't a waltz."""
     notes = []
     scale = "harmonic_minor" if minor else "major"
-    progs = [
-        [(0, "min"), (4, "dom7"), (4, "dom7"), (0, "min")],
-        [(0, "min"), (3, "min"), (4, "dom7"), (0, "min")],
-        [(3, "min"), (4, "dom7"), (0, "min"), (0, "min")],
-        [(5, "maj"), (4, "dom7"), (0, "min"), (4, "dom7")],
-    ] if minor else [
-        [(0, "maj"), (4, "dom7"), (4, "dom7"), (0, "maj")],
-        [(0, "maj"), (5, "min"), (1, "min"), (4, "dom7")],
-        [(3, "maj"), (4, "dom7"), (0, "maj"), (0, "maj")],
-        [(1, "min"), (4, "dom7"), (0, "maj"), (5, "min")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_waltz(d):
+        if minor:
+            return {0:"min", 1:"dim", 2:"aug", 3:"min", 4:"dom7", 5:"maj", 6:"dim"}.get(d, "min")
+        return {0:"maj", 1:"min", 2:"min", 3:"maj", 4:"dom7", 5:"min", 6:"dim"}.get(d, "maj")
+    prog = [(d, map_waltz(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -796,14 +782,10 @@ def gen_waltz(key_pc, scale_name, bpm, steps, beats_per_bar=3, minor=False):
 def gen_einaudi(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "natural_minor"
-    progs = [
-        [(5, "maj"), (3, "min"), (0, "min"), (4, "min")],
-        [(0, "min"), (5, "maj"), (2, "maj"), (6, "maj")],
-        [(3, "min"), (5, "maj"), (0, "min"), (4, "min")],
-        [(5, "maj"), (6, "maj"), (0, "min"), (0, "min")],
-        [(5, "maj"), (0, "min"), (3, "min"), (4, "min")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_einaudi(d):
+        return {0:"min", 1:"dim", 2:"maj", 3:"min", 4:"min", 5:"maj", 6:"maj"}.get(d, "min")
+    prog = [(d, map_einaudi(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -846,15 +828,10 @@ def gen_einaudi(key_pc, scale_name, bpm, steps, beats_per_bar=4):
 def gen_glass(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "dorian"
-    progs = [
-        [(0, "min"), (0, "min"), (5, "maj"), (5, "maj")],
-        [(0, "min"), (0, "min"), (3, "maj"), (3, "maj")],
-        [(3, "maj"), (3, "maj"), (0, "min"), (0, "min")],
-        [(5, "maj"), (3, "maj"), (0, "min"), (0, "min")],
-        [(6, "maj"), (5, "maj"), (0, "min"), (0, "min")],
-        [(3, "maj"), (5, "maj"), (0, "min"), (0, "min")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_glass(d):
+        return {0:"min", 1:"min", 2:"maj", 3:"maj", 4:"min", 5:"dim", 6:"maj"}.get(d, "min")
+    prog = [(d, map_glass(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -887,15 +864,10 @@ def gen_glass(key_pc, scale_name, bpm, steps, beats_per_bar=4):
 def gen_tiersen(key_pc, scale_name, bpm, steps, beats_per_bar=3):
     notes = []
     scale = "harmonic_minor"
-    progs = [
-        [(0, "min"), (4, "dom7"), (0, "min"), (4, "dom7")],
-        [(0, "min"), (5, "maj"), (3, "min"), (4, "dom7")],
-        [(5, "maj"), (4, "dom7"), (0, "min"), (0, "min")],
-        [(3, "min"), (0, "min"), (5, "maj"), (4, "dom7")],
-        [(5, "maj"), (3, "min"), (0, "min"), (4, "dom7")],
-        [(3, "min"), (5, "maj"), (4, "dom7"), (0, "min")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_tiersen(d):
+        return {0:"min", 1:"dim", 2:"aug", 3:"min", 4:"dom7", 5:"maj", 6:"dim"}.get(d, "min")
+    prog = [(d, map_tiersen(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -934,21 +906,12 @@ def gen_frahm(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
     caller/style metadata."""
     notes = []
     scale = "natural_minor" if minor else "major"
-    minor_progs = [
-        [(0, "min"), (0, "min"), (3, "min"), (3, "min")],
-        [(0, "min"), (0, "min"), (5, "maj"), (5, "maj")],
-        [(5, "maj"), (5, "maj"), (0, "min"), (0, "min")],
-        [(3, "min"), (4, "min"), (0, "min"), (0, "min")],
-        [(5, "maj"), (6, "maj"), (0, "min"), (0, "min")],
-    ]
-    major_progs = [
-        [(0, "maj"), (0, "maj"), (3, "maj"), (3, "maj")],
-        [(3, "maj"), (3, "maj"), (0, "maj"), (0, "maj")],
-        [(5, "min"), (3, "maj"), (0, "maj"), (4, "maj")],
-        [(1, "min"), (4, "maj"), (0, "maj"), (5, "min")],
-        [(3, "maj"), (4, "maj"), (5, "min"), (5, "min")],
-    ]
-    prog = random.choice(minor_progs if minor else major_progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_frahm(d):
+        if minor:
+            return {0:"min", 1:"dim", 2:"maj", 3:"min", 4:"min", 5:"maj", 6:"maj"}.get(d, "min")
+        return {0:"maj", 1:"min", 2:"min", 3:"maj", 4:"maj", 5:"min", 6:"dim"}.get(d, "maj")
+    prog = [(d, map_frahm(d)) for d in degrees]
 
     n = len(prog)
     bar_steps = beats_per_bar * 4
@@ -996,17 +959,10 @@ def gen_frahm(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
 def gen_bossa_nova(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "major"
-    progs = [
-        [(0, "maj9"), (5, "dom9"), (1, "min9"), (4, "dom9")],
-        [(0, "maj9"), (1, "dom9"), (1, "min9"), (4, "dom9")],
-        [(1, "min9"), (4, "dom9"), (0, "maj9"), (0, "maj9")],
-        [(0, "maj9"), (0, "dim7"), (1, "min9"), (4, "dom9")],
-        [(0, "maj9"), (3, "maj9"), (2, "min7"), (5, "dom9")],
-        [(2, "min7"), (5, "dom9"), (1, "min9"), (4, "dom9")],
-        [(3, "maj9"), (4, "dom9"), (0, "maj9"), (5, "dom9")],
-        [(5, "min7"), (1, "dom9"), (4, "maj9"), (4, "maj9")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_bossa(d):
+        return {0:"maj9", 1:"min9", 2:"min7", 3:"maj9", 4:"dom9", 5:"min7", 6:"m7b5"}.get(d, "maj9")
+    prog = [(d, map_bossa(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -1071,18 +1027,12 @@ def gen_romantic(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
     scale choice (60% harmonic_minor) independent of what was requested."""
     notes = []
     scale = "harmonic_minor" if minor else "major"
-    progs = [
-        [(0, "min"), (5, "maj"), (3, "min"), (4, "dom7")],
-        [(0, "min"), (4, "dom9"), (0, "min"), (4, "dom7")],
-        [(3, "min"), (4, "dom7"), (0, "min"), (5, "maj")],
-        [(5, "maj"), (3, "min"), (0, "min"), (4, "dom7")],
-    ] if minor else [
-        [(0, "maj"), (5, "min"), (1, "min7"), (4, "dom7")],
-        [(0, "maj"), (3, "maj"), (4, "dom7"), (0, "maj")],
-        [(3, "maj"), (4, "dom7"), (0, "maj"), (5, "min")],
-        [(1, "min7"), (4, "dom7"), (0, "maj"), (0, "maj")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_romantic(d):
+        if minor:
+            return {0:"min", 1:"dim", 2:"aug", 3:"min", 4:"dom7", 5:"maj", 6:"dim7"}.get(d, "min")
+        return {0:"maj", 1:"min", 2:"min", 3:"maj", 4:"dom7", 5:"min", 6:"dim"}.get(d, "maj")
+    prog = [(d, map_romantic(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -1130,14 +1080,10 @@ def gen_romantic(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
 def gen_lofi(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "major"
-    progs = [
-        [(3, "maj9"), (2, "min7"), (1, "min9"), (0, "maj9")],
-        [(1, "min9"), (4, "dom9"), (0, "maj9"), (5, "dom7")],
-        [(3, "maj7"), (4, "dom9"), (2, "min7"), (5, "min7")],
-        [(0, "maj9"), (5, "min7"), (1, "min9"), (4, "dom9")],
-        [(2, "min7"), (5, "dom9"), (1, "min9"), (4, "dom9")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_lofi(d):
+        return {0:"maj9", 1:"min9", 2:"min7", 3:"maj9", 4:"dom9", 5:"min7", 6:"m7b5"}.get(d, "maj9")
+    prog = [(d, map_lofi(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -1200,13 +1146,10 @@ def gen_lofi(key_pc, scale_name, bpm, steps, beats_per_bar=4):
 def gen_neo_soul(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "major"
-    progs = [
-        [(0, "maj9"), (0, "dim7"), (1, "min9"), (4, "dom13")],
-        [(3, "maj9"), (4, "dom13"), (2, "min9"), (5, "min9")],
-        [(1, "min9"), (4, "dom13"), (0, "maj9"), (5, "dom13")],
-        [(5, "min9"), (1, "min9"), (4, "dom13"), (0, "maj9")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_neo_soul(d):
+        return {0:"maj9", 1:"min9", 2:"min9", 3:"maj9", 4:"dom13", 5:"min9", 6:"m7b5"}.get(d, "maj9")
+    prog = [(d, map_neo_soul(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -1275,15 +1218,10 @@ def gen_neo_soul(key_pc, scale_name, bpm, steps, beats_per_bar=4):
 def gen_video_game(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     notes = []
     scale = "major"
-    progs = [
-        [(5, "min"), (3, "maj"), (0, "maj"), (4, "maj")],
-        [(0, "maj"), (3, "maj"), (4, "maj"), (4, "dom7")],
-        [(5, "min"), (0, "maj"), (3, "maj"), (4, "maj")],
-        [(0, "maj"), (5, "min"), (3, "maj"), (4, "maj")],
-        [(3, "maj"), (4, "maj"), (0, "maj"), (5, "min")],
-        [(1, "min"), (4, "maj"), (0, "maj"), (5, "min")],
-    ]
-    prog = random.choice(progs)
+    degrees = generate_harmony(scale, length=4)
+    def map_vg(d):
+        return {0:"maj", 1:"min", 2:"min", 3:"maj", 4:"maj", 5:"min", 6:"dim"}.get(d, "maj")
+    prog = [(d, map_vg(d)) for d in degrees]
     n = len(prog)
     bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
@@ -1437,6 +1375,17 @@ if __name__ == "__main__":
         assert rM["scale"] == "Major"
     print("romantic scale-consistency check passed")
 
+    # NEW: confirm the three renaissance styles are actually distinct modes
+    # now, instead of all rerolling the same random 3-way choice internally.
+    for _ in range(10):
+        rd = generate_loop("renaissance_dorian", "C")
+        rp = generate_loop("renaissance_phrygian", "C")
+        rm2 = generate_loop("renaissance_mixolydian", "C")
+        assert rd["scale"] == "Minor"   # dorian counted as a minor-family mode
+        assert rp["scale"] == "Minor"   # phrygian counted as a minor-family mode
+        assert rm2["scale"] == "Major"  # mixolydian is major-family (no b3)
+    print("renaissance mode-consistency check passed")
+
     try:
         generate_loop("jazz_minor", "A", steps=20, beats_per_bar=4)
         raise AssertionError("expected ValueError for a steps value that isn't a valid multiple")
@@ -1444,7 +1393,7 @@ if __name__ == "__main__":
         pass
     print("steps-axis checks passed")
 
-    demo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "theory_engine_demo_fixed.json")
+    demo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "theory_engine_demo_fixed2.json")
     with open(demo_path, "w", encoding="utf-8") as f:
         json.dump(demo, f, ensure_ascii=False, indent=2)
     print(f"Demo written to: {demo_path}")
