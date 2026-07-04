@@ -24,21 +24,23 @@ const STYLES = [
     { id: "ragtime",              icon: "🎹", name: "Ragtime",                    desc: "Syncopated melody, oom-pah bass" },
     { id: "waltz_major",          icon: "🎻", name: "Waltz · Major",              desc: "Classical waltz pattern, 3/4 time" },
     { id: "waltz_minor",          icon: "🎻", name: "Waltz · Minor",              desc: "Classical waltz pattern, 3/4 time in minor" },
-    { id: "einaudi",              icon: "🌊", name: "Neoclassical · Einaudi",     desc: "Cinematic, sweeping arpeggios, sparse melody" },
-    { id: "glass",                icon: "📐", name: "Minimalist · Glass",         desc: "Mathematical arpeggios, shifting accents" },
-    { id: "tiersen",              icon: "🎠", name: "Cinematic · Tiersen",        desc: "Fast waltz, rapid scalar melodies" },
+    { id: "einaudi_major",        icon: "🌊", name: "Neoclassical · Einaudi Major", desc: "Cinematic, sweeping arpeggios, sparse melody" },
+    { id: "einaudi_minor",        icon: "🌊", name: "Neoclassical · Einaudi Minor", desc: "Cinematic, sweeping arpeggios, sparse melody in minor" },
+    { id: "glass_major",          icon: "📐", name: "Minimalist · Glass Major",   desc: "Mathematical arpeggios, shifting accents" },
+    { id: "glass_minor",          icon: "📐", name: "Minimalist · Glass Minor",   desc: "Mathematical arpeggios, shifting accents in minor" },
+    { id: "tiersen_major",        icon: "🎠", name: "Cinematic · Tiersen Major",  desc: "Fast waltz, rapid scalar melodies" },
+    { id: "tiersen_minor",        icon: "🎠", name: "Cinematic · Tiersen Minor",  desc: "Fast waltz, rapid scalar melodies in minor" },
     { id: "frahm_major",          icon: "🌫️", name: "Ambient · Major",            desc: "Pulsing ostinato, soft sustained chords" },
     { id: "frahm_minor",          icon: "🌫️", name: "Ambient · Minor",            desc: "Pulsing ostinato, soft sustained chords in minor" },
 ];
 
-let selectedStyle = STYLES[0].id;
-let nameOverride = false;   // true when user typed something in the name field
+let selectedStyles = [STYLES[0].id];
 
 // ── Build style cards ─────────────────────────────────────────
 const grid = document.getElementById("style-grid");
 STYLES.forEach(s => {
     const card = document.createElement("div");
-    card.className = "style-card" + (s.id === selectedStyle ? " selected" : "");
+    card.className = "style-card" + (selectedStyles.includes(s.id) ? " selected" : "");
     card.dataset.id = s.id;
     card.innerHTML = `
         <span class="sc-icon">${s.icon}</span>
@@ -46,41 +48,18 @@ STYLES.forEach(s => {
         <span class="sc-desc">${s.desc}</span>
     `;
     card.addEventListener("click", () => {
-        document.querySelectorAll(".style-card").forEach(c => c.classList.remove("selected"));
-        card.classList.add("selected");
-        selectedStyle = s.id;
-        if (s.id === "waltz" || s.id === "tiersen") {
-            const meterEl = document.getElementById("sel-meter");
-            if (meterEl) meterEl.value = "3";
+        if (selectedStyles.includes(s.id)) {
+            if (selectedStyles.length > 1) {
+                selectedStyles = selectedStyles.filter(id => id !== s.id);
+                card.classList.remove("selected");
+            }
+        } else {
+            selectedStyles.push(s.id);
+            card.classList.add("selected");
         }
-        if (!nameOverride) syncName();
     });
     grid.appendChild(card);
 });
-
-// ── Auto-name ─────────────────────────────────────────────────
-function autoName() {
-    const style = STYLES.find(s => s.id === selectedStyle);
-    const key   = document.getElementById("sel-key").value;
-    const bpm   = document.getElementById("bpm-number").value;
-    // match what generate_loop() produces: "Style Title in Key"
-    const title = selectedStyle.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-    return `${title} in ${key}`;
-}
-
-function syncName() {
-    if (!nameOverride) document.getElementById("name-input").value = autoName();
-}
-
-document.getElementById("sel-key").addEventListener("change", syncName);
-document.getElementById("btn-reset-name").addEventListener("click", () => {
-    nameOverride = false;
-    document.getElementById("name-input").value = autoName();
-});
-document.getElementById("name-input").addEventListener("input", () => {
-    nameOverride = true;
-});
-syncName();
 
 // ── BPM slider ↔ number ───────────────────────────────────────
 const bpmSlider = document.getElementById("bpm-slider");
@@ -92,81 +71,96 @@ bpmNumber.addEventListener("input", () => {
     bpmNumber.value = v;
 });
 
-// ── Seed controls ─────────────────────────────────────────────
-const seedEnable = document.getElementById("seed-enable");
-const seedValue  = document.getElementById("seed-value");
-const btnRandom  = document.getElementById("btn-random-seed");
+// ── Chip Controls ───────────────────────────────────────────────
+document.querySelectorAll('.chip-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+    });
+});
 
-seedEnable.addEventListener("change", () => {
-    const on = seedEnable.checked;
-    seedValue.disabled  = !on;
-    btnRandom.disabled  = !on;
-});
-btnRandom.addEventListener("click", () => {
-    seedValue.value = Math.floor(Math.random() * 100000);
-});
+function toggleChips(groupId) {
+    const group = document.getElementById(groupId);
+    const chips = group.querySelectorAll('.chip-btn');
+    const allSelected = Array.from(chips).every(c => c.classList.contains('selected'));
+    
+    chips.forEach(c => {
+        if (allSelected) {
+            c.classList.remove('selected');
+        } else {
+            c.classList.add('selected');
+        }
+    });
+}
+
+function getSelectedValues(groupId) {
+    const group = document.getElementById(groupId);
+    return Array.from(group.querySelectorAll('.chip-btn.selected')).map(chip => chip.dataset.value);
+}
 
 // ── Generate ──────────────────────────────────────────────────
 const btnGenerate = document.getElementById("btn-generate");
 const resultCard  = document.getElementById("gen-result");
-const resultIcon  = document.getElementById("result-icon");
-const resultTitle = document.getElementById("result-title");
 const resultMeta  = document.getElementById("result-meta");
+const resultActions = document.getElementById("result-actions");
 
 btnGenerate.addEventListener("click", async () => {
-    const name  = document.getElementById("name-input").value.trim();
-    const key   = document.getElementById("sel-key").value;
-    const bpm   = parseInt(bpmNumber.value);
-    const steps = parseInt(document.getElementById("sel-steps").value);
-    const meterEl = document.getElementById("sel-meter");
-    const beats_per_bar = meterEl ? parseInt(meterEl.value) : 4;
-    const seed  = seedEnable.checked ? parseInt(seedValue.value) : null;
+    const keys = getSelectedValues("sel-key");
+    const meters = getSelectedValues("sel-meter").map(v => parseInt(v));
+    const stepsArr = getSelectedValues("sel-steps").map(v => parseInt(v));
+    const bpm = parseInt(document.getElementById("bpm-number").value);
+    
+    if (selectedStyles.length === 0 || keys.length === 0 || meters.length === 0 || stepsArr.length === 0) {
+        alert("Please select at least one item from all parameters.");
+        return;
+    }
 
-    const payload = { style: selectedStyle, key, bpm, steps, beats_per_bar };
-    if (name) payload.name = name;
-    if (seed !== null && !isNaN(seed)) payload.seed = seed;
+    const totalCombos = selectedStyles.length * keys.length * meters.length * stepsArr.length;
+    let completed = 0;
 
     btnGenerate.disabled = true;
-    btnGenerate.innerHTML = '<span class="material-icons">hourglass_empty</span> Generating...';
-    resultCard.classList.add("hidden");
+    btnGenerate.innerHTML = '<span class="material-icons">hourglass_empty</span> Generating Batch...';
+    resultCard.classList.remove("hidden", "error");
+    resultActions.classList.add("hidden");
+    resultMeta.textContent = `Generated 0 / ${totalCombos}...`;
 
-    try {
-        const res = await fetch("/api/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-        const data = await res.json();
+    for (const style of selectedStyles) {
+        for (const key of keys) {
+            for (const beats_per_bar of meters) {
+                for (const steps of stepsArr) {
+                    const seed = Math.floor(Math.random() * 1000000);
+                    const payload = { 
+                        style: style, 
+                        key: key, 
+                        bpm: bpm, 
+                        steps: steps, 
+                        beats_per_bar: beats_per_bar, 
+                        seed: seed,
+                        is_batch: true
+                    };
 
-        if (!res.ok) {
-            throw new Error(data.detail || "Server error");
+                    try {
+                        const res = await fetch("/api/generate", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        });
+                        
+                        if (!res.ok) {
+                            console.error(`Error generating ${style} in ${key}`);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    }
+                    
+                    completed++;
+                    resultMeta.textContent = `Generated ${completed} / ${totalCombos}...`;
+                }
+            }
         }
-
-        const loop = data.loop;
-        resultCard.classList.remove("hidden", "error");
-        resultIcon.textContent  = "✓";
-        resultTitle.textContent = loop.name;
-        resultMeta.innerHTML =
-            `Style: <strong>${loop.style.replace(/_/g," ")}</strong> &nbsp;·&nbsp; ` +
-            `Key: <strong>${loop.key} ${loop.scale}</strong> &nbsp;·&nbsp; ` +
-            `BPM: <strong>${loop.bpm}</strong> &nbsp;·&nbsp; ` +
-            `Steps: <strong>${loop.steps}</strong> &nbsp;·&nbsp; ` +
-            `Notes: <strong>${loop.notes.length}</strong><br>` +
-            `Saved as: <code style="font-size:.72rem;opacity:.7">${data.filename}</code>`;
-
-    } catch (err) {
-        resultCard.classList.remove("hidden");
-        resultCard.classList.add("error");
-        resultIcon.textContent  = "✗";
-        resultTitle.textContent = "Generation failed";
-        resultMeta.textContent  = err.message;
-    } finally {
-        btnGenerate.disabled = false;
-        btnGenerate.innerHTML = '<span class="material-icons">bolt</span> Generate &amp; Save';
     }
-});
 
-document.getElementById("btn-generate-another").addEventListener("click", () => {
-    resultCard.classList.add("hidden");
-    if (!nameOverride) syncName();
+    resultMeta.innerHTML = `<strong>Done!</strong> Generated ${totalCombos} tracks and added them to the Catalog.`;
+    resultActions.classList.remove("hidden");
+    btnGenerate.disabled = false;
+    btnGenerate.innerHTML = '<span class="material-icons">bolt</span> Batch Generate';
 });

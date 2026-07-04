@@ -10,8 +10,9 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <style>
         body { overflow: auto; }
-        .gen-main { flex:1; overflow-y:auto; display:flex; justify-content:center; padding:2rem 1rem 3rem; }
-        .gen-container { width:100%; max-width:860px; display:flex; flex-direction:column; gap:1.25rem; }
+        .gen-main { flex:1; overflow-y:auto; display:flex; justify-content:center; padding:2rem 1rem 0; }
+        .gen-container { width:85%; display:flex; flex-direction:column; gap:1.25rem; }
+        .gen-container::after { content:""; display:block; height:100px; width:100%; flex-shrink:0; }
         .gen-card { background:var(--panel-bg); border:1px solid var(--border-color); border-radius:10px; padding:1.25rem 1.5rem; }
         .gen-card h3 { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:1rem; }
         .style-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:.6rem; }
@@ -22,11 +23,21 @@
         .style-card .sc-name { font-size:.78rem; font-weight:600; color:var(--text-main); line-height:1.2; }
         .style-card .sc-desc { font-size:.68rem; color:var(--text-muted); line-height:1.3; }
         .style-card.selected .sc-name { color:#93c5fd; }
-        .params-row { display:flex; gap:1.5rem; flex-wrap:wrap; align-items:flex-end; }
-        .param-group { display:flex; flex-direction:column; gap:.4rem; }
-        .param-group label { font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); }
+        .params-layout { display:flex; flex-direction:column; gap:1.5rem; }
+        .params-row-split { display:flex; gap:2.5rem; align-items:flex-start; flex-wrap:wrap; }
+        .param-group { display:flex; flex-direction:column; gap:.6rem; }
+        .param-group label { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; }
         .param-group select,.param-group input[type=number] { background:var(--bg-color); border:1px solid var(--border-color); color:var(--text-main); padding:.45rem .6rem; border-radius:6px; font-size:.85rem; font-family:Inter,sans-serif; outline:none; transition:border-color .15s; min-width:120px; }
         .param-group select:focus,.param-group input[type=number]:focus { border-color:var(--primary); }
+        .chip-group { display:flex; flex-wrap:nowrap; gap:0.5rem; overflow-x:auto; padding-bottom:4px; }
+        .chip-group::-webkit-scrollbar { height: 4px; }
+        .chip-group::-webkit-scrollbar-track { background: transparent; }
+        .chip-group::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        .chip-btn { background:var(--bg-color); border:1px solid var(--border-color); color:var(--text-main); padding:.35rem .65rem; border-radius:15px; font-size:.78rem; font-family:Inter,sans-serif; cursor:pointer; user-select:none; transition:all 0.15s; }
+        .chip-btn:hover { border-color:var(--primary); background:rgba(255,255,255,0.05); }
+        .chip-btn.selected { background:var(--primary); border-color:var(--primary); color:#fff; font-weight:500; }
+        .action-link { cursor:pointer; color:var(--primary); font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em; margin-left:0.5rem; transition:opacity 0.2s; }
+        .action-link:hover { opacity:0.8; text-decoration:underline; }
         .bpm-row { display:flex; align-items:center; gap:.6rem; }
         .bpm-row input[type=range] { accent-color:var(--primary); width:130px; }
         .bpm-row input[type=number] { width:70px; text-align:center; }
@@ -45,10 +56,10 @@
         #name-input:focus { border-color:var(--primary); }
         #btn-reset-name { background:transparent; border:1px solid var(--border-color); color:var(--text-muted); border-radius:6px; padding:.45rem .7rem; font-size:.75rem; cursor:pointer; white-space:nowrap; transition:background .15s,color .15s; }
         #btn-reset-name:hover { background:var(--border-color); color:var(--text-main); }
-        .generate-btn { padding:.85rem 2rem; font-size:.95rem; font-weight:600; border-radius:8px; justify-content:center; gap:.5rem; transition:background .2s,transform .1s,opacity .2s; }
+        .generate-btn { padding:.85rem 2rem; font-size:.95rem; font-weight:600; border-radius:8px; justify-content:center; gap:.5rem; transition:background .2s,transform .1s,opacity .2s; margin-bottom:1rem; }
         .generate-btn:active { transform:scale(.98); }
         .generate-btn:disabled { opacity:.5; cursor:not-allowed; }
-        .gen-result-card { background:var(--panel-bg); border:1.5px solid var(--success); border-radius:10px; padding:1.25rem 1.5rem; display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap; }
+        .gen-result-card { background:var(--panel-bg); border:1.5px solid var(--success); border-radius:10px; padding:1.25rem 1.5rem; display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap; margin-bottom:1rem; }
         .gen-result-card.error { border-color:var(--danger); }
         .result-icon { font-size:2rem; flex-shrink:0; }
         .result-details { flex:1; min-width:180px; }
@@ -82,77 +93,75 @@
                 <div class="style-grid" id="style-grid"></div>
             </div>
             <div class="gen-card">
-                <h3>Parameters</h3>
-                <div class="params-row">
-                    <div class="param-group">
-                        <label>Key</label>
-                        <select id="sel-key">
-                            <option>C</option><option>C#</option><option>D</option><option>D#</option>
-                            <option>E</option><option>F</option><option>F#</option><option>G</option>
-                            <option>G#</option><option selected>A</option><option>A#</option><option>B</option>
-                        </select>
-                    </div>
-                    <div class="param-group">
-                        <label>BPM</label>
-                        <div class="bpm-row">
-                            <input type="range" id="bpm-slider" min="40" max="240" value="100">
-                            <input type="number" id="bpm-number" min="40" max="240" value="100">
+                <h3>Parameters (Select multiple)</h3>
+                <div class="params-layout">
+                    <!-- Row 1: Keys and Meters -->
+                    <div class="params-row-split" style="flex-wrap: nowrap; gap: 1.5rem;">
+                        <div class="param-group" style="flex: 1; min-width: 0;">
+                            <label>Key(s)</label>
+                            <div class="chip-group" id="sel-key">
+                                <div class="chip-btn selected" data-value="C">C</div>
+                                <div class="chip-btn" data-value="C#">C#</div>
+                                <div class="chip-btn" data-value="D">D</div>
+                                <div class="chip-btn" data-value="D#">D#</div>
+                                <div class="chip-btn" data-value="E">E</div>
+                                <div class="chip-btn" data-value="F">F</div>
+                                <div class="chip-btn" data-value="F#">F#</div>
+                                <div class="chip-btn" data-value="G">G</div>
+                                <div class="chip-btn" data-value="G#">G#</div>
+                                <div class="chip-btn" data-value="A">A</div>
+                                <div class="chip-btn" data-value="A#">A#</div>
+                                <div class="chip-btn" data-value="B">B</div>
+                            </div>
+                        </div>
+                        <div class="param-group">
+                            <label>Meter(s)</label>
+                            <div class="chip-group" id="sel-meter">
+                                <div class="chip-btn" data-value="2">2/4 time</div>
+                                <div class="chip-btn" data-value="3">3/4 time</div>
+                                <div class="chip-btn selected" data-value="4">4/4 time</div>
+                                <div class="chip-btn" data-value="5">5/4 time</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="param-group">
-                        <label>Meter</label>
-                        <select id="sel-meter">
-                            <option value="2">2/4</option>
-                            <option value="3">3/4</option>
-                            <option value="4" selected>4/4</option>
-                            <option value="5">5/4</option>
-                        </select>
+                    
+                    <!-- Row 2: Lengths and BPM -->
+                    <div class="params-row-split" style="flex-wrap: nowrap; gap: 1.5rem;">
+                        <div class="param-group" style="flex: 1; min-width: 0;">
+                            <label>Length(s)</label>
+                            <div class="chip-group" id="sel-steps">
+                                <div class="chip-btn" data-value="16">16 steps</div>
+                                <div class="chip-btn" data-value="32">32 steps</div>
+                                <div class="chip-btn" data-value="48">48 steps</div>
+                                <div class="chip-btn selected" data-value="64">64 steps</div>
+                                <div class="chip-btn" data-value="80">80 steps</div>
+                                <div class="chip-btn" data-value="96">96 steps</div>
+                                <div class="chip-btn" data-value="128">128 steps</div>
+                            </div>
+                        </div>
+                        <div class="param-group">
+                            <label>Base BPM</label>
+                            <div class="bpm-row">
+                                <input type="range" id="bpm-slider" min="40" max="240" value="100">
+                                <input type="number" id="bpm-number" min="40" max="240" value="100">
+                            </div>
+                        </div>
                     </div>
-                    <div class="param-group">
-                        <label>Length</label>
-                        <select id="sel-steps">
-                            <option value="16">16 steps — 1 bar</option>
-                            <option value="32">32 steps — 2 bars</option>
-                            <option value="48">48 steps — 3 bars</option>
-                            <option value="64" selected>64 steps — 4 bars</option>
-                            <option value="80">80 steps — 5 bars</option>
-                            <option value="96">96 steps — 6 bars</option>
-                            <option value="128">128 steps — 8 bars</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="seed-row">
-                    <label>
-                        <input type="checkbox" id="seed-enable">
-                        Fixed seed
-                    </label>
-                    <input type="number" id="seed-value" min="0" max="99999" value="42" disabled>
-                    <button id="btn-random-seed" disabled title="Random seed">dice</button>
-                    <span class="seed-hint">Same seed + same params = identical loop every time</span>
-                </div>
-            </div>
-            <div class="gen-card">
-                <h3>Name</h3>
-                <div class="name-row">
-                    <input type="text" id="name-input" placeholder="Leave blank for auto-name">
-                    <button id="btn-reset-name">Auto</button>
                 </div>
             </div>
             <button id="btn-generate" class="btn primary generate-btn">
                 <span class="material-icons">bolt</span>
-                Generate &amp; Save
+                Batch Generate
             </button>
             <div id="gen-result" class="gen-result-card hidden">
-                <div class="result-icon" id="result-icon"></div>
                 <div class="result-details">
-                    <h4 id="result-title"></h4>
-                    <div class="result-meta" id="result-meta"></div>
+                    <h4 id="result-title">Batch Progress</h4>
+                    <div class="result-meta" id="result-meta">Generated 0 / 0...</div>
                 </div>
-                <div class="result-actions">
-                    <a id="result-catalog-link" href="catalog.html" class="btn success">
+                <div class="result-actions hidden" id="result-actions">
+                    <a href="catalog.html" class="btn success">
                         <span class="material-icons">library_music</span> Open Catalog
                     </a>
-                    <button id="btn-generate-another" class="btn secondary">Generate another</button>
                 </div>
             </div>
         </div>

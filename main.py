@@ -104,6 +104,7 @@ class GenerateRequest(BaseModel):
     beats_per_bar: int = 4
     seed: Optional[int] = None
     name: Optional[str] = None
+    is_batch: bool = False
 
 @app.get("/api/styles")
 def get_styles():
@@ -133,8 +134,37 @@ def generate_loop_endpoint(req: GenerateRequest):
         raise HTTPException(status_code=400, detail=str(exc))
 
     # Persist to disk
-    safe = "".join(c for c in loop["name"] if c.isalnum() or c in " -_").strip()
-    base = safe.replace(" ", "_").lower() or f"loop_{uuid.uuid4().hex[:8]}"
+    if req.is_batch:
+        # Build a smart, non-redundant name
+        style_parts = req.style.split('_')
+        scale_parts = loop["scale"].lower().replace('-', ' ').replace('_', ' ').split()
+        
+        words = []
+        for p in style_parts:
+            words.append(p.title())
+            
+        for p in scale_parts:
+            pt = p.title()
+            # Add scale parts only if they aren't already in the style name
+            if pt not in words:
+                words.append(pt)
+                
+        # Key
+        words.append(req.key)
+        # Seed
+        seed_str = str(req.seed) if req.seed is not None else "Rand"
+        words.append(seed_str)
+        
+        loop["name"] = " ".join(words)
+        
+        # For filename, lower case and use underscores, replace # with sharp
+        safe_key = req.key.replace('#', 'sharp').lower()
+        fn_words = [w.lower() if w != req.key else safe_key for w in words]
+        base = "_".join(fn_words)
+    else:
+        safe = "".join(c for c in loop["name"] if c.isalnum() or c in " -_").strip()
+        base = safe.replace(" ", "_").lower() or f"loop_{uuid.uuid4().hex[:8]}"
+        
     filename = f"{base}.json"
     filepath = os.path.join(LOOPS_DIR, filename)
     ctr = 1
