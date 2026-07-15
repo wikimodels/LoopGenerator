@@ -1,0 +1,49 @@
+﻿[
+  {
+    "songTitle": "Loop_Neoc_7_Clarinet",
+    "styles": "110 BPM, upright piano, lively folk neoclassical, bright chords, cheerful, vintage tape warmth, wooden room decay, instrumental, clarinet",
+    "lyrics": "[Instrumental]
+
+[Intro]
+[110 BPM]
+[Solo Upright Piano]
+
+[Section 1]
+[Clarinet Enters]
+[Cheerful Folk Melody]
+
+[Section 2]
+[Piano and Clarinet Duet]
+[Bright Chords]
+
+[Outro]
+[Graceful Ending]
+
+[End]"
+  },
+
+
+  {
+    "songTitle": "Loop_Neoc_7_Alt_Sax",
+    "styles": "110bpm, upright piano, alto saxophone, lively folk neoclassical, bright chords, cheerful, flat dynamics, vintage tape warmth, wooden room decay, instrumental",
+    "lyrics": "[Instrumental]
+
+[Intro]
+[110 BPM]
+[Solo Upright Piano]
+[Steady Dynamics]
+
+[Section 1]
+[Classical Alto Saxophone Enters]
+[Lively Folk Neoclassical Melody]
+
+[Section 2]
+[Upright Piano and Alto Saxophone Harmony]
+[Flat Dynamics]
+
+[Outro]
+[Graceful Ending]
+
+[End]"
+  }
+]

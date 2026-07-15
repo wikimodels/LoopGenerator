@@ -343,7 +343,7 @@ def gen_baroque(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
             notes.append(mk(s0, note, "2n", 0.25, steps))
         prev_pad = pad_pitches
 
-        chord = chord_tones(root_pc, qual, 5)
+        chord = chord_tones(root_pc, qual, 4)
         v2_choices = tuple(range(len(chord)))
         v2_notes_cnt = seg // 2
         v2_idx = contour_sequence(v2_notes_cnt, choices=v2_choices, start=carry_start(v2_choices, prev_v2_val))
@@ -356,7 +356,7 @@ def gen_baroque(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
         if i == num_segments-1 and seg >= 4:
             for k in range(4):
                 t_step = s0 + seg - 4 + k
-                trill_note = note_name(root_pc + (2 if k%2==0 else 0), 5)
+                trill_note = note_name(root_pc + (2 if k%2==0 else 0), 4)
                 notes.append(mk(t_step, trill_note, "32n", 0.6, steps))
     return notes
 

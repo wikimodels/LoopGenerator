@@ -830,9 +830,11 @@ async function batchExport() {
 
         const blob = await exportSingleLoopSilent(loop);
         
-        // Add to ZIP
-        const cleanName = loop.name.replace(/[^a-zA-Z0-9_-]/g, '_') || 'loop';
-        zip.file(`${cleanName}.webm`, blob);
+        // Add to ZIP (skip if export bailed out)
+        if (blob) {
+            const cleanName = loop.name.replace(/[^a-zA-Z0-9_-]/g, '_') || 'loop';
+            zip.file(`${cleanName}.webm`, blob);
+        }
     }
 
     progressText.innerText = `Packaging ZIP archive...`;
@@ -982,9 +984,9 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             stepNotes[n.step].push(n);
         });
 
-        // 8n = 2 steps per beat
-        const beats = loopData.steps / 2;
-        const durationSec = beats * (60 / bpm);
+        // Each step = one "8n" (eighth note). At BPM bpm there are bpm*2 eighth notes per minute.
+        // durationSec = steps / (bpm * 2) * 60  =  steps * 30 / bpm
+        const durationSec = loopData.steps * 30 / bpm;
 
         const tempSequence = new Tone.Sequence((time, step) => {
             if (stepNotes[step]) {
@@ -998,7 +1000,8 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             }
         }, stepsArray, "8n").start(0);
 
-        tempSequence.loop = 1; // Play exactly 1 time
+        // Do NOT loop — play exactly once then let the tail ring out
+        tempSequence.loop = false;
         
         recorder.start();
         Tone.Transport.start();
@@ -1022,9 +1025,11 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             tempSequence.stop();
             tempSequence.dispose();
             
-            const recording = await recorder.stop();
+            // Hard safety: if recorder.stop() hangs (e.g. Sampler not loaded), bail after 8 s
+            const hardTimeout = new Promise(res => setTimeout(() => res(null), 8000));
+            const recording = await Promise.race([recorder.stop(), hardTimeout]);
             resolve(recording);
-        }, (durationSec + 1.5) * 1000); // Wait for sequence + tail
+        }, (durationSec + 1.5) * 1000); // Wait for sequence playback + note tail
     });
 }
 

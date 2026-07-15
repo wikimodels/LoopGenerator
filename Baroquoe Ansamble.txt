@@ -1,0 +1,27 @@
+[
+  {
+    "songTitle": "Baroque_Harpsichord_Cello_Bassoon_Focus",
+    "styles": "minimal baroque ensemble, harpsichord ostinato, cello continuo, mellow bassoon, no violin, no viola, no strings section, no marimba, warm low-mid register, neo-baroque counterpoint, steady tempo, no dynamic swells, no buildup, no drop, seamless loopable, study/focus music, instrumental",
+    "lyrics": "[Instrumental]\n[Intro]\n[Consistent Tempo]\n[Warm Low-Mid Register]\n[Harpsichord Ostinato Entry]\n[Section 1]\n[Cello Continuo Underneath]\n[Steady Baroque Counterpoint]\n[Section 2]\n[Mellow Bassoon Enters]\n[Chamber Baroque Minimalism]\n[Flat Even Dynamics]\n[Outro]\n[Gradual Fade On The Loop Point]\n[No Buildup No Drop]\n[Graceful Ending]\n[End]"
+  },
+  {
+    "songTitle": "Baroque_Harpsichord_Cello_Flute_Focus",
+    "styles": "baroque chamber trio, harpsichord ostinato, cello continuo, soft baroque flute traverso, no violin, no viola, no strings section, no marimba, warm low register, gentle contrapuntal lines, consistent tempo, no crescendo, no dynamic swells, seamless loop, study/focus ambient, instrumental",
+    "lyrics": "[Instrumental]\n[Intro]\n[Consistent Tempo]\n[Warm Low Register]\n[Harpsichord Ostinato Entry]\n[Section 1]\n[Cello Continuo Underneath]\n[Gentle Contrapuntal Lines]\n[Section 2]\n[Soft Flute Traverso Enters]\n[Chamber Baroque Minimalism]\n[Flat Even Dynamics]\n[Outro]\n[Gradual Fade On The Loop Point]\n[No Crescendo No Buildup]\n[Graceful Ending]\n[End]"
+  },
+  {
+    "songTitle": "Baroque_Harpsichord_Cello_Clarinet_Bassoon_Quartet",
+    "styles": "minimal baroque ensemble, harpsichord ostinato, cello continuo, warm clarinet countermelody, mellow bassoon undertone, no violin, no viola, no strings section, no marimba, low-mid warm register, structural minimalism, steady rhythmic pulse, flat dynamics, no dynamic swells, seamless loop, study/focus music, instrumental",
+    "lyrics": "[Instrumental]\n[Intro]\n[Steady Rhythmic Pulse]\n[Low-Mid Warm Register]\n[Harpsichord Ostinato Entry]\n[Section 1]\n[Cello Continuo Underneath]\n[Structural Minimalism]\n[Section 2]\n[Mellow Bassoon Enters]\n[Section 3]\n[Warm Clarinet Countermelody]\n[Flat Even Dynamics]\n[Outro]\n[Gradual Fade On The Loop Point]\n[No Buildup No Drop]\n[Graceful Ending]\n[End]"
+  },
+  {
+    "songTitle": "Baroque_Harpsichord_Cello_Horn_Focus",
+    "styles": "baroque chamber ensemble, harpsichord ostinato, cello continuo, soft natural horn, no violin, no viola, no strings section, no marimba, no brass fanfare, warm rounded tones, low register focus, neo-baroque minimalism, consistent tempo, no buildup, no dynamic swells, seamless loop, instrumental study music",
+    "lyrics": "[Instrumental]\n[Intro]\n[Consistent Tempo]\n[Warm Rounded Tones]\n[Harpsichord Ostinato Entry]\n[Section 1]\n[Cello Continuo Underneath]\n[Low Register Focus]\n[Section 2]\n[Soft Natural Horn Pad Enters]\n[Chamber Baroque Minimalism]\n[Flat Even Dynamics]\n[Outro]\n[Gradual Fade On The Loop Point]\n[No Buildup No Drop]\n[Graceful Ending]\n[End]"
+  },
+  {
+    "songTitle": "Baroque_Piano_Cello_Bassoon_Clarinet_Focus",
+    "styles": "neo-baroque chamber ensemble, soft piano ostinato, cello continuo, mellow bassoon, warm clarinet, no violin, no viola, no strings section, no marimba, no bright percussion, low-mid warmth, structural repetition, steady tempo, flat dynamics, seamless loopable, focus/study ambient, instrumental",
+    "lyrics": "[Instrumental]\n[Intro]\n[Steady Tempo]\n[Low-Mid Warmth]\n[Soft Piano Ostinato Entry]\n[Section 1]\n[Cello Continuo Underneath]\n[Structural Repetition]\n[Section 2]\n[Mellow Bassoon Enters]\n[Section 3]\n[Warm Clarinet Enters]\n[Flat Even Dynamics]\n[Outro]\n[Gradual Fade On The Loop Point]\n[No Buildup No Drop]\n[Graceful Ending]\n[End]"
+  }
+]
