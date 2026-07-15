@@ -207,10 +207,13 @@ def nearest_register(pc, center):
 # voice's register — which is exactly what the old independent-rounding +
 # reactive min_gap patch was doing (verified: 12/12 roots, dom7 shell,
 # produced 18-20 semitone-wide voicings with the 7th landing in the bass).
-def voice_lead(intervals, root_pc, prev_voicing, anchor_octave=4, min_gap=3):
+def voice_lead(intervals, root_pc, prev_voicing, anchor_octave=4, min_gap=3, max_octave=5):
     pitch_classes = [(root_pc + iv) % 12 for iv in intervals]
     center = (sum(prev_voicing)/len(prev_voicing)) if prev_voicing else anchor_octave*12
     first = nearest_register(pitch_classes[0], center)
+    # Clamp: if drift pushed us too high, pull down one octave
+    if first > max_octave * 12:
+        first -= 12
     pitches = [first]
     for pc in pitch_classes[1:]:
         prev = pitches[-1]
@@ -337,8 +340,9 @@ def gen_baroque(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
         if seg >= 4:
             notes.append(mk(s0+seg//2, note_name(root_pc+CHORD_QUALITIES[qual][2], 2), "4n", 0.45, steps))
 
-        pad_intervals = maybe_add_color(CHORD_QUALITIES[qual])
-        pad_pitches = voice_lead(pad_intervals, root_pc, prev_pad, anchor_octave=4)
+        # Baroque: plain triads/7ths only — no jazz 9th extensions (they'd drift up into squeaky octaves)
+        pad_intervals = list(CHORD_QUALITIES[qual])
+        pad_pitches = voice_lead(pad_intervals, root_pc, prev_pad, anchor_octave=3, max_octave=4)
         for note in realize(pad_pitches):
             notes.append(mk(s0, note, "2n", 0.25, steps))
         prev_pad = pad_pitches

@@ -684,14 +684,21 @@
 
 .export-track-item {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.38rem 0.65rem;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.45rem 0.65rem;
     border-radius: 6px;
     background: var(--bg-color);
     border: 1px solid var(--border-color);
     font-size: 0.78rem;
     transition: background 0.2s, border-color 0.2s;
+}
+
+.export-track-item-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
 }
 
 .export-track-item.in-progress {
@@ -737,5 +744,42 @@
     color: var(--text-muted);
     flex-shrink: 0;
     font-variant-numeric: tabular-nums;
+}
+
+/* Per-track recording progress bar */
+.export-track-progress {
+    display: none;
+    width: 100%;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.export-track-item.in-progress .export-track-progress {
+    display: flex;
+}
+
+.export-track-progress-bg {
+    flex: 1;
+    height: 4px;
+    background: rgba(124, 58, 237, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.export-track-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+.export-track-progress-time {
+    font-size: 0.62rem;
+    color: #a78bfa;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    min-width: 70px;
+    text-align: right;
 }
 

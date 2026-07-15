@@ -10,6 +10,7 @@ let currentStarFilter = 0;
 let synths = {};
 let silentSynths = {};
 let recorder = null;
+let exportLimiter = null;  // module-scope so exportSingleLoopSilent can reconnect fresh recorders
 let activeSequence = null;
 let activeLoopName = null;
 let activeItemEl = null; // DOM element of the currently active catalog-item
@@ -201,19 +202,21 @@ async function initAudioContext() {
         drums: createDrumKit()
     };
 
-    // Silent synths for background rendering (export)
+    // Silent synths for background rendering (export).
+    // exportLimiter is module-scope so exportSingleLoopSilent can attach a fresh
+    // Tone.Recorder to it for every track (reusing one Recorder causes corrupt files).
     recorder = new Tone.Recorder();
-    const mergeLimiter = new Tone.Limiter(-2).connect(recorder); // Limit at -2dB to prevent clipping
+    exportLimiter = new Tone.Limiter(-2).connect(recorder);
     silentSynths = {
-        synth: new Tone.PolySynth(Tone.Synth).connect(mergeLimiter),
-        amSynth: new Tone.PolySynth(Tone.AMSynth).connect(mergeLimiter),
-        fmSynth: new Tone.PolySynth(Tone.FMSynth).connect(mergeLimiter),
+        synth: new Tone.PolySynth(Tone.Synth).connect(exportLimiter),
+        amSynth: new Tone.PolySynth(Tone.AMSynth).connect(exportLimiter),
+        fmSynth: new Tone.PolySynth(Tone.FMSynth).connect(exportLimiter),
         piano: new Tone.Sampler({
             urls: { "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3" },
             release: 1,
             baseUrl: "https://tonejs.github.io/audio/salamander/"
-        }).connect(mergeLimiter),
-        drums: createDrumKit(mergeLimiter)
+        }).connect(exportLimiter),
+        drums: createDrumKit(exportLimiter)
     };
 
     isAudioInitialized = true;
@@ -886,13 +889,22 @@ async function bulkExportAudio() {
     exportTrackList.innerHTML = '';
     loopsToExport.forEach((loop, idx) => {
         const bpm = loopBpmMap[loop._filename] !== undefined ? loopBpmMap[loop._filename] : (loop.bpm || 120);
+        const durationSec = loop.steps * 30 / bpm;
         const item = document.createElement('div');
         item.className = 'export-track-item';
         item.id = `export-track-item-${idx}`;
         item.innerHTML = `
-            <span class="export-track-status material-icons">radio_button_unchecked</span>
-            <span class="export-track-name">${loop.name}</span>
-            <span class="export-track-bpm">${bpm} BPM</span>
+            <div class="export-track-item-row">
+                <span class="export-track-status material-icons">radio_button_unchecked</span>
+                <span class="export-track-name">${loop.name}</span>
+                <span class="export-track-bpm">${bpm} BPM</span>
+            </div>
+            <div class="export-track-progress">
+                <div class="export-track-progress-bg">
+                    <div class="export-track-progress-fill"></div>
+                </div>
+                <span class="export-track-progress-time">0.0s / ${durationSec.toFixed(1)}s</span>
+            </div>
         `;
         exportTrackList.appendChild(item);
     });
@@ -915,15 +927,38 @@ async function bulkExportAudio() {
 
         exportCurrentTrack.textContent = loop.name;
 
-        // Mark as in-progress
+        // Mark as in-progress and start real-time progress bar
         const trackItem = document.getElementById(`export-track-item-${i}`);
+        const durationSec = loop.steps * 30 / overrideBpm;
+        let trackProgressInterval = null;
         if (trackItem) {
             trackItem.querySelector('.export-track-status').textContent = 'hourglass_empty';
             trackItem.classList.add('in-progress');
             trackItem.scrollIntoView({ block: 'nearest' });
+
+            const progressFill = trackItem.querySelector('.export-track-progress-fill');
+            const progressTime = trackItem.querySelector('.export-track-progress-time');
+            const totalSec = durationSec + 1.5; // match exportSingleLoopSilent timeout
+            const startTime = Date.now();
+
+            trackProgressInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                const pct = Math.min(elapsed / totalSec, 1) * 100;
+                if (progressFill) progressFill.style.width = `${pct.toFixed(1)}%`;
+                if (progressTime) progressTime.textContent =
+                    `${Math.min(elapsed, durationSec).toFixed(1)}s / ${durationSec.toFixed(1)}s`;
+            }, 100);
         }
 
         const blob = await exportSingleLoopSilent(loop, overrideBpm);
+        if (trackProgressInterval) clearInterval(trackProgressInterval);
+        // Snap bar to 100% on completion
+        if (trackItem) {
+            const pf = trackItem.querySelector('.export-track-progress-fill');
+            const pt = trackItem.querySelector('.export-track-progress-time');
+            if (pf) pf.style.width = '100%';
+            if (pt) pt.textContent = `${durationSec.toFixed(1)}s / ${durationSec.toFixed(1)}s`;
+        }
 
         if (exportCancelled || blob === null) break;
 
@@ -988,10 +1023,21 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
 
         if (exportCancelled) { resolve(null); return; }
 
-        // ── 2. Reset Transport completely before each track.
-        //       Without this the position may be mid-sequence from the previous export.
+        // ── 2. Fresh Tone.Recorder for every track.
+        //       Reusing one Recorder causes MediaRecorder state-machine corruption:
+        //       the browser hasn't finished flushing track N's data before track N+1
+        //       starts, producing empty or bleed-contaminated files.
+        if (recorder) {
+            try { await recorder.stop(); } catch (_) {}
+            recorder.dispose();
+        }
+        recorder = new Tone.Recorder();
+        exportLimiter.disconnect();
+        exportLimiter.connect(recorder);
+
+        // ── 3. Reset Transport completely before each track.
         Tone.Transport.stop();
-        Tone.Transport.cancel();           // clear all previously scheduled events
+        Tone.Transport.cancel();
         Tone.Transport.position = 0;
         Tone.Transport.bpm.value = bpm;
         Tone.Transport.swing = loopData.swing || 0.0;
@@ -1010,8 +1056,8 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
         const tempSequence = new Tone.Sequence((time, step) => {
             if (stepNotes[step]) {
                 stepNotes[step].forEach(n => {
-                    const chance    = n.chance    !== undefined ? n.chance    : 1.0;
-                    const velocity  = n.velocity  !== undefined ? n.velocity  : 1.0;
+                    const chance   = n.chance   !== undefined ? n.chance   : 1.0;
+                    const velocity = n.velocity !== undefined ? n.velocity : 1.0;
                     if (Math.random() <= chance) {
                         currentSynth.triggerAttackRelease(n.note, n.duration || "8n", time, velocity);
                     }
@@ -1022,8 +1068,16 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
         // Play exactly once — do NOT loop
         tempSequence.loop = false;
 
-        // ── 3. Start recorder THEN transport (order matters for Tone.Recorder)
+        // ── 4. Start recorder, then wait 150 ms pre-roll so MediaRecorder is
+        //       guaranteed in 'recording' state before audio starts flowing.
         recorder.start();
+        await new Promise(res => setTimeout(res, 150));
+        if (exportCancelled) {
+            try { await recorder.stop(); } catch (_) {}
+            tempSequence.dispose();
+            resolve(null);
+            return;
+        }
         Tone.Transport.start();
 
         // Allow cancel to abort mid-render
@@ -1049,7 +1103,7 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             const hardTimeout = new Promise(res => setTimeout(() => res(null), 8000));
             const recording = await Promise.race([recorder.stop(), hardTimeout]);
             resolve(recording);
-        }, (durationSec + 1.5) * 1000); // playback + note tail
+        }, (durationSec + 1.5) * 1000);
     });
 }
 
