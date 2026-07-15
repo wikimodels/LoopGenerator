@@ -973,10 +973,30 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
     return new Promise(async (resolve) => {
         const currentSynth = silentSynths[loopData.instrument] || silentSynths.piano;
         const bpm = overrideBpm || loopData.bpm || 120;
+
+        // ── 1. Wait for all audio samples to load (piano Sampler loads from CDN).
+        //       Without this, the first few notes are silent → gaps in the exported file.
+        //       Cap the wait at 10 s so we don't hang on a slow/down CDN.
+        try {
+            const loadTimeout = new Promise((_, rej) =>
+                setTimeout(() => rej(new Error('load timeout')), 10000)
+            );
+            await Promise.race([Tone.loaded(), loadTimeout]);
+        } catch (e) {
+            console.warn('exportSingleLoopSilent: sample load timeout, exporting anyway', e);
+        }
+
+        if (exportCancelled) { resolve(null); return; }
+
+        // ── 2. Reset Transport completely before each track.
+        //       Without this the position may be mid-sequence from the previous export.
+        Tone.Transport.stop();
+        Tone.Transport.cancel();           // clear all previously scheduled events
+        Tone.Transport.position = 0;
         Tone.Transport.bpm.value = bpm;
         Tone.Transport.swing = loopData.swing || 0.0;
         Tone.Transport.swingSubdivision = "8n";
-        
+
         const stepsArray = Array.from({length: loopData.steps}, (_, i) => i);
         const stepNotes = {};
         loopData.notes.forEach(n => {
@@ -984,15 +1004,14 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             stepNotes[n.step].push(n);
         });
 
-        // Each step = one "8n" (eighth note). At BPM bpm there are bpm*2 eighth notes per minute.
-        // durationSec = steps / (bpm * 2) * 60  =  steps * 30 / bpm
+        // Each step = one "8n" (eighth note). durationSec = steps * 30 / bpm
         const durationSec = loopData.steps * 30 / bpm;
 
         const tempSequence = new Tone.Sequence((time, step) => {
             if (stepNotes[step]) {
                 stepNotes[step].forEach(n => {
-                    let chance = n.chance !== undefined ? n.chance : 1.0;
-                    let velocity = n.velocity !== undefined ? n.velocity : 1.0;
+                    const chance    = n.chance    !== undefined ? n.chance    : 1.0;
+                    const velocity  = n.velocity  !== undefined ? n.velocity  : 1.0;
                     if (Math.random() <= chance) {
                         currentSynth.triggerAttackRelease(n.note, n.duration || "8n", time, velocity);
                     }
@@ -1000,9 +1019,10 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             }
         }, stepsArray, "8n").start(0);
 
-        // Do NOT loop — play exactly once then let the tail ring out
+        // Play exactly once — do NOT loop
         tempSequence.loop = false;
-        
+
+        // ── 3. Start recorder THEN transport (order matters for Tone.Recorder)
         recorder.start();
         Tone.Transport.start();
 
@@ -1024,16 +1044,17 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             Tone.Transport.stop();
             tempSequence.stop();
             tempSequence.dispose();
-            
-            // Hard safety: if recorder.stop() hangs (e.g. Sampler not loaded), bail after 8 s
+
+            // Hard safety: if recorder.stop() hangs, bail after 8 s
             const hardTimeout = new Promise(res => setTimeout(() => res(null), 8000));
             const recording = await Promise.race([recorder.stop(), hardTimeout]);
             resolve(recording);
-        }, (durationSec + 1.5) * 1000); // Wait for sequence playback + note tail
+        }, (durationSec + 1.5) * 1000); // playback + note tail
     });
 }
 
 // --- Merge Modal Logic ---
+
 
 function openMergeModal() {
     const loopsToExport = loopsData.filter(l => selectedLoops.has(l._filename));
