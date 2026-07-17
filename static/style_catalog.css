@@ -555,11 +555,17 @@
     align-items: center;
     justify-content: center;
     z-index: 2000;
-    animation: overlayFadeIn 0.2s ease;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s, visibility 0.2s, backdrop-filter 0.2s;
 }
 
 .export-overlay.hidden {
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
 }
 
 @keyframes overlayFadeIn {

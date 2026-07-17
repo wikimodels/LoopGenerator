@@ -13,7 +13,11 @@ app = FastAPI()
 # Directory to save loops
 DATA_DIR = "data"
 LOOPS_DIR = os.path.join(DATA_DIR, "loops")
+GOLDEN_DIR = os.path.join(DATA_DIR, "golden_fond")
+INSTRUCTIONS_DIR = os.path.join(DATA_DIR, "instructions")
 os.makedirs(LOOPS_DIR, exist_ok=True)
+os.makedirs(GOLDEN_DIR, exist_ok=True)
+os.makedirs(INSTRUCTIONS_DIR, exist_ok=True)
 
 # Metadata file (ratings, notes, etc.)
 META_FILE = os.path.join(DATA_DIR, "_loop_meta.json")
@@ -65,6 +69,43 @@ def get_loops(response: Response):
                 pass
     return loops
 
+@app.get("/api/instructions")
+def get_instructions():
+    instructions = []
+    if os.path.exists(INSTRUCTIONS_DIR):
+        for filename in os.listdir(INSTRUCTIONS_DIR):
+            if filename.endswith(".md"):
+                filepath = os.path.join(INSTRUCTIONS_DIR, filename)
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        content = f.read()
+                        style_name = filename[:-3].capitalize()
+                        instructions.append({
+                            "name": style_name,
+                            "content": content
+                        })
+                except Exception:
+                    pass
+    return instructions
+
+
+@app.get("/api/golden")
+def get_golden(response: Response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    loops = []
+    for filename in os.listdir(GOLDEN_DIR):
+        if filename.endswith(".json"):
+            filepath = os.path.join(GOLDEN_DIR, filename)
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    data["_filename"] = filename
+                    data["_golden"] = True
+                    loops.append(data)
+            except Exception:
+                pass
+    return loops
+
 @app.post("/api/loops")
 def save_loop(loop: Loop):
     # simple sanitization
@@ -89,6 +130,28 @@ def save_loop(loop: Loop):
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(loop.dict(), f, indent=4)
     return {"status": "success", "filename": filename}
+
+
+@app.put("/api/loops/{filename}")
+def update_loop(filename: str, loop: Loop):
+    safe_filename = os.path.basename(filename)
+    if safe_filename == os.path.basename(META_FILE):
+        raise HTTPException(status_code=400, detail="Reserved filename")
+        
+    filepath = None
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+        candidate = os.path.join(search_dir, safe_filename)
+        if os.path.exists(candidate):
+            filepath = candidate
+            break
+            
+    if not filepath:
+        raise HTTPException(status_code=404, detail="Loop not found")
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(loop.dict(), f, indent=4)
+    return {"status": "success", "filename": safe_filename}
+
 
 
 # -----------------------------------------------------------------
@@ -180,20 +243,20 @@ def generate_loop_endpoint(req: GenerateRequest):
 
 @app.delete("/api/loops/{filename}")
 def delete_loop(filename: str):
-    # secure delete
+    # secure delete — search in both loops/ and golden_fond/
     safe_filename = os.path.basename(filename)
     if safe_filename == os.path.basename(META_FILE):
         raise HTTPException(status_code=400, detail="Cannot delete metadata file")
-        
-    filepath = os.path.join(LOOPS_DIR, safe_filename)
-    if os.path.exists(filepath):
-        os.remove(filepath)
-        # Clean up metadata too
-        meta = load_meta()
-        if safe_filename in meta:
-            del meta[safe_filename]
-            save_meta(meta)
-        return {"status": "success"}
+
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+        filepath = os.path.join(search_dir, safe_filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            meta = load_meta()
+            if safe_filename in meta:
+                del meta[safe_filename]
+                save_meta(meta)
+            return {"status": "success"}
     raise HTTPException(status_code=404, detail="File not found")
 
 @app.get("/api/meta")
@@ -205,11 +268,29 @@ def update_meta(filename: str, patch: LoopMeta):
     safe_filename = os.path.basename(filename)
     meta = load_meta()
     existing = meta.get(safe_filename, {})
+    old_rating = existing.get("rating", 0)
     incoming = patch.dict(exclude_none=True)
     existing.update(incoming)
+    new_rating = existing.get("rating", 0)
     meta[safe_filename] = existing
     save_meta(meta)
-    return {"status": "success", "filename": safe_filename, "meta": existing}
+
+    # Move file between loops/ and golden_fond/ based on rating
+    loops_path  = os.path.join(LOOPS_DIR,  safe_filename)
+    golden_path = os.path.join(GOLDEN_DIR, safe_filename)
+
+    if new_rating == 5 and old_rating != 5:
+        # Promote to golden
+        if os.path.exists(loops_path):
+            import shutil
+            shutil.move(loops_path, golden_path)
+    elif new_rating != 5 and old_rating == 5:
+        # Demote from golden back to loops
+        if os.path.exists(golden_path):
+            import shutil
+            shutil.move(golden_path, loops_path)
+
+    return {"status": "success", "filename": safe_filename, "meta": existing, "rating": new_rating}
 
 # Create static directory if it doesn't exist
 os.makedirs("static", exist_ok=True)

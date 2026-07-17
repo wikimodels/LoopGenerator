@@ -28,6 +28,9 @@
                 <a href="catalog.html" class="btn secondary" title="Open Loop Catalog">
                     <span class="material-icons">library_music</span> Catalog
                 </a>
+                <a href="golden.html" class="btn accent" title="Golden Fund">
+                    <span class="material-icons">star</span> Golden Fund
+                </a>
                 <a href="generate.html" class="btn primary" title="Generate a new loop">
                     <span class="material-icons">auto_awesome</span> Generate
                 </a>
@@ -169,8 +172,12 @@
             </div>
             <div class="modal-body">
                 <div class="ai-prompt-container" style="margin: 20px 0;">
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
-                        <button id="btn-copy-prompt" class="btn secondary" style="transform: scale(0.8); transform-origin: right center;"><span class="material-icons">content_copy</span> Copy Prompt</button>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: flex-end;">
+                        <div id="instructions-tabs" class="tabs-container" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <!-- Tabs will be injected here -->
+                            <button class="btn secondary active" data-tab="default">Default Prompt</button>
+                        </div>
+                        <button id="btn-copy-prompt" class="btn secondary" style="transform: scale(0.8); transform-origin: right center; white-space: nowrap;"><span class="material-icons">content_copy</span> Copy Prompt</button>
                     </div>
                     <textarea id="ai-prompt-text" class="input-text prompt-textarea" readonly>
 You are an expert music producer, beatmaker, and sound designer. I am building a custom web-based step sequencer using Tone.js and I need you to generate loops for me.
@@ -235,7 +242,7 @@ B. Drum Kit ("drums"):
 - If anything is unclear, please make suggestions or ask for clarifications.
 
 6. Mixed Loops Naming Convention:
-- The naming convention for mixed loops MUST follow this pattern: ---Loop_{loop_name}.{file_extension}
+- The naming convention for mixed loops MUST follow this pattern: ---Loop_{loop_name}
 
 Please output the JSON block within markdown code tags. You may include suggestions or explanations outside of the JSON block if needed.
 </textarea>

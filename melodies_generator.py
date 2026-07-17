@@ -318,50 +318,563 @@ def gen_neoclassical(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=Fals
     return notes
 
 
+# =================================================================
+# BAROQUE ENGINE — progressions × textures
+# =================================================================
+# ── Segment dataclass substitute (plain dict) ─────────────────────
+# Each progression builder returns a list of:
+#   {"s0": int, "root_pc": int, "quality": str, "bass_pc": int}
+# covering every segment (half-bar or bar, depending on style).
+
+# ── Baroque progression builders ─────────────────────────────────
+
+def _baroque_segs(key_pc, scale, steps, seg, formula_degrees, formula_qualities=None):
+    """Turn a repeating list of scale degrees into segment dicts."""
+    n = len(formula_degrees)
+    num_seg = steps // seg
+    segs = []
+    for i in range(num_seg):
+        deg = formula_degrees[i % n]
+        scale_len = len(SCALES[scale])
+        root_pc = (key_pc + SCALES[scale][deg % scale_len]) % 12
+        if formula_qualities:
+            qual = formula_qualities[i % len(formula_qualities)]
+        else:
+            qual = build_diatonic_chord(scale, deg)
+        segs.append({"s0": i * seg, "root_pc": root_pc, "quality": qual,
+                     "bass_pc": root_pc, "deg": deg})
+    return segs
+
+
+def prog_andalusian(key_pc, scale, steps, seg, minor=True):
+    """i–VII–VI–V(major) — Andalusian cadence: Am–G–F–E.
+
+    FIX: degree 6 (bVII = G in A minor) must be looked up in natural_minor,
+    NOT harmonic_minor. harmonic_minor[6] = interval 11 → G# (leading tone),
+    which turns the bVII into a dissonant chromatic chord instead of the
+    expected diatonic G major. Only degree 4 (V) uses harmonic_minor pitch
+    class — but SCALES[natural_minor][4] == SCALES[harmonic_minor][4] = 7,
+    so swapping to natural_minor across the board is correct and sufficient.
+    """
+    formula   = [0, 6, 5, 4]
+    qualities = ["min", "maj", "maj", "maj"]
+    return _baroque_segs(key_pc, "natural_minor", steps, seg, formula, qualities)
+
+
+def prog_lament_bass(key_pc, scale, steps, seg, minor=True):
+    """Chromatic descending tetrachord (passacaglia / lament bass).
+
+    4-bar ground bass pattern (A minor example):
+      Bar:   1       2       3       4
+      Bass:  A       G#      G       E   <- E is the dominant (V root)
+      Chord: Am      Am/G#   Am/G    E
+
+    The chromatic descent goes tonic -> -1st -> -2nd -> dominant.
+    Offset -5 from tonic equals the dominant root (perfect 4th below = V).
+    Because bar 4's bass note IS the dominant root, the V chord sits
+    perfectly on top — zero clash between bass and harmony.
+
+    KEY FIX (was [0,-1,-2,-3]):
+      offset -3 from G# = F natural.  V chord = D# major (D#/F##/A#).
+      F natural vs D#/G/A# => minor-7th, whole-step, TRITONE — cacophony!
+      offset -5 from G# = D# = the dominant root itself => consonant.
+    """
+    hm_scale = "harmonic_minor"
+    # tonic -> -1 -> -2 -> dominant (perfect 5th up = perfect 4th down = -5)
+    chromatic_offsets = [0, -1, -2, -5]
+    v_root_pc = (key_pc + SCALES[hm_scale][4]) % 12   # E for Am, D# for G#m
+
+    def _harm(step_idx):
+        if step_idx % len(chromatic_offsets) < 3:
+            return key_pc % 12, "min"   # i  (Am with chromatic bass)
+        else:
+            return v_root_pc, "maj"     # V  (E major)
+
+    num_seg = steps // seg
+    segs = []
+    for i in range(num_seg):
+        ch_off  = chromatic_offsets[i % len(chromatic_offsets)]
+        bass_pc = (key_pc + ch_off) % 12
+        root_pc, qual = _harm(i)
+        segs.append({"s0": i * seg, "root_pc": root_pc, "quality": qual,
+                     "bass_pc": bass_pc, "deg": i % 4})
+    return segs
+
+
+def prog_pachelbel(key_pc, scale, steps, seg, minor=False):
+    """I–V–vi–iii–IV–I–IV–V — Pachelbel's Canon (major)."""
+    maj = "major"
+    formula = [0, 4, 5, 2, 3, 0, 3, 4]
+    # Diatonic qualities in major: 0=maj,1=min,2=min,3=maj,4=maj,5=min,6=dim
+    q_map = {0:"maj",1:"min",2:"min",3:"maj",4:"maj",5:"min",6:"dim"}
+    qualities = [q_map[d] for d in formula]
+    return _baroque_segs(key_pc, maj, steps, seg, formula, qualities)
+
+
+def prog_circle_of_fifths(key_pc, scale, steps, seg, minor=True):
+    """i–iv–VII–III–VI–ii°–V–i — Circle of fifths (minor)."""
+    hm = "harmonic_minor"
+    formula = [0, 3, 6, 2, 5, 1, 4, 0]
+    q_map = {0:"min",1:"dim",2:"maj",3:"min",4:"maj",5:"maj",6:"dim"}
+    qualities = [q_map[d % 7] for d in formula]
+    return _baroque_segs(key_pc, hm, steps, seg, formula, qualities)
+
+
+def prog_la_folia(key_pc, scale, steps, seg, minor=True):
+    """La Folia 8-chord cycle: i–V–i–VII–III–VII–i–V.
+
+    FIX: degree 6 (bVII) appears at positions 3 and 5 in the formula.
+    Must use natural_minor to get G (not G# from harmonic_minor).
+    """
+    formula   = [0, 4, 0, 6, 2, 6, 0, 4]
+    qualities = ["min","maj","min","maj","maj","maj","min","maj"]
+    return _baroque_segs(key_pc, "natural_minor", steps, seg, formula, qualities)
+
+
+def prog_romanesca(key_pc, scale, steps, seg, minor=True):
+    """III–VII–i–V — Romanesca (early baroque).
+
+    FIX: degree 6 (bVII) at position 1 — natural_minor required.
+    """
+    formula   = [2, 6, 0, 4]
+    qualities = ["maj", "maj", "min", "maj"]
+    return _baroque_segs(key_pc, "natural_minor", steps, seg, formula, qualities)
+
+
+def prog_passamezzo_antico(key_pc, scale, steps, seg, minor=True):
+    """i–VII–i–V–III–VII–i–V–i — Passamezzo antico (extended 9-chord).
+
+    FIX: degree 6 (bVII) at positions 1 and 5 — natural_minor required.
+    """
+    formula   = [0, 6, 0, 4, 2, 6, 0, 4, 0]
+    qualities = ["min","maj","min","maj","maj","maj","min","maj","min"]
+    return _baroque_segs(key_pc, "natural_minor", steps, seg, formula, qualities)
+
+
+def prog_passamezzo_moderno(key_pc, scale, steps, seg, minor=False):
+    """I–IV–I–V–I–IV–I–V–I — Passamezzo moderno (major)."""
+    maj = "major"
+    formula = [0, 3, 0, 4, 0, 3, 0, 4, 0]
+    qualities = ["maj","maj","maj","maj","maj","maj","maj","maj","maj"]
+    return _baroque_segs(key_pc, maj, steps, seg, formula, qualities)
+
+
+# ── Baroque texture builders ──────────────────────────────────────
+# All texture functions append notes[] in-place and return nothing.
+
+def _bq_texture_alberti(notes, s0, seg, root_pc, qual, steps):
+    """Alberti bass: root–fifth–third–fifth in 8th notes."""
+    triad = chord_tones(root_pc, qual, 3)
+    if len(triad) < 3:
+        triad = triad + [triad[-1]]
+    # order: root, fifth(idx2), third(idx1), fifth(idx2)
+    order = [0, 2, 1, 2]
+    n_notes = seg  # one per 16th-step slot, stride 1 → 8n each 2 steps
+    for k in range(seg // 2):
+        step = s0 + k * 2
+        idx = order[k % 4]
+        notes.append(mk(step, triad[idx % len(triad)], "8n", 0.45 + 0.05 * (k % 4 == 0), steps))
+
+
+def _bq_texture_broken_arp(notes, s0, seg, root_pc, qual, steps, direction="up"):
+    """Broken chord arpeggio: root→3rd→5th→[oct] smoothly."""
+    triad = chord_tones(root_pc, qual, 3)
+    # optionally add octave for fuller sweep
+    extended = triad + [note_name(root_pc, 4)]
+    if direction == "down":
+        extended = list(reversed(extended))
+    elif direction == "up_down":
+        extended = triad + list(reversed(triad))
+    n_slots = seg // 2
+    for k in range(n_slots):
+        step = s0 + k * 2
+        note = extended[k % len(extended)]
+        notes.append(mk(step, note, "8n", 0.42 + 0.05 * (k == 0), steps))
+
+
+def _bq_texture_murky(notes, s0, seg, root_pc, steps):
+    """Murky bass: octave leaps — low note, same note 8va, repeat."""
+    for k in range(seg // 4):
+        step_lo = s0 + k * 4
+        step_hi = s0 + k * 4 + 2
+        notes.append(mk(step_lo, note_name(root_pc, 2), "8n", 0.65, steps))
+        notes.append(mk(step_hi, note_name(root_pc, 3), "8n", 0.50, steps))
+
+
+def _bq_texture_block_chord(notes, s0, root_pc, qual, prev_pad, steps, anchor_octave=3):
+    """Basso continuo: block chord held for the segment."""
+    intervals = list(CHORD_QUALITIES[qual])
+    pad_pitches = voice_lead(intervals, root_pc, prev_pad, anchor_octave=anchor_octave, max_octave=anchor_octave + 1)
+    for n_ in realize(pad_pitches):
+        notes.append(mk(s0, n_, "2n", 0.28, steps))
+    return pad_pitches
+
+
+def _bq_texture_drone(notes, s0, seg, tonic_pc, root_pc, qual, steps):
+    """Pedal point: tonic held in bass, upper chord changes above it."""
+    notes.append(mk(s0, note_name(tonic_pc, 2), "2n", 0.55, steps))
+    upper = chord_tones(root_pc, qual, 4)
+    for k, n_ in enumerate(upper):
+        step = s0 + k * (seg // max(len(upper), 1))
+        if step < s0 + seg:
+            notes.append(mk(step, n_, "4n", 0.35, steps))
+
+
+def _bq_walking_bass_segs(notes, segs, steps, key_pc, scale):
+    """Walking bass: stepwise movement between chord roots, one note per half-beat."""
+    scale_pcs = SCALES[scale]
+    n_scale = len(scale_pcs)
+    for idx, seg_d in enumerate(segs):
+        s0 = seg_d["s0"]
+        root_pc = seg_d["root_pc"]
+        next_root_pc = segs[(idx + 1) % len(segs)]["root_pc"]
+        # Find scale degree of current root
+        best_deg = min(range(n_scale), key=lambda d: (root_pc - key_pc - scale_pcs[d]) % 12)
+        # Walk: current root → stepwise → approach next root
+        seg_len = (segs[idx + 1]["s0"] if idx + 1 < len(segs) else steps) - s0
+        n_steps = seg_len // 4   # one bass note per quarter note
+        for b in range(n_steps):
+            if b == 0:
+                bass_pc = root_pc
+            elif b == n_steps - 1:
+                # Chromatic approach to next root
+                diff = (next_root_pc - root_pc) % 12
+                bass_pc = (root_pc + diff - 1) % 12 if diff > 0 else (root_pc - 1) % 12
+            else:
+                # Diatonic step up
+                step_deg = (best_deg + b) % n_scale
+                bass_pc = (key_pc + scale_pcs[step_deg]) % 12
+            step = s0 + b * 4
+            if step < steps:
+                notes.append(mk(step, note_name(bass_pc, 2), "4n", 0.58 + 0.07 * (b == 0), steps))
+
+
+def _bq_melody_voice(notes, segs, key_pc, scale, steps, octave=5):
+    """Upper melodic voice: contour-based, one per segment, respects chord tones."""
+    prev_mel = None
+    mel_choices = (0, 1, 2, 3, 4)
+    for seg_d in segs:
+        s0 = seg_d["s0"]
+        deg = seg_d.get("deg", 0)
+        seg_end = s0
+        # Find next segment start to know duration
+        choices = (deg, deg + 1, deg + 2, deg + 3, deg + 4)
+        contour = contour_sequence(2, choices=choices,
+                                   start=carry_start(choices, prev_mel),
+                                   reversal_bias=0.5, max_run=2)
+        for k, d in enumerate(contour):
+            step = s0 + k * 4
+            if step < steps:
+                notes.append(mk(step, scale_tone(key_pc, scale, d, octave),
+                                "4n", 0.60 - 0.05 * k, steps))
+        prev_mel = contour[-1]
+
+
+# ── Main baroque generator (diversified) ─────────────────────────
+
 def gen_baroque(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
+    """
+    Baroque generator v2: picks one of several authentic progressions and
+    one of several textures on every call, producing varied results.
+    """
     notes = []
     scale = "harmonic_minor" if minor else "major"
-    seq_degrees = generate_harmony(scale, length=8)
-    n = len(seq_degrees)
-    seg = (beats_per_bar * 4) // 2
-    if seg < 2: seg = 2
-    num_segments = steps // seg
+    seg = max(2, (beats_per_bar * 4) // 2)   # half-bar segments
+
+    # — Choose progression ——————————————————————————————————————————
+    if minor:
+        prog_builders = [
+            lambda: prog_andalusian(key_pc, scale, steps, seg),
+            lambda: prog_la_folia(key_pc, scale, steps, seg),
+            lambda: prog_romanesca(key_pc, scale, steps, seg),
+            lambda: prog_passamezzo_antico(key_pc, scale, steps, seg),
+            lambda: prog_circle_of_fifths(key_pc, scale, steps, seg),
+        ]
+        prog_weights = [30, 25, 15, 15, 15]
+    else:
+        prog_builders = [
+            lambda: prog_pachelbel(key_pc, scale, steps, seg),
+            lambda: prog_passamezzo_moderno(key_pc, scale, steps, seg),
+            # fall back to Markov for major variety
+            lambda: _baroque_segs(key_pc, scale, steps, seg,
+                                   generate_harmony(scale, length=8)),
+        ]
+        prog_weights = [40, 35, 25]
+
+    prog_fn = random.choices(prog_builders, weights=prog_weights, k=1)[0]
+    segs = prog_fn()
+    if not segs:
+        return notes
+
+    # — Choose texture ——————————————————————————————————————————————
+    if minor:
+        texture = random.choices(
+            ["alberti", "walking", "broken_up", "broken_down", "murky", "block"],
+            weights=[30, 25, 15, 10, 10, 10], k=1)[0]
+    else:
+        texture = random.choices(
+            ["alberti", "broken_up", "broken_updown", "block", "murky", "walking"],
+            weights=[35, 25, 20, 10, 5, 5], k=1)[0]
+
+    # — Build notes ————————————————————————————————————————————————
+    prev_pad = None
+
+    if texture == "walking":
+        _bq_walking_bass_segs(notes, segs, steps, key_pc, scale)
+    
+    for seg_d in segs:
+        s0 = seg_d["s0"]
+        root_pc = seg_d["root_pc"]
+        qual = seg_d["quality"]
+        bass_pc = seg_d.get("bass_pc", root_pc)
+
+        # Bass note (always present, but not for walking bass — already done)
+        if texture != "walking":
+            notes.append(mk(s0, note_name(bass_pc, 2), "4n", 0.58, steps))
+
+        # Mid-register accompaniment (texture-specific)
+        if texture == "alberti":
+            _bq_texture_alberti(notes, s0, seg, root_pc, qual, steps)
+
+        elif texture in ("broken_up", "broken_down", "broken_updown"):
+            direction = {"broken_up": "up", "broken_down": "down",
+                         "broken_updown": "up_down"}[texture]
+            _bq_texture_broken_arp(notes, s0, seg, root_pc, qual, steps, direction)
+
+        elif texture == "murky":
+            _bq_texture_murky(notes, s0, seg, root_pc, steps)
+            # add block chord above murky
+            prev_pad = _bq_texture_block_chord(notes, s0, root_pc, qual, prev_pad, steps)
+
+        elif texture == "block":
+            prev_pad = _bq_texture_block_chord(notes, s0, root_pc, qual, prev_pad, steps)
+
+        elif texture == "walking":
+            # Walking bass already placed; add simple block chord above
+            prev_pad = _bq_texture_block_chord(notes, s0, root_pc, qual, prev_pad, steps)
+
+    # — Upper melodic voice ————————————————————————————————————————
+    _bq_melody_voice(notes, segs, key_pc, scale, steps, octave=5)
+
+    return notes
+
+
+# ── Specialised baroque style generators ─────────────────────────
+
+def gen_baroque_passacaglia(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
+    """
+    Baroque Passacaglia / Lament bass.
+    Ground bass: chromatic descending tetrachord (A–G#–G–F#) in octave 2.
+    Above it: sustained block chords (basso continuo), smooth voice leading.
+    Slow expressive melody at octave 5.
+    Inspired by Purcell's Dido's Lament, Bach's Passacaglia in C minor.
+
+    Fixed: removed _bq_walking_bass_segs (was doubling the bass and adding
+    dissonant passing tones against the chromatic ground); melody now uses
+    actual harmonic_minor scale degrees instead of the raw seg index.
+    """
+    notes = []
+    scale = "harmonic_minor"
+    seg = max(4, beats_per_bar * 4)   # one chord per bar
+
+    segs = prog_lament_bass(key_pc, scale, steps, seg)
+    if not segs:
+        return notes
+
+    # Map each lament-bass chord root to its best diatonic scale degree
+    # (used for the melody voice so it stays in tune with the harmony)
+    scale_pcs = SCALES[scale]
+    n_scale = len(scale_pcs)
+
+    def best_scale_deg(root_pc_):
+        return min(range(n_scale),
+                   key=lambda d: (root_pc_ - key_pc - scale_pcs[d]) % 12)
 
     prev_pad = None
-    prev_v2_val = None
+    prev_mel = None
+    pattern_len = 4   # prog_lament_bass always produces a 4-chord cycle
 
-    for i in range(num_segments):
-        deg = seq_degrees[i % n]
-        qual = build_diatonic_chord(scale, deg)
-        s0 = i*seg
-        root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
+    for i, seg_d in enumerate(segs):
+        # Reset voice-leading anchor at the start of every new cycle so
+        # the block chord stays in octave 2-3 and does not drift upward.
+        if i % pattern_len == 0:
+            prev_pad = None
 
-        notes.append(mk(s0, note_name(root_pc,2), "4n", 0.55, steps))
-        if seg >= 4:
-            notes.append(mk(s0+seg//2, note_name(root_pc+CHORD_QUALITIES[qual][2], 2), "4n", 0.45, steps))
+        s0      = seg_d["s0"]
+        root_pc = seg_d["root_pc"]
+        qual    = seg_d["quality"]
+        bass_pc = seg_d.get("bass_pc", root_pc)  # chromatic lament bass note
 
-        # Baroque: plain triads/7ths only — no jazz 9th extensions (they'd drift up into squeaky octaves)
-        pad_intervals = list(CHORD_QUALITIES[qual])
-        pad_pitches = voice_lead(pad_intervals, root_pc, prev_pad, anchor_octave=3, max_octave=4)
-        for note in realize(pad_pitches):
-            notes.append(mk(s0, note, "2n", 0.25, steps))
-        prev_pad = pad_pitches
+        # ── Ground bass: the actual chromatic descending note ──────────
+        # Play it twice per bar (downbeat + half-bar) for weight
+        notes.append(mk(s0,           note_name(bass_pc, 2), "4n", 0.70, steps))
+        if seg >= 8:
+            notes.append(mk(s0 + seg // 2, note_name(bass_pc, 2), "4n", 0.55, steps))
 
-        chord = chord_tones(root_pc, qual, 4)
-        v2_choices = tuple(range(len(chord)))
-        v2_notes_cnt = seg // 2
-        v2_idx = contour_sequence(v2_notes_cnt, choices=v2_choices, start=carry_start(v2_choices, prev_v2_val))
-        for j,ci in enumerate(v2_idx):
-            step = s0+j*2
-            note = chord[ci]
-            notes.append(mk(step, note, "8n", 0.55+0.05*(j%2==0), steps))
-        prev_v2_val = v2_idx[-1]
+        # Basso continuo: block chord in octave 3-4
+        prev_pad = _bq_texture_block_chord(notes, s0, root_pc, qual, prev_pad, steps, anchor_octave=4)
+        if seg >= 8:
+            # Play a second chord on the half-bar to keep the slow tempo grounded
+            prev_pad = _bq_texture_block_chord(notes, s0 + seg // 2, root_pc, qual, prev_pad, steps, anchor_octave=4)
 
-        if i == num_segments-1 and seg >= 4:
-            for k in range(4):
-                t_step = s0 + seg - 4 + k
-                trill_note = note_name(root_pc + (2 if k%2==0 else 0), 4)
-                notes.append(mk(t_step, trill_note, "32n", 0.6, steps))
+        # Flowing expressive melody in octave 5 (steady quarter notes)
+        chord_deg = best_scale_deg(root_pc)
+        mel_choices = (chord_deg, chord_deg + 1, chord_deg + 2,
+                       chord_deg + 3, chord_deg - 1)
+        mel_choices = tuple(max(0, c) for c in mel_choices)
+        
+        num_mel_notes = max(2, seg // 4)
+        contour = contour_sequence(num_mel_notes, choices=mel_choices,
+                                   start=carry_start(mel_choices, prev_mel),
+                                   reversal_bias=0.55, max_run=2)
+        step_stride = 4  # Quarter notes (1 beat per note)
+        for k, d in enumerate(contour):
+            step = s0 + k * step_stride
+            if step < steps:
+                notes.append(mk(step, scale_tone(key_pc, scale, d, 5),
+                                "4n", 0.62 - 0.04 * k, steps))
+        prev_mel = contour[-1]
+
+    return notes
+
+
+def gen_baroque_pachelbel(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=False):
+    """
+    Pachelbel Canon progression: I–V–vi–iii–IV–I–IV–V, major.
+    Broken-chord arpeggio texture — 'crystal' harpsichord sound.
+    """
+    notes = []
+    scale = "major"
+    seg = max(4, beats_per_bar * 4)
+
+    # Choose arpeggio direction per call for variety
+    direction = random.choice(["up", "down", "up_down"])
+    segs = prog_pachelbel(key_pc, scale, steps, seg)
+    if not segs:
+        return notes
+
+    prev_pad = None
+    for seg_d in segs:
+        s0 = seg_d["s0"]
+        root_pc = seg_d["root_pc"]
+        qual = seg_d["quality"]
+
+        # Bass: root on the downbeat
+        notes.append(mk(s0, note_name(root_pc, 2), "4n", 0.60, steps))
+
+        # Broken arpeggio fills the bar
+        _bq_texture_broken_arp(notes, s0, seg, root_pc, qual, steps, direction)
+
+        # Occasionally add block chord on beat 3 for weight
+        if random.random() < 0.35 and seg >= 8:
+            prev_pad = _bq_texture_block_chord(notes, s0 + seg // 2, root_pc, qual, prev_pad, steps)
+
+    # Cantabile melody above
+    _bq_melody_voice(notes, segs, key_pc, scale, steps, octave=5)
+
+    return notes
+
+
+def gen_baroque_circle(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
+    """
+    Circle of fifths progression: i–iv–VII–III–VI–ii°–V–i (minor).
+    Alberti bass or murky texture — gives a driven, fugue-like feel.
+    """
+    notes = []
+    scale = "harmonic_minor"
+    seg = max(4, beats_per_bar * 4)
+
+    texture = random.choice(["alberti", "murky"])
+    segs = prog_circle_of_fifths(key_pc, scale, steps, seg)
+    if not segs:
+        return notes
+
+    prev_pad = None
+    for seg_d in segs:
+        s0 = seg_d["s0"]
+        root_pc = seg_d["root_pc"]
+        qual = seg_d["quality"]
+
+        # Bass
+        notes.append(mk(s0, note_name(root_pc, 2), "4n", 0.60, steps))
+
+        if texture == "alberti":
+            _bq_texture_alberti(notes, s0, seg, root_pc, qual, steps)
+        else:  # murky
+            _bq_texture_murky(notes, s0, seg, root_pc, steps)
+            prev_pad = _bq_texture_block_chord(notes, s0, root_pc, qual, prev_pad, steps)
+
+    # Two-voice counterpoint above
+    prev_v1, prev_v2 = None, None
+    v1_choices = (0, 2, 4, 6, 1, 3)
+    v2_choices = (1, 3, 5, 0, 2, 4)
+    for seg_d in segs:
+        s0 = seg_d["s0"]
+        deg = seg_d.get("deg", 0)
+        c1 = tuple(deg + x for x in (0, 2, 4, 1))
+        c2 = tuple(deg + x for x in (1, 3, 5, 2))
+        v1 = contour_sequence(2, choices=c1, start=carry_start(c1, prev_v1))
+        v2 = contour_sequence(2, choices=c2, start=carry_start(c2, prev_v2))
+        for k, d in enumerate(v1):
+            step = s0 + k * (seg // 2)
+            if step < steps:
+                notes.append(mk(step, scale_tone(key_pc, scale, d, 5),
+                                "4n", 0.62, steps))
+        for k, d in enumerate(v2):
+            step = s0 + 2 + k * (seg // 2)
+            if step < steps:
+                notes.append(mk(step, scale_tone(key_pc, scale, d, 4),
+                                "4n", 0.48, steps))
+        prev_v1 = v1[-1]
+        prev_v2 = v2[-1]
+
+    return notes
+
+
+def gen_baroque_folia(key_pc, scale_name, bpm, steps, beats_per_bar=4, minor=True):
+    """
+    La Folia — 8-chord ostinato: i–V–i–VII–III–VII–i–V.
+    Fast Alberti bass in harpsichord style (Corelli, Vivaldi).
+    The whole loop is one or two full Folia cycles.
+    """
+    notes = []
+    scale = "harmonic_minor"
+    seg = max(4, beats_per_bar * 4)
+
+    segs = prog_la_folia(key_pc, scale, steps, seg)
+    if not segs:
+        return notes
+
+    for seg_d in segs:
+        s0 = seg_d["s0"]
+        root_pc = seg_d["root_pc"]
+        qual = seg_d["quality"]
+
+        # Bass on downbeat
+        notes.append(mk(s0, note_name(root_pc, 2), "4n", 0.65, steps))
+
+        # Fast Alberti in mid register
+        _bq_texture_alberti(notes, s0, seg, root_pc, qual, steps)
+
+    # Virtuoso upper voice: tighter contour, more notes per segment
+    prev_mel = None
+    mel_choices_base = (0, 1, 2, 3, 4)
+    for seg_d in segs:
+        s0 = seg_d["s0"]
+        deg = seg_d.get("deg", 0)
+        choices = tuple(deg + x for x in (0, 1, 2, 3, 4))
+        mel_cnt = max(2, seg // 4)   # denser melody
+        contour = contour_sequence(mel_cnt, choices=choices,
+                                   start=carry_start(choices, prev_mel),
+                                   reversal_bias=0.45, max_run=2)
+        step_stride = seg // max(mel_cnt, 1)
+        for k, d in enumerate(contour):
+            step = s0 + k * step_stride
+            if step < steps:
+                notes.append(mk(step, scale_tone(key_pc, scale, d, 5),
+                                "8n", 0.60 - 0.02 * k, steps))
+        prev_mel = contour[-1]
+
     return notes
 
 
@@ -1368,6 +1881,15 @@ STYLE_META = {
     "neoclassical_minor": dict(scale="harmonic_minor",  swing=0.0,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_neoclassical(kp,s,b,st,bpb,minor=True)),
     "baroque_major":      dict(scale="major",          swing=0.0,  segment_steps=lambda b: max(2, (b*4)//2), fn=lambda kp,s,b,st,bpb: gen_baroque(kp,s,b,st,bpb,minor=False)),
     "baroque_minor":      dict(scale="harmonic_minor",  swing=0.0,  segment_steps=lambda b: max(2, (b*4)//2), fn=lambda kp,s,b,st,bpb: gen_baroque(kp,s,b,st,bpb,minor=True)),
+    # ── New specialised baroque styles ──────────────────────────────────────────
+    # passacaglia: chromatic lament bass, one chord per bar
+    "baroque_passacaglia": dict(scale="harmonic_minor", swing=0.0,  segment_steps=lambda b: b*4,             fn=lambda kp,s,b,st,bpb: gen_baroque_passacaglia(kp,s,b,st,bpb)),
+    # pachelbel: I–V–vi–iii–IV–I–IV–V major, broken arpeggio
+    "baroque_pachelbel":   dict(scale="major",          swing=0.0,  segment_steps=lambda b: b*4,             fn=lambda kp,s,b,st,bpb: gen_baroque_pachelbel(kp,s,b,st,bpb)),
+    # circle of fifths: i–iv–VII–III–VI–ii°–V–i minor, fugue-like drive
+    "baroque_circle":      dict(scale="harmonic_minor", swing=0.0,  segment_steps=lambda b: b*4,             fn=lambda kp,s,b,st,bpb: gen_baroque_circle(kp,s,b,st,bpb)),
+    # la folia: 8-chord ostinato, fast Alberti, Corelli/Vivaldi style
+    "baroque_folia":       dict(scale="harmonic_minor", swing=0.0,  segment_steps=lambda b: b*4,             fn=lambda kp,s,b,st,bpb: gen_baroque_folia(kp,s,b,st,bpb)),
     "jazz_major":         dict(scale="major",          swing=0.6,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_jazz(kp,s,b,st,bpb,minor=False)),
     "jazz_minor":         dict(scale="dorian",         swing=0.6,  segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_jazz(kp,s,b,st,bpb,minor=True)),
     "modal_folk":         dict(scale="dorian",         swing=0.15, segment_steps=lambda b: b*4, fn=lambda kp,s,b,st,bpb: gen_modal_folk(kp,s,b,st,bpb)),
@@ -1514,6 +2036,48 @@ if __name__ == "__main__":
     except ValueError:
         pass
     print("steps-axis checks passed")
+
+    # ── Pitch-correctness regression tests (musical golden values) ────────
+    # These catch bVII degree-6 bugs: the correct scale for bVII is natural_minor
+    # (interval 10 → G in Am), NOT harmonic_minor (interval 11 → G#, leading tone).
+
+    def _roots(segs):
+        return [note_name(s["root_pc"], 2) for s in segs]
+
+    # Andalusian: Am–G–F–E (one full cycle, seg=16)
+    segs_and = prog_andalusian(PC["A"], "harmonic_minor", steps=64, seg=16)
+    assert _roots(segs_and) == ["A2", "G2", "F2", "E2"], \
+        f"prog_andalusian pitch bug: expected A2-G2-F2-E2, got {_roots(segs_and)}"
+    print("prog_andalusian pitch check passed")
+
+    # La Folia: positions 3 and 5 of the 8-chord cycle must be G (bVII)
+    segs_fol = prog_la_folia(PC["A"], "harmonic_minor", steps=128, seg=16)
+    assert segs_fol[3]["root_pc"] % 12 == PC["G"], \
+        f"prog_la_folia pos-3 pitch bug: expected G, got pc={segs_fol[3]['root_pc'] % 12}"
+    assert segs_fol[5]["root_pc"] % 12 == PC["G"], \
+        f"prog_la_folia pos-5 pitch bug: expected G, got pc={segs_fol[5]['root_pc'] % 12}"
+    print("prog_la_folia pitch check passed")
+
+    # Romanesca: position 1 (VII) must be G in Am
+    segs_rom = prog_romanesca(PC["A"], "harmonic_minor", steps=64, seg=16)
+    assert segs_rom[1]["root_pc"] % 12 == PC["G"], \
+        f"prog_romanesca pos-1 pitch bug: expected G, got pc={segs_rom[1]['root_pc'] % 12}"
+    print("prog_romanesca pitch check passed")
+
+    # Passamezzo antico: positions 1 and 5 (VII) must be G in Am
+    segs_pas = prog_passamezzo_antico(PC["A"], "harmonic_minor", steps=144, seg=16)
+    assert segs_pas[1]["root_pc"] % 12 == PC["G"], \
+        f"prog_passamezzo_antico pos-1 pitch bug: expected G, got pc={segs_pas[1]['root_pc'] % 12}"
+    assert segs_pas[5]["root_pc"] % 12 == PC["G"], \
+        f"prog_passamezzo_antico pos-5 pitch bug: expected G, got pc={segs_pas[5]['root_pc'] % 12}"
+    print("prog_passamezzo_antico pitch check passed")
+
+    # Sanity-check: prog_circle_of_fifths is NOT broken — its degree-6 is vii°
+    # (raised leading tone on harmonic_minor[6] = 11 semitones → G# in Am = correct dim chord)
+    segs_cof = prog_circle_of_fifths(PC["A"], "harmonic_minor", steps=128, seg=16)
+    assert segs_cof[2]["quality"] == "dim", \
+        f"prog_circle_of_fifths vii° should be 'dim', got {segs_cof[2]['quality']}"
+    print("prog_circle_of_fifths vii° check passed (unchanged — correct)")
 
     demo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "theory_engine_demo_v4.json")
     with open(demo_path, "w", encoding="utf-8") as f:

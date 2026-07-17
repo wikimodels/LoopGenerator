@@ -56,15 +56,26 @@ function generateScale(root, scaleType) {
     return notes.reverse();
 }
 
-function rebuildGridData() {
-    if (state.instrument === 'drums') {
-        state.notes = ["Crash", "Tom H", "Tom L", "OpenHat", "HiHat", "Clap", "Snare", "Kick"];
-        document.getElementById('key-select').disabled = true;
-        document.getElementById('scale-select').disabled = true;
+function rebuildGridData(customNotes = null) {
+    if (customNotes) {
+        state.notes = customNotes;
+        if (state.instrument === 'drums') {
+            document.getElementById('key-select').disabled = true;
+            document.getElementById('scale-select').disabled = true;
+        } else {
+            document.getElementById('key-select').disabled = false;
+            document.getElementById('scale-select').disabled = false;
+        }
     } else {
-        state.notes = generateScale(state.key, state.scale);
-        document.getElementById('key-select').disabled = false;
-        document.getElementById('scale-select').disabled = false;
+        if (state.instrument === 'drums') {
+            state.notes = ["Crash", "Tom H", "Tom L", "OpenHat", "HiHat", "Clap", "Snare", "Kick"];
+            document.getElementById('key-select').disabled = true;
+            document.getElementById('scale-select').disabled = true;
+        } else {
+            state.notes = generateScale(state.key, state.scale);
+            document.getElementById('key-select').disabled = false;
+            document.getElementById('scale-select').disabled = false;
+        }
     }
     state.grid = [];
     state.gridMeta = [];
@@ -117,6 +128,51 @@ async function init() {
     createGridUI();
     setupEventListeners();
     await fetchLoops();
+    await initInstructions();
+}
+
+let instructionsData = {};
+
+async function initInstructions() {
+    // Save default prompt
+    instructionsData['default'] = aiPromptText.value;
+    
+    try {
+        const res = await fetch('/api/instructions');
+        if (res.ok) {
+            const data = await res.json();
+            const tabsContainer = document.getElementById('instructions-tabs');
+            
+            data.forEach(inst => {
+                instructionsData[inst.name] = inst.content;
+                const btn = document.createElement('button');
+                btn.className = 'btn secondary';
+                btn.innerText = inst.name;
+                btn.dataset.tab = inst.name;
+                tabsContainer.appendChild(btn);
+            });
+            
+            // Setup tab click events
+            tabsContainer.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    // Update active state
+                    Array.from(tabsContainer.children).forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    // Update content
+                    const tabKey = e.target.dataset.tab;
+                    aiPromptText.value = instructionsData[tabKey];
+                    
+                    // Auto-copy
+                    aiPromptText.select();
+                    document.execCommand('copy');
+                    showToast(`${e.target.innerText} copied to clipboard!`);
+                }
+            });
+        }
+    } catch (e) {
+        console.error("Failed to load instructions:", e);
+    }
 }
 
 async function initAudioContext() {
@@ -295,6 +351,19 @@ function setupEventListeners() {
         Tone.Transport.bpm.value = state.bpm;
     });
 
+    bpmSlider.addEventListener('change', async () => {
+        if (state.loopName && state.loopName !== "My New Loop") {
+            try {
+                const filename = state.loopName.replace(/\s+/g, '_') + '.json';
+                await fetch(`/api/loops/${filename}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(getLoopData())
+                });
+            } catch (err) { console.error("Auto-save BPM failed", err); }
+        }
+    });
+
     const swingSlider = document.getElementById('swing-slider');
     const swingVal = document.getElementById('swing-val');
 
@@ -303,6 +372,19 @@ function setupEventListeners() {
         swingVal.innerText = state.swing.toFixed(2);
         Tone.Transport.swing = state.swing;
         Tone.Transport.swingSubdivision = "8n";
+    });
+
+    swingSlider.addEventListener('change', async () => {
+        if (state.loopName && state.loopName !== "My New Loop") {
+            try {
+                const filename = state.loopName.replace(/\s+/g, '_') + '.json';
+                await fetch(`/api/loops/${filename}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(getLoopData())
+                });
+            } catch (err) { console.error("Auto-save Swing failed", err); }
+        }
     });
 
     loopNameInput.addEventListener('change', (e) => {
@@ -669,8 +751,27 @@ function loadLoopData(data) {
     state.scale = data.scale || "Major";
     scaleSelect.value = state.scale;
 
-    // Reset grid
-    rebuildGridData();
+    // Dynamically expand notes to include all notes from the loop + the base scale
+    let scaleNotes = generateScale(state.key, state.scale);
+    let dynamicNotes = null;
+
+    if (data.notes && data.notes.length > 0) {
+        let uniqueNotes = new Set(scaleNotes);
+        data.notes.forEach(n => {
+            if (n.note) uniqueNotes.add(n.note);
+        });
+        
+        const chromatic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const getPitch = (noteStr) => {
+            const m = noteStr.match(/^([A-G]#?)(\d)$/);
+            if (!m) return 0;
+            return parseInt(m[2]) * 12 + chromatic.indexOf(m[1]);
+        };
+        dynamicNotes = Array.from(uniqueNotes).sort((a, b) => getPitch(b) - getPitch(a));
+    }
+
+    // Reset grid with dynamically extracted notes
+    rebuildGridData(dynamicNotes);
 
     // Populate grid
     if (data.notes) {

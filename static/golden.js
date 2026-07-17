@@ -147,8 +147,8 @@ async function setRating(filename, rating) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ rating: newRating })
         });
-        // Track moved to/from golden_fond — reload to reflect change
-        if (newRating === 5 || current === 5) {
+        // If rating dropped below 5, track moved back to loops/ — refresh golden list
+        if (newRating !== 5) {
             await fetchLoops();
         }
     } catch(e) { console.error('Failed to save rating', e); }
@@ -267,11 +267,11 @@ function showToast(msg) {
 // --- Data Fetching & Rendering ---
 async function fetchLoops() {
     try {
-        const res = await fetch(`/api/loops?t=${Date.now()}`);
+        const res = await fetch(`/api/golden?t=${Date.now()}`);
         loopsData = await res.json();
         renderCatalog();
     } catch (e) {
-        console.error("Failed to fetch loops", e);
+        console.error("Failed to fetch golden loops", e);
     }
 }
 
@@ -279,19 +279,23 @@ function renderCatalog() {
     catalogList.innerHTML = '';
     
     filteredLoops = loopsData.filter(loop => {
-        // Search
+        // Search only (no star filter — all tracks here are 5-star)
         if (currentSearchQuery) {
             const query = currentSearchQuery.toLowerCase();
             const textToSearch = `${loop.name} ${loop.instrument}`.toLowerCase();
             if (!textToSearch.includes(query)) return false;
         }
-        // Star Filter
-        if (currentStarFilter > 0) {
-            const rating = (loopMeta[loop._filename] || {}).rating || 0;
-            if (rating !== currentStarFilter) return false;
-        }
         return true;
     });
+
+    if (filteredLoops.length === 0) {
+        catalogList.innerHTML = `
+            <div class="empty-golden">
+                <span class="material-icons">star_border</span>
+                <p>No golden loops yet.<br>Rate any track <strong>5 stars</strong> in the Catalog to add it here.</p>
+            </div>`;
+        return;
+    }
 
     filteredLoops.forEach(loop => {
         const div = document.createElement('div');
@@ -509,22 +513,7 @@ function setupEventListeners() {
         });
     }
 
-    // Header Star Filter
-    const starFilterEl = document.getElementById('star-filter');
-    if (starFilterEl) {
-        starFilterEl.querySelectorAll('.star').forEach(star => {
-            star.addEventListener('click', (e) => {
-                const val = parseInt(e.target.dataset.value);
-                currentStarFilter = currentStarFilter === val ? 0 : val;
-                
-                // update UI
-                starFilterEl.querySelectorAll('.star').forEach((s, idx) => {
-                    s.classList.toggle('filled', idx < currentStarFilter);
-                });
-                renderCatalog();
-            });
-        });
-    }
+    // No star filter on Golden Fund page — all tracks here are 5-star
 
     btnDownload.addEventListener('click', batchExport);
     btnDelete.addEventListener('click', bulkDelete);
