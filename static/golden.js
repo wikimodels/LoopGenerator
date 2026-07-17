@@ -8,10 +8,6 @@ let currentStarFilter = 0;
 
 // Audio state
 let synths = {};
-let silentSynths = {};
-let recorder = null;
-let exportLimiter = null;
-let exportRecorderNode = null;
 let activeSequence = null;
 let activeLoopName = null;
 let activeItemEl = null; // DOM element of the currently active catalog-item
@@ -20,7 +16,6 @@ let eqBars = [];
 let animFrameId = null;
 let playbackId = 0;
 let loopBpmMap = {};      // { filename: bpmValue } — per-track BPM override
-let exportCancelled = false;
 
 // Modal specific state
 let isPreviewing = false;
@@ -195,10 +190,17 @@ async function initAudioContext() {
     Tone.getDestination().output.connect(fft);
 
     // Normal synths — plain .toDestination(), no routing magic
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    synth.maxPolyphony = 64;
+    const amSynth = new Tone.PolySynth(Tone.AMSynth).toDestination();
+    amSynth.maxPolyphony = 64;
+    const fmSynth = new Tone.PolySynth(Tone.FMSynth).toDestination();
+    fmSynth.maxPolyphony = 64;
+
     synths = {
-        synth: new Tone.PolySynth(Tone.Synth).toDestination(),
-        amSynth: new Tone.PolySynth(Tone.AMSynth).toDestination(),
-        fmSynth: new Tone.PolySynth(Tone.FMSynth).toDestination(),
+        synth: synth,
+        amSynth: amSynth,
+        fmSynth: fmSynth,
         piano: new Tone.Sampler({
             urls: { "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3" },
             release: 1,
@@ -221,18 +223,6 @@ async function initAudioContext() {
     // the browser tab is in the background. It outputs 100% silence.
     const silentPath = new Tone.Gain(0).toDestination();
     exportLimiter.connect(silentPath);
-
-    silentSynths = {
-        synth: new Tone.PolySynth(Tone.Synth).connect(exportLimiter),
-        amSynth: new Tone.PolySynth(Tone.AMSynth).connect(exportLimiter),
-        fmSynth: new Tone.PolySynth(Tone.FMSynth).connect(exportLimiter),
-        piano: new Tone.Sampler({
-            urls: { "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3" },
-            release: 1,
-            baseUrl: "https://tonejs.github.io/audio/salamander/"
-        }).connect(exportLimiter),
-        drums: createDrumKit(exportLimiter)
-    };
 
     isAudioInitialized = true;
 }
@@ -720,13 +710,14 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
     let loopCounter = 0;
     
     activeSequence = new Tone.Sequence((time, step) => {
+        const safeTime = Math.max(0, time);
         if (step === 0) loopCounter++;
         
         // Stop automatically after 3 loops
         if (loopCounter > 3) {
             Tone.Transport.scheduleOnce(() => {
                 stopLoop(btnPlayToggle, btnStop, itemEl);
-            }, time);
+            }, safeTime);
             return;
         }
 
@@ -735,7 +726,7 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
                 let chance = n.chance !== undefined ? n.chance : 1.0;
                 let velocity = n.velocity !== undefined ? n.velocity : 1.0;
                 if (Math.random() <= chance) {
-                    currentSynth.triggerAttackRelease(n.note, n.duration || "8n", time, velocity);
+                    currentSynth.triggerAttackRelease(n.note, n.duration || "8n", safeTime, velocity);
                 }
             });
         }
@@ -979,12 +970,17 @@ async function bulkExportAudio() {
 
         // Download immediately
         const cleanName = loop.name.replace(/[^a-zA-Z0-9_-]/g, '_') || 'loop';
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${cleanName}.webm`;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        const filename = `${cleanName}.webm`;
+
+        // Upload to backend
+        try {
+            await fetch(`/api/export_audio/${filename}`, {
+                method: 'POST',
+                body: blob
+            });
+        } catch (err) {
+            console.error("Failed to upload audio to backend:", err);
+        }
 
         // Mark as done
         if (trackItem) {
@@ -1017,121 +1013,6 @@ async function bulkExportAudio() {
             renderCatalog();
         }, 800);
     }
-}
-
-function exportSingleLoopSilent(loopData, overrideBpm) {
-    return new Promise(async (resolve) => {
-        const currentSynth = silentSynths[loopData.instrument] || silentSynths.piano;
-        const bpm = overrideBpm || loopData.bpm || 120;
-
-        // ── 1. Wait for all audio samples to load (piano Sampler loads from CDN).
-        //       Without this, the first few notes are silent → gaps in the exported file.
-        //       Cap the wait at 10 s so we don't hang on a slow/down CDN.
-        try {
-            const loadTimeout = new Promise((_, rej) =>
-                setTimeout(() => rej(new Error('load timeout')), 10000)
-            );
-            await Promise.race([Tone.loaded(), loadTimeout]);
-        } catch (e) {
-            console.warn('exportSingleLoopSilent: sample load timeout, exporting anyway', e);
-        }
-
-        if (exportCancelled) { resolve(null); return; }
-
-        if (Tone.context.state !== 'running') {
-            await Tone.context.resume();
-        }
-
-        // ── 2. Fresh Tone.Recorder for every track.
-        if (recorder) {
-            try { 
-                if (recorder.state === "started") {
-                    await recorder.stop(); 
-                }
-            } catch (_) {}
-            try { recorder.dispose(); } catch (_) {}
-        }
-        recorder = new Tone.Recorder();
-        exportRecorderNode.disconnect();
-        exportRecorderNode.connect(recorder);
-
-        // ── 3. Reset Transport completely before each track.
-        Tone.Transport.stop();
-        Tone.Transport.cancel();
-        Tone.Transport.position = 0;
-        Tone.Transport.bpm.value = bpm;
-        Tone.Transport.swing = loopData.swing || 0.0;
-        Tone.Transport.swingSubdivision = "8n";
-
-        const stepsArray = Array.from({length: loopData.steps}, (_, i) => i);
-        const stepNotes = {};
-        loopData.notes.forEach(n => {
-            if (!stepNotes[n.step]) stepNotes[n.step] = [];
-            stepNotes[n.step].push(n);
-        });
-
-        // Each step = one "8n" (eighth note). durationSec = steps * 30 / bpm
-        const durationSec = loopData.steps * 30 / bpm;
-
-        const tempSequence = new Tone.Sequence((time, step) => {
-            if (stepNotes[step]) {
-                stepNotes[step].forEach(n => {
-                    const chance   = n.chance   !== undefined ? n.chance   : 1.0;
-                    const velocity = n.velocity !== undefined ? n.velocity : 1.0;
-                    if (Math.random() <= chance) {
-                        currentSynth.triggerAttackRelease(n.note, n.duration || "8n", time, velocity);
-                    }
-                });
-            }
-        }, stepsArray, "8n").start(0);
-
-        // Play exactly once — do NOT loop
-        tempSequence.loop = false;
-
-        // ── 4. Start recorder, then wait 150 ms pre-roll so MediaRecorder is
-        //       guaranteed in 'recording' state before audio starts flowing.
-        recorder.start();
-        await new Promise(res => setTimeout(res, 150));
-        if (exportCancelled) {
-            try { await recorder.stop(); } catch (_) {}
-            tempSequence.dispose();
-            resolve(null);
-            return;
-        }
-        Tone.Transport.start();
-
-        // Allow cancel to abort mid-render
-        let exportTimeoutId;
-        const cancelWatcher = setInterval(() => {
-            if (exportCancelled) {
-                clearInterval(cancelWatcher);
-                clearTimeout(exportTimeoutId);
-                Tone.Transport.stop();
-                tempSequence.stop();
-                tempSequence.dispose();
-                if (recorder && recorder.state === "started") {
-                    recorder.stop().then(() => resolve(null)).catch(() => resolve(null));
-                } else {
-                    resolve(null);
-                }
-            }
-        }, 250);
-
-        exportTimeoutId = setTimeout(async () => {
-            clearInterval(cancelWatcher);
-            Tone.Transport.stop();
-            tempSequence.stop();
-            tempSequence.dispose();
-
-            // Hard safety: if recorder.stop() hangs, bail after 8 s
-            let recording = null;
-            if (recorder && recorder.state === "started") {
-                const hardTimeout = new Promise(res => setTimeout(() => res(null), 8000));
-                recording = await Promise.race([recorder.stop(), hardTimeout]);
-            }
-            resolve(recording);
-        }, (durationSec + 1.5) * 1000);
-    });
 }
 
 // --- Merge Modal Logic ---
@@ -1252,6 +1133,7 @@ async function startPreview() {
     });
 
     previewSequence = new Tone.Sequence((time, step) => {
+        const safeTime = Math.max(0, time);
         const notesToPlay = masterStepNotes[step];
         if (notesToPlay) {
             notesToPlay.forEach(n => {
@@ -1259,7 +1141,7 @@ async function startPreview() {
                     // Use regular synths for preview playback
                     const currentSynth = synths[n.synthName] || synths.piano;
                     const volMultiplier = trackVolumes[n.loopFilename] !== undefined ? trackVolumes[n.loopFilename] : 1.0;
-                    currentSynth.triggerAttackRelease(n.note, n.duration, time, n.velocity * volMultiplier);
+                    currentSynth.triggerAttackRelease(n.note, n.duration, safeTime, n.velocity * volMultiplier);
                 }
             });
         }
@@ -1348,6 +1230,7 @@ async function mergeExportFromModal() {
     });
 
     const masterSequence = new Tone.Sequence((time, step) => {
+        const safeTime = Math.max(0, time);
         const notesToPlay = masterStepNotes[step];
         if (notesToPlay) {
             notesToPlay.forEach(n => {
@@ -1355,7 +1238,7 @@ async function mergeExportFromModal() {
                     // Use silentSynths for recording!
                     const currentSynth = silentSynths[n.synthName] || silentSynths.piano;
                     const volMultiplier = trackVolumes[n.loopFilename] !== undefined ? trackVolumes[n.loopFilename] : 1.0;
-                    currentSynth.triggerAttackRelease(n.note, n.duration, time, n.velocity * volMultiplier);
+                    currentSynth.triggerAttackRelease(n.note, n.duration, safeTime, n.velocity * volMultiplier);
                 }
             });
         }

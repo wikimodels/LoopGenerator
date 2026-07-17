@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, Request
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
@@ -15,9 +15,11 @@ DATA_DIR = "data"
 LOOPS_DIR = os.path.join(DATA_DIR, "loops")
 GOLDEN_DIR = os.path.join(DATA_DIR, "golden_fond")
 INSTRUCTIONS_DIR = os.path.join(DATA_DIR, "instructions")
+EXPORTS_DIR = os.path.join(DATA_DIR, "audio_exports")
 os.makedirs(LOOPS_DIR, exist_ok=True)
 os.makedirs(GOLDEN_DIR, exist_ok=True)
 os.makedirs(INSTRUCTIONS_DIR, exist_ok=True)
+os.makedirs(EXPORTS_DIR, exist_ok=True)
 
 # Metadata file (ratings, notes, etc.)
 META_FILE = os.path.join(DATA_DIR, "_loop_meta.json")
@@ -164,10 +166,15 @@ class GenerateRequest(BaseModel):
     key: str
     bpm: int = 100
     steps: int = 64
-    beats_per_bar: int = 4
     seed: Optional[int] = None
     name: Optional[str] = None
     is_batch: bool = False
+
+class RenameRequest(BaseModel):
+    new_filename: str
+
+class DownloadRequest(BaseModel):
+    filenames: list[str]
 
 @app.get("/api/styles")
 def get_styles():
@@ -294,8 +301,111 @@ def update_meta(filename: str, patch: LoopMeta):
 
 # Create static directory if it doesn't exist
 os.makedirs("static", exist_ok=True)
-
 # Serve the static files
+@app.post("/api/export_audio/local_download")
+def local_download_exports(req: DownloadRequest):
+    import shutil
+    # Path to Windows Downloads folder
+    downloads_dir = os.path.join(os.environ.get('USERPROFILE', os.path.expanduser('~')), 'Downloads', 'Loops')
+    os.makedirs(downloads_dir, exist_ok=True)
+    
+    downloaded = []
+    for filename in req.filenames:
+        safe_filename = os.path.basename(filename)
+        src = os.path.join(EXPORTS_DIR, safe_filename)
+        if os.path.exists(src):
+            dst = os.path.join(downloads_dir, safe_filename)
+            shutil.copy2(src, dst)
+            downloaded.append(safe_filename)
+            
+    return {"status": "ok", "downloaded": downloaded, "destination": downloads_dir}
+
+@app.post("/api/export_audio/{filename}")
+async def upload_audio(filename: str, request: Request):
+    """Saves exported audio (blob) to the exports directory."""
+    data = await request.body()
+    filepath = os.path.join(EXPORTS_DIR, filename)
+    with open(filepath, "wb") as f:
+        f.write(data)
+    return {"status": "ok", "filename": filename}
+
+@app.get("/api/exports")
+def list_exports():
+    """Lists all exported audio files."""
+    files = []
+    for f in os.listdir(EXPORTS_DIR):
+        if f.endswith(".webm") or f.endswith(".wav") or f.endswith(".mp3"):
+            filepath = os.path.join(EXPORTS_DIR, f)
+            stat = os.stat(filepath)
+            files.append({
+                "filename": f,
+                "size": stat.st_size,
+                "created_at": stat.st_ctime
+            })
+    files.sort(key=lambda x: x["created_at"], reverse=True)
+    return files
+
+@app.delete("/api/export_audio/{filename}")
+def delete_export_audio(filename: str):
+    safe_filename = os.path.basename(filename)
+    filepath = os.path.join(EXPORTS_DIR, safe_filename)
+    if os.path.exists(filepath):
+        os.remove(filepath)
+        return {"status": "ok", "filename": safe_filename}
+    raise HTTPException(status_code=404, detail="File not found")
+
+@app.post("/api/export_audio/{filename}/rename")
+def rename_export_audio(filename: str, req: RenameRequest):
+    safe_filename = os.path.basename(filename)
+    safe_new = os.path.basename(req.new_filename)
+    if not safe_new.endswith(".webm"):
+        safe_new += ".webm"
+        
+    old_path = os.path.join(EXPORTS_DIR, safe_filename)
+    new_path = os.path.join(EXPORTS_DIR, safe_new)
+    
+    if not os.path.exists(old_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    if os.path.exists(new_path):
+        raise HTTPException(status_code=400, detail="New filename already exists")
+        
+    os.rename(old_path, new_path)
+    
+    # Update corresponding JSON file in loops or golden_fond so we don't break Regeneration
+    old_base = safe_filename[:-5] # remove .webm
+    new_base = safe_new[:-5]
+    
+    import json
+    import re
+    
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+        for f in os.listdir(search_dir):
+            if f.endswith(".json"):
+                fp = os.path.join(search_dir, f)
+                try:
+                    with open(fp, "r", encoding="utf-8") as jf:
+                        data = json.load(jf)
+                    
+                    # Match name using the exact same logic as the frontend cleanName
+                    clean_name = re.sub(r'[^a-zA-Z0-9_-]', '_', data.get("name", "loop"))
+                    if clean_name == old_base:
+                        # Found the matching JSON. Update name and rename file.
+                        data["name"] = new_base
+                        
+                        new_json_name = new_base.replace(' ', '_').lower() + ".json"
+                        new_fp = os.path.join(search_dir, new_json_name)
+                        
+                        with open(fp, "w", encoding="utf-8") as jf:
+                            json.dump(data, jf, indent=4)
+                            
+                        if fp != new_fp and not os.path.exists(new_fp):
+                            os.rename(fp, new_fp)
+                        break
+                except Exception:
+                    pass
+
+    return {"status": "ok", "new_filename": safe_new}
+app.mount("/exports", StaticFiles(directory=EXPORTS_DIR), name="exports")
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":

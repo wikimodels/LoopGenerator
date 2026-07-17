@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Exports - LoopGenerator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_exports.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Tone.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="audio_renderer.js"></script>
+    <!-- WaveSurfer.js CDN -->
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="top-bar">
+            <div class="logo">
+                <span class="material-icons">graphic_eq</span>
+                Audio Exports
+            </div>
+            <div class="header-actions">
+                <a href="generate.html" class="btn primary"><span class="material-icons">auto_awesome</span> Generate</a>
+                <a href="catalog.html" class="btn secondary" title="Open Loop Catalog">
+                    <span class="material-icons">library_music</span> Catalog
+                </a>
+                <a href="golden.html" class="btn accent" title="Golden Fund">
+                    <span class="material-icons">star</span> Golden Fund
+                </a>
+                <a href="index.html" class="btn secondary"><span class="material-icons">arrow_back</span> Editor</a>
+            </div>
+        </header>
+
+        <main class="main-content exports-main">
+            <div class="exports-header">
+                <h2>Exported Audio Files</h2>
+                <div class="bulk-actions">
+                    <label class="bulk-checkbox-container">
+                        <input type="checkbox" id="check-all" class="custom-checkbox">
+                        <span class="checkmark"></span>
+                        Select All
+                    </label>
+                    <button id="btn-bulk-delete" class="btn danger hidden">
+                        <span class="material-icons">delete</span> Delete
+                    </button>
+                    <button id="btn-bulk-download" class="btn primary hidden">
+                        <span class="material-icons">download</span> Download
+                    </button>
+                    <button id="btn-refresh" class="btn secondary">
+                        <span class="material-icons">refresh</span> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div id="exports-list" class="exports-list">
+                <!-- Exports rendered here via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">Message</div>
+
+    <script src="exports.js"></script>
+</body>
+</html>

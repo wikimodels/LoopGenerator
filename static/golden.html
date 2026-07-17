@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="audio_renderer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         .logo .material-icons { color: #f59e0b; }
@@ -28,7 +29,12 @@
             <div class="header-actions">
                 <a href="generate.html" class="btn primary"><span class="material-icons">auto_awesome</span> Generate</a>
                 <button id="btn-insert-json" class="btn secondary"><span class="material-icons">data_object</span> Insert JSON</button>
-                <a href="catalog.html" class="btn secondary"><span class="material-icons">library_music</span> Catalog</a>
+                <a href="catalog.html" class="btn secondary" title="Open Loop Catalog">
+                    <span class="material-icons">library_music</span> Catalog
+                </a>
+                <a href="exports.html" class="btn neutral" title="Audio Exports">
+                    <span class="material-icons">graphic_eq</span> Audio Exports
+                </a>
                 <a href="index.html" class="btn secondary"><span class="material-icons">arrow_back</span> Editor</a>
             </div>
         </header>

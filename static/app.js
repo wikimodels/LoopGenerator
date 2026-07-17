@@ -179,10 +179,19 @@ async function initAudioContext() {
     if (isAudioInitialized) return;
     await Tone.start();
     
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    synth.maxPolyphony = 64;
+    
+    const amSynth = new Tone.PolySynth(Tone.AMSynth).toDestination();
+    amSynth.maxPolyphony = 64;
+    
+    const fmSynth = new Tone.PolySynth(Tone.FMSynth).toDestination();
+    fmSynth.maxPolyphony = 64;
+
     synths = {
-        synth: new Tone.PolySynth(Tone.Synth).toDestination(),
-        amSynth: new Tone.PolySynth(Tone.AMSynth).toDestination(),
-        fmSynth: new Tone.PolySynth(Tone.FMSynth).toDestination(),
+        synth: synth,
+        amSynth: amSynth,
+        fmSynth: fmSynth,
         piano: new Tone.Sampler({
             urls: {
                 "C4": "C4.mp3",
@@ -315,7 +324,7 @@ function setupEventListeners() {
             setupSequence();
         }
         
-        Tone.Transport.start();
+        Tone.Transport.start("+0.1");
         state.isPlaying = true;
         if (playIcon) playIcon.innerText = 'pause';
         playBtn.classList.add('paused');
@@ -465,22 +474,27 @@ function setupEventListeners() {
         toneSequence.loop = 1;
 
         recorder.start();
-        Tone.Transport.start();
+        Tone.Transport.start("+0.1");
 
         // Wait for loop to finish + 1.5 seconds for audio tail (reverb/release)
         setTimeout(async () => {
             Tone.Transport.stop();
             const recording = await recorder.stop();
             
-            // Download file
-            const url = URL.createObjectURL(recording);
-            const anchor = document.createElement("a");
-            anchor.download = `${state.loopName.replace(/\s+/g, '_')}.webm`;
-            anchor.href = url;
-            anchor.click();
+            const filename = `${state.loopName.replace(/\s+/g, '_')}.webm`;
+            
+            // Upload to backend
+            try {
+                await fetch(`/api/export_audio/${filename}`, {
+                    method: 'POST',
+                    body: recording
+                });
+            } catch (err) {
+                console.error("Failed to upload audio to backend:", err);
+            }
 
             exportBtn.disabled = false;
-            showToast("Export complete!");
+            showToast("Export complete and saved to backend!");
             
             // Reset looping for normal playback
             toneSequence.loop = true;
@@ -654,14 +668,18 @@ function setupSequence() {
     const steps = Array.from({length: state.steps}, (_, i) => i);
 
     toneSequence = new Tone.Sequence((time, step) => {
+        const safeTime = Math.max(0, time);
         // Collect and play notes for this step
+        let playedCount = 0;
         for (let r = 0; r < state.notes.length; r++) {
             if (state.grid[r][step]) {
                 const note = state.notes[r];
                 const meta = state.gridMeta[r][step] || { duration: "8n", velocity: 1.0, chance: 1.0 };
                 
                 if (Math.random() <= meta.chance) {
-                    currentSynth.triggerAttackRelease(note, meta.duration, time, meta.velocity);
+                    const t = safeTime + (playedCount * 0.0001);
+                    currentSynth.triggerAttackRelease(note, meta.duration, t, meta.velocity);
+                    playedCount++;
                 }
             }
         }

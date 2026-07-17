@@ -1,0 +1,193 @@
+/* style_exports.css */
+
+.exports-main {
+    flex-direction: column;
+    padding: 11px 1.6rem 1.6rem 1.6rem;
+    max-width: 1420px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.exports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.exports-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.exports-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+    overflow-y: auto;
+}
+
+.export-card {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.export-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.export-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.export-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    overflow: hidden;
+}
+
+.export-filename {
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-main);
+}
+
+.export-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.export-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.export-controls .btn.icon-btn {
+    padding: 0.25rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.export-controls .btn.icon-btn .material-icons {
+    font-size: 1.1rem;
+}
+
+/* Waveform Container */
+.waveform-container {
+    width: 100%;
+    height: 80px;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Loading overlay for waveform */
+.waveform-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.5);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    z-index: 10;
+    gap: 0.5rem;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Bulk Actions and Checkboxes */
+.bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bulk-checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+}
+
+.custom-checkbox {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.export-card.selected {
+    border-color: var(--primary);
+    background-color: rgba(59, 130, 246, 0.15); /* Made brighter */
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.card-checkbox {
+    transform: scale(1.4); /* Made slightly larger */
+    cursor: pointer;
+    accent-color: var(--primary); /* Bright blue tick */
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5)); /* Adds a little glow to make it stand out */
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 0.5rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    margin-left: 0.5rem;
+}
+
+.export-info {
+    padding-left: 1rem; /* Removed the extra padding since checkbox moved */
+}
+
+/* Inline Edit Filename */
+.export-filename {
+    cursor: text;
+    padding: 0.2rem 0.4rem;
+    margin-left: -0.4rem;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    min-width: 100px;
+    display: inline-block;
+}
+
+.export-filename:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.export-filename:focus {
+    outline: none;
+    background: rgba(15, 23, 42, 0.8);
+    border-color: var(--primary);
+    color: var(--text);
+}
