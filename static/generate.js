@@ -120,6 +120,7 @@ btnGenerate.addEventListener("click", async () => {
 
     const totalCombos = selectedStyles.length * keys.length * meters.length * stepsArr.length;
     let completed = 0;
+    let successCount = 0;
 
     btnGenerate.disabled = true;
     btnGenerate.innerHTML = '<span class="material-icons">hourglass_empty</span> Generating Batch...';
@@ -151,6 +152,8 @@ btnGenerate.addEventListener("click", async () => {
                         
                         if (!res.ok) {
                             console.error(`Error generating ${style} in ${key}`);
+                        } else {
+                            successCount++;
                         }
                     } catch (err) {
                         console.error(err);
@@ -163,7 +166,11 @@ btnGenerate.addEventListener("click", async () => {
         }
     }
 
-    resultMeta.innerHTML = `<strong>Done!</strong> Generated ${totalCombos} tracks and added them to the Catalog.`;
+    if (successCount === totalCombos) {
+        resultMeta.innerHTML = `<strong>Done!</strong> Generated ${totalCombos} tracks and added them to the Catalog.`;
+    } else {
+        resultMeta.innerHTML = `<strong>Finished with errors:</strong> Generated ${successCount} out of ${totalCombos} tracks successfully. Check console for details.`;
+    }
     resultActions.classList.remove("hidden");
     btnGenerate.disabled = false;
     btnGenerate.innerHTML = '<span class="material-icons">bolt</span> Batch Generate';

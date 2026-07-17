@@ -166,6 +166,7 @@ class GenerateRequest(BaseModel):
     key: str
     bpm: int = 100
     steps: int = 64
+    beats_per_bar: int = 4
     seed: Optional[int] = None
     name: Optional[str] = None
     is_batch: bool = False
