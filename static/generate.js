@@ -53,10 +53,8 @@ STYLES.forEach(s => {
     `;
     card.addEventListener("click", () => {
         if (selectedStyles.includes(s.id)) {
-            if (selectedStyles.length > 1) {
-                selectedStyles = selectedStyles.filter(id => id !== s.id);
-                card.classList.remove("selected");
-            }
+            selectedStyles = selectedStyles.filter(id => id !== s.id);
+            card.classList.remove("selected");
         } else {
             selectedStyles.push(s.id);
             card.classList.add("selected");
