@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Classes\loopgenerator]
+@="URL:LoopGenerator Protocol"
+"URL Protocol"=""
+
+[HKEY_CURRENT_USER\Software\Classes\loopgenerator\shell]
+
+[HKEY_CURRENT_USER\Software\Classes\loopgenerator\shell\open]
+
+[HKEY_CURRENT_USER\Software\Classes\loopgenerator\shell\open\command]
+@="wscript.exe \"D:\\GitHub\\LoopGenerator\\run_silent.vbs\""

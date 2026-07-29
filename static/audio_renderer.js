@@ -5,9 +5,15 @@
 // asynchronously from WebAudio scheduler — uncatchable via try/catch.
 // We swallow ONLY this specific error so it never breaks the export flow.
 window.addEventListener('unhandledrejection', (e) => {
-    if (e.reason instanceof RangeError &&
-        e.reason.message && e.reason.message.includes('[0, Infinity]')) {
+    if (e.reason && (e.reason instanceof RangeError || e.reason.name === 'RangeError')) {
         e.preventDefault(); // suppress console error + don't crash
+    }
+});
+
+// Also catch synchronous WebAudio errors bubbling up to window
+window.addEventListener('error', (e) => {
+    if (e.error && (e.error instanceof RangeError || e.error.name === 'RangeError')) {
+        e.preventDefault();
     }
 });
 
@@ -174,7 +180,7 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
                         try {
                             trigger(t);
                         } catch (e) {
-                            if (e instanceof RangeError) {
+                            if (e instanceof RangeError || e.name === 'RangeError') {
                                 // Floating-point jitter: time ended up slightly negative inside Tone.js
                                 // Retry immediately with a guaranteed-safe future time
                                 try { trigger(Tone.context.currentTime + 0.005); } catch (_) {}
