@@ -38,7 +38,7 @@ const STYLES = [
     { id: "frahm_minor",           icon: "🌫️", name: "Ambient · Minor",               desc: "Pulsing ostinato, soft sustained chords in minor" },
 ];
 
-let selectedStyles = [STYLES[0].id];
+let selectedStyles = [];
 
 // ── Build style cards ─────────────────────────────────────────
 const grid = document.getElementById("style-grid");
