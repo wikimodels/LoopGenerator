@@ -7,6 +7,7 @@
 window.addEventListener('unhandledrejection', (e) => {
     if (e.reason && (e.reason instanceof RangeError || e.reason.name === 'RangeError')) {
         e.preventDefault(); // suppress console error + don't crash
+        window.dispatchEvent(new Event('audio_glitch'));
     }
 });
 
@@ -14,6 +15,7 @@ window.addEventListener('unhandledrejection', (e) => {
 window.addEventListener('error', (e) => {
     if (e.error && (e.error instanceof RangeError || e.error.name === 'RangeError')) {
         e.preventDefault();
+        window.dispatchEvent(new Event('audio_glitch'));
     }
 });
 
@@ -98,8 +100,17 @@ function createDrumKit(outputNode) {
 }
 
 function exportSingleLoopSilent(loopData, overrideBpm) {
-    return new Promise(async (resolve) => {
-        await initSilentSynths();
+    return new Promise((resolve) => {
+        let attempt = 0;
+        const maxAttempts = 3;
+
+        async function tryExport() {
+            attempt++;
+            let glitchDetected = false;
+            const onGlitch = () => { glitchDetected = true; };
+            window.addEventListener('audio_glitch', onGlitch);
+
+            await initSilentSynths();
         
         const currentSynth = silentSynths[loopData.instrument] || silentSynths.piano;
         const bpm = overrideBpm || loopData.bpm || 120;
@@ -213,6 +224,7 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
         if (exportCancelled) {
             try { await recorder.stop(); } catch (_) {}
             tempSequence.dispose();
+            window.removeEventListener('audio_glitch', onGlitch);
             resolve(null);
             return;
         }
@@ -228,6 +240,7 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
                 Tone.Transport.stop();
                 tempSequence.stop();
                 tempSequence.dispose();
+                window.removeEventListener('audio_glitch', onGlitch);
                 if (recorder && recorder.state === "started") {
                     recorder.stop().then(() => resolve(null)).catch(() => resolve(null));
                 } else {
@@ -248,7 +261,23 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
                 const hardTimeout = new Promise(res => setTimeout(() => res(null), 8000));
                 recording = await Promise.race([recorder.stop(), hardTimeout]);
             }
-            resolve(recording);
+
+            window.removeEventListener('audio_glitch', onGlitch);
+
+            if (glitchDetected && attempt < maxAttempts) {
+                console.warn(`[Export] Audio glitch detected on attempt ${attempt}, regenerating track...`);
+                // Give WebAudio a moment to clean up before retrying
+                setTimeout(tryExport, 100);
+            } else {
+                if (glitchDetected) {
+                    console.error(`[Export] Track still glitched after ${maxAttempts} attempts. Giving up.`);
+                }
+                resolve(recording);
+            }
         }, (totalDurationSec + 1.5) * 1000);
+        
+        } // end of tryExport()
+        
+        tryExport();
     });
 }
