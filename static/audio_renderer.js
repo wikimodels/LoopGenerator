@@ -1,6 +1,17 @@
 // audio_renderer.js
 // Shared audio rendering logic for all pages
 
+// Global guard: Tone.js can throw RangeError("Value must be within [0, Infinity]")
+// asynchronously from WebAudio scheduler — uncatchable via try/catch.
+// We swallow ONLY this specific error so it never breaks the export flow.
+window.addEventListener('unhandledrejection', (e) => {
+    if (e.reason instanceof RangeError &&
+        e.reason.message && e.reason.message.includes('[0, Infinity]')) {
+        e.preventDefault(); // suppress console error + don't crash
+    }
+});
+
+
 let silentSynths = {};
 let recorder = null;
 let exportLimiter = null;
@@ -135,8 +146,12 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
         const durationSec = loopData.steps * 30 / bpm;
 
         const tempSequence = new Tone.Sequence((time, step) => {
-            // Fix floating point precision causing negative time error
-            const safeTime = Math.max(0, time);
+            // Hard clamp: never schedule behind audioContext.currentTime.
+            // Tone.js internally converts transport time → AudioContext time; floating-point
+            // rounding can produce tiny negatives (-2e-12) that WebAudio rejects asynchronously
+            // (uncatchable with try/catch). Pinning to currentTime+0.005 eliminates the issue.
+            const minSafe = Tone.context.currentTime + 0.005;
+            const safeTime = Math.max(minSafe, time);
             
             if (stepNotes[step]) {
                 stepNotes[step].forEach((n, idx) => {
@@ -144,20 +159,45 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
                     const velocity = n.velocity !== undefined ? n.velocity : 1.0;
                     if (Math.random() <= chance) {
                         // Micro-offset prevents PolySynth floating point crash on exact same time chords
-                        const t = safeTime + (idx * 0.0001);
-                        if (currentSynth === silentSynths.drums) {
-                            currentSynth.triggerAttackRelease(n.note, n.duration || "8n", t, velocity);
-                        } else if (currentSynth.triggerAttackRelease) {
-                            currentSynth.triggerAttackRelease(n.note, n.duration || "8n", t, velocity);
-                        } else if (currentSynth.triggerAttack) {
-                            currentSynth.triggerAttack(n.note, t);
+                        const t = Math.max(0, safeTime + (idx * 0.0001));
+
+                        const trigger = (at) => {
+                            if (currentSynth === silentSynths.drums) {
+                                currentSynth.triggerAttackRelease(n.note, n.duration || "8n", at, velocity);
+                            } else if (currentSynth.triggerAttackRelease) {
+                                currentSynth.triggerAttackRelease(n.note, n.duration || "8n", at, velocity);
+                            } else if (currentSynth.triggerAttack) {
+                                currentSynth.triggerAttack(n.note, at);
+                            }
+                        };
+
+                        try {
+                            trigger(t);
+                        } catch (e) {
+                            if (e instanceof RangeError) {
+                                // Floating-point jitter: time ended up slightly negative inside Tone.js
+                                // Retry immediately with a guaranteed-safe future time
+                                try { trigger(Tone.context.currentTime + 0.005); } catch (_) {}
+                            }
                         }
                     }
                 });
             }
+
         }, stepsArray, "8n").start(0);
 
-        tempSequence.loop = false;
+        // If loop is shorter than 7s, repeat it until total >= 7s
+        const MIN_DURATION_SEC = 7;
+        const loopCount = durationSec < MIN_DURATION_SEC
+            ? Math.ceil(MIN_DURATION_SEC / durationSec)
+            : 1;
+        const totalDurationSec = durationSec * loopCount;
+
+        if (loopCount > 1) {
+            tempSequence.loop = loopCount - 1;  // Tone.js loop=N means "repeat N times" (plays N+1 total)
+        } else {
+            tempSequence.loop = false;
+        }
 
         // 4. Start recorder, then wait 150 ms pre-roll so MediaRecorder is
         //    guaranteed in 'recording' state before audio starts flowing.
@@ -203,6 +243,6 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
                 recording = await Promise.race([recorder.stop(), hardTimeout]);
             }
             resolve(recording);
-        }, (durationSec + 1.5) * 1000);
+        }, (totalDurationSec + 1.5) * 1000);
     });
 }

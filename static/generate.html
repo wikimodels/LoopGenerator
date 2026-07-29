@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generate Loop - LoopGenerator</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_modal.css">
+    <link rel="stylesheet" href="style_modal_extras.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="navbar.js" defer></script>
     <style>
         body { overflow: auto; }
         .gen-main { flex:1; overflow-y:auto; display:flex; justify-content:center; padding:2rem 1rem 0; }
@@ -72,26 +75,7 @@
 </head>
 <body>
 <div class="app-container">
-    <header class="top-bar">
-        <div class="logo">
-            <span class="material-icons">auto_awesome</span>
-            Generate Loop
-        </div>
-        <div class="header-actions">
-            <a href="catalog.html" class="btn secondary">
-                <span class="material-icons">library_music</span> Catalog
-            </a>
-            <a href="golden.html" class="btn accent" title="Golden Fund">
-                <span class="material-icons">star</span> Golden Fund
-            </a>
-            <a href="exports.html" class="btn neutral" title="Audio Exports">
-                <span class="material-icons">graphic_eq</span> Audio Exports
-            </a>
-            <a href="index.html" class="btn secondary">
-                <span class="material-icons">piano</span> Editor
-            </a>
-        </div>
-    </header>
+        <!-- Navbar injected by navbar.js -->
     <main class="gen-main">
         <div class="gen-container">
             <div class="gen-card">

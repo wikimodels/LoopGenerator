@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="export-info">
                         <div class="export-details">
                             <div class="export-filename" contenteditable="true" spellcheck="false" title="Click to rename">${displayName}</div>
-                            <div class="export-meta">${formatBytes(file.size)} &bull; ${dateStr}</div>
+                            <div class="export-meta"><span class="export-duration">…</span></div>
                         </div>
                         <div class="export-controls">
                             <button class="btn icon-btn play-btn" title="Play/Pause">
@@ -219,7 +219,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 ws.on('ready', () => {
                     loadingOverlay.style.display = 'none';
+                    // Show track duration
+                    const dur = ws.getDuration();
+                    const durEl = card.querySelector('.export-duration');
+                    if (durEl && dur) {
+                        const m = Math.floor(dur / 60);
+                        const s = Math.floor(dur % 60).toString().padStart(2, '0');
+                        durEl.textContent = m > 0 ? `${m}m ${s}s` : `${s}s`;
+                    }
                 });
+
 
                 ws.on('play', () => {
                     iconPlay.textContent = 'pause';

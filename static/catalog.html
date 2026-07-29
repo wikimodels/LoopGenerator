@@ -11,38 +11,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <!-- Tone.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="audio_renderer.js"></script>
     <!-- JSZip CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="navbar.js" defer></script>
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
-        <header class="top-bar">
-            <div class="logo">
-                <span class="material-icons">library_music</span>
-                Loop Catalog
-            </div>
-            <div class="header-actions">
-                <a href="generate.html" class="btn primary" title="Generate a new loop">
-                    <span class="material-icons">auto_awesome</span> Generate
-                </a>
-                <a href="golden.html" class="btn accent" title="Golden Fund">
-                    <span class="material-icons">star</span> Golden Fund
-                </a>
-                <a href="exports.html" class="btn neutral" title="Audio Exports">
-                    <span class="material-icons">graphic_eq</span> Audio Exports
-                </a>
-                <button id="btn-insert-json" class="btn secondary" title="Insert JSON">
-                    <span class="material-icons">data_object</span> Insert JSON
-                </button>
-                <a href="index.html" class="btn secondary" title="Back to Editor">
-                    <span class="material-icons">arrow_back</span> Editor
-                </a>
-            </div>
-        </header>
+        <!-- Navbar injected by navbar.js -->
 
         <main class="main-content catalog-main">
             <div class="catalog-header">
@@ -155,33 +132,7 @@
         </div>
     </div>
 
-    <!-- Insert JSON Modal -->
-    <div id="insert-modal" class="modal hidden">
-        <div class="modal-content wide">
-            <div class="modal-header">
-                <h2>Insert JSON Loops</h2>
-                <button id="btn-close-insert" class="modal-close-btn"><span class="material-icons">close</span></button>
-            </div>
-            <div class="modal-body">
-                <p>Paste a JSON <strong>Array</strong> of loop objects to import them into your catalog.</p>
-                <textarea id="json-paste-area" class="input-text large-textarea" placeholder="[
-  {
-    &quot;name&quot;: &quot;Loop 1&quot;,
-    ...
-  },
-  {
-    &quot;name&quot;: &quot;Loop 2&quot;,
-    ...
-  }
-]"></textarea>
-                <div style="display: flex; justify-content: flex-end;">
-                    <button id="btn-import-pasted" class="btn primary">
-                        <span class="material-icons">playlist_add</span> Import Array
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Insert JSON modal injected by navbar.js -->
 
     <!-- Notification Toast -->
     <div id="toast" class="toast hidden">Message</div>

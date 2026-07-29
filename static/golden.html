@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="audio_renderer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="navbar.js" defer></script>
     <style>
         .logo .material-icons { color: #f59e0b; }
         .catalog-header h2 { background: linear-gradient(135deg,#f59e0b,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
@@ -24,20 +25,7 @@
 </head>
 <body>
     <div class="app-container">
-        <header class="top-bar">
-            <div class="logo"><span class="material-icons">star</span> Golden Fund</div>
-            <div class="header-actions">
-                <a href="generate.html" class="btn primary"><span class="material-icons">auto_awesome</span> Generate</a>
-                <button id="btn-insert-json" class="btn secondary"><span class="material-icons">data_object</span> Insert JSON</button>
-                <a href="catalog.html" class="btn secondary" title="Open Loop Catalog">
-                    <span class="material-icons">library_music</span> Catalog
-                </a>
-                <a href="exports.html" class="btn neutral" title="Audio Exports">
-                    <span class="material-icons">graphic_eq</span> Audio Exports
-                </a>
-                <a href="index.html" class="btn secondary"><span class="material-icons">arrow_back</span> Editor</a>
-            </div>
-        </header>
+        <!-- Navbar injected by navbar.js -->
         <main class="main-content catalog-main">
             <div class="catalog-header">
                 <div class="header-title-row">
@@ -103,21 +91,7 @@
             </div>
         </div>
     </div>
-    <div id="insert-modal" class="modal hidden">
-        <div class="modal-content wide">
-            <div class="modal-header">
-                <h2>Insert JSON Loops</h2>
-                <button id="btn-close-insert" class="modal-close-btn"><span class="material-icons">close</span></button>
-            </div>
-            <div class="modal-body">
-                <p>Paste a JSON <strong>Array</strong> of loop objects to import.</p>
-                <textarea id="json-paste-area" class="input-text large-textarea" placeholder="[...]"></textarea>
-                <div style="display:flex;justify-content:flex-end;">
-                    <button id="btn-import-pasted" class="btn primary"><span class="material-icons">playlist_add</span> Import Array</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Insert JSON modal injected by navbar.js -->
     <div id="toast" class="toast hidden">Message</div>
     <div id="export-overlay" class="export-overlay hidden">
         <div class="export-overlay-card">

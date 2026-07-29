@@ -13,42 +13,11 @@
     <!-- Tone.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="audio_renderer.js"></script>
+    <script src="navbar.js" defer></script>
 </head>
-<body>
+<body data-page="editor">
     <div class="app-container">
-        <!-- Header -->
-        <header class="top-bar">
-            <div class="logo">
-                <span class="material-icons">graphic_eq</span>
-                LoopGenerator
-            </div>
-            <div class="header-actions">
-                <button id="btn-instructions" class="btn secondary" title="Instructions">
-                    <span class="material-icons">help_outline</span> Help
-                </button>
-                <a href="catalog.html" class="btn secondary" title="Open Loop Catalog">
-                    <span class="material-icons">library_music</span> Catalog
-                </a>
-                <a href="golden.html" class="btn accent" title="Golden Fund">
-                    <span class="material-icons">star</span> Golden Fund
-                </a>
-                <a href="exports.html" class="btn neutral" title="Audio Exports">
-                    <span class="material-icons">graphic_eq</span> Audio Exports
-                </a>
-                <a href="generate.html" class="btn primary" title="Generate a new loop">
-                    <span class="material-icons">auto_awesome</span> Generate
-                </a>
-                <button id="btn-save" class="btn primary" title="Save Loop">
-                    <span class="material-icons">save</span> Save
-                </button>
-                <button id="btn-export" class="btn secondary" title="Export to Audio">
-                    <span class="material-icons">download</span> Export Audio
-                </button>
-                <button id="btn-insert-json" class="btn secondary" title="Insert JSON">
-                    <span class="material-icons">data_object</span> Insert JSON
-                </button>
-            </div>
-        </header>
+        <!-- Navbar injected by navbar.js -->
 
         <main class="main-content">
             <!-- Sidebar / Catalog -->
@@ -165,122 +134,7 @@
                 </div>
             </section>
         </main>
-    </div>
-
-    <!-- Instructions Modal -->
-    <div id="instructions-modal" class="modal hidden">
-        <div class="modal-content wide">
-            <div class="modal-header">
-                <h2>Instructions & AI Prompt</h2>
-                <button id="btn-close-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
-            </div>
-            <div class="modal-body">
-                <div class="ai-prompt-container" style="margin: 20px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: flex-end;">
-                        <div id="instructions-tabs" class="tabs-container" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <!-- Tabs will be injected here -->
-                            <button class="btn secondary active" data-tab="default">Default Prompt</button>
-                        </div>
-                        <button id="btn-copy-prompt" class="btn secondary" style="transform: scale(0.8); transform-origin: right center; white-space: nowrap;"><span class="material-icons">content_copy</span> Copy Prompt</button>
-                    </div>
-                    <textarea id="ai-prompt-text" class="input-text prompt-textarea" readonly>
-You are an expert music producer, beatmaker, and sound designer. I am building a custom web-based step sequencer using Tone.js and I need you to generate loops for me.
-
-IMPORTANT: Before doing anything else, please recall and review the official Tone.js documentation, especially regarding Timing/Time notation (such as "16n", "8n", "8t", "4n", "2m", etc.) and note formats.
-
-Once you have that context, generate a JSON file containing a musical loop. You MUST strictly follow these technical constraints:
-
-1. Format: The output MUST be a JSON ARRAY containing one or more loop objects.
-Example:
-[
-  {
-    "name": "Cyberpunk FM Bassline",
-    "bpm": 130, // integer from 60 to 240
-    "instrument": "piano", // BY DEFAULT use "piano". MUST BE EXACTLY ONE OF: "piano", "synth", "amSynth", "fmSynth", "drums"
-    "steps": 16, // typical lengths: 16, 32, 64
-    "key": "A", // "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
-    "scale": "Minor", // "Major", "Minor", "Pentatonic"
-    "swing": 0.0, // float from 0.0 to 1.0
-    "notes": [
-      {"step": 0, "note": "A4", "duration": "16n", "velocity": 1.0},
-      {"step": 3, "note": "C5", "duration": "16n", "velocity": 0.6}
-    ]
-  }
-]
-
-2. The "notes" Array Rules:
-- "step": Integer representing the position in the sequencer grid (0-indexed). For a 16-step loop, steps are 0 to 15.
-- "duration": MUST use valid Tone.js duration notation (e.g., "16n" for 16th note, "8n" for 8th note, "4n" for quarter note, "32n", "8t").
-- "velocity": Float from 0.0 to 1.0. Use this heavily to create groove, accents, and ghost notes!
-- "chance" (optional): Float from 0.0 to 1.0 representing probability of the note playing.
-
-3. "note" Pitch Rules (CRITICAL):
-A. Melodic Instruments ("piano", "synth", "amSynth", "fmSynth"):
-- Use standard scientific pitch notation (e.g., "C4", "D#5", "Bb3").
-- Ensure all notes strictly belong to the specified "key" and "scale".
-- You can place multiple notes on the exact same "step" to create chords.
-
-B. Drum Kit ("drums"):
-- If the instrument is "drums", the "note" field MUST be EXACTLY one of these strings (no standard pitches!):
-  - "Kick" (Membrane synth, deep sub)
-  - "Snare" (Noise synth)
-  - "Clap" (Noise synth)
-  - "HiHat" (Short closed hat)
-  - "OpenHat" (Long open hat)
-  - "Tom H" (High tom)
-  - "Tom L" (Low tom)
-  - "Crash" (Long cymbal crash)
-- PROHIBITION: Do NOT use "Crash", "OpenHat", "HiHat", "Clap", or "Snare" without special permission. If you think the requested genre deeply requires them, you MUST first ask the user for permission before generating the loop.
-- Example drum note: {"step": 4, "note": "Kick", "duration": "16n", "velocity": 1.0}
-
-4. Musical Guidelines:
-- "piano": Real acoustic piano.
-- "synth": PolySynth (good for chords/pads).
-- "amSynth": AM Synth (good for bells/electric pianos).
-- "fmSynth": FM Synth (good for aggressive/metallic basses and leads).
-- Add polyrhythms, syncopation, and realistic velocities to make it sound human.
-
-5. Duration Requirement:
-- The length of the generated loop MUST be a minimum of 8 seconds in real time.
-- You must calculate the appropriate number of steps, BPM, and note durations based on this 8-second minimum.
-- If anything is unclear, please make suggestions or ask for clarifications.
-
-6. Mixed Loops Naming Convention:
-- The naming convention for mixed loops MUST follow this pattern: ---Loop_{loop_name}
-
-Please output the JSON block within markdown code tags. You may include suggestions or explanations outside of the JSON block if needed.
-</textarea>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Insert JSON Modal -->
-    <div id="insert-modal" class="modal hidden">
-        <div class="modal-content wide">
-            <div class="modal-header">
-                <h2>Insert JSON Loops</h2>
-                <button id="btn-close-insert" class="modal-close-btn"><span class="material-icons">close</span></button>
-            </div>
-            <div class="modal-body">
-                <p>Paste a JSON <strong>Array</strong> of loop objects to import them into your catalog.</p>
-                <textarea id="json-paste-area" class="input-text large-textarea" placeholder="[
-  {
-    &quot;name&quot;: &quot;Loop 1&quot;,
-    ...
-  },
-  {
-    &quot;name&quot;: &quot;Loop 2&quot;,
-    ...
-  }
-]"></textarea>
-                <div style="display: flex; justify-content: flex-end;">
-                    <button id="btn-import-pasted" class="btn primary">
-                        <span class="material-icons">playlist_add</span> Import Array
-                    </button>
-                </div>
-            </div>
-        </div>
+        <!-- Modals injected by navbar.js -->
     </div>
 
     <!-- Notification Toast -->

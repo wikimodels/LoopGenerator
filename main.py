@@ -267,6 +267,38 @@ def delete_loop(filename: str):
             return {"status": "success"}
     raise HTTPException(status_code=404, detail="File not found")
 
+@app.delete("/api/clear/loops")
+def clear_loops():
+    """Delete all audio files from the Downloads\\Loops folder."""
+    downloads_dir = os.path.join(os.environ.get('USERPROFILE', os.path.expanduser('~')), 'Downloads', 'Loops')
+    count = 0
+    if os.path.exists(downloads_dir):
+        for f in os.listdir(downloads_dir):
+            if f.endswith((".webm", ".wav", ".mp3")):
+                os.remove(os.path.join(downloads_dir, f))
+                count += 1
+    return {"status": "ok", "deleted": count}
+
+@app.delete("/api/clear/exports")
+def clear_exports():
+    """Delete all audio files from the exports directory."""
+    count = 0
+    for f in os.listdir(EXPORTS_DIR):
+        if f.endswith((".webm", ".wav", ".mp3")):
+            os.remove(os.path.join(EXPORTS_DIR, f))
+            count += 1
+    return {"status": "ok", "deleted": count}
+
+@app.delete("/api/clear/catalog")
+def clear_catalog():
+    """Delete all JSON files from loops only (golden_fond is preserved)."""
+    count = 0
+    for f in os.listdir(LOOPS_DIR):
+        if f.endswith(".json"):
+            os.remove(os.path.join(LOOPS_DIR, f))
+            count += 1
+    return {"status": "ok", "deleted": count}
+
 @app.get("/api/meta")
 def get_meta():
     return load_meta()
