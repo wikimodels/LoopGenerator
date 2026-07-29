@@ -1256,121 +1256,212 @@ def gen_classical_alberti(key_pc, scale_name, bpm, steps, beats_per_bar=4):
     return notes
 
 
-def gen_renaissance(key_pc, scale_name, bpm, steps, beats_per_bar=4, mode="dorian"):
+def _ren_progression(mode, num_bars):
+    # Authentic modal progressions instead of generic tonal Markov chain
+    progs = []
+    if mode == "dorian":
+        progs = [
+            [0, 6, 0, 4], # i - VII - i - v
+            [0, 2, 3, 4], # i - III - IV - v
+            [0, 6, 2, 4], # i - VII - III - v
+            [0, 3, 4, 0], # i - IV - v - i
+        ]
+    elif mode == "phrygian":
+        progs = [
+            [0, 1, 0, 3], # i - II - i - iv
+            [0, 3, 2, 1], # i - iv - III - II (descending to phrygian cadence)
+            [0, 5, 1, 0], # i - VI - II - i
+            [0, 1, 3, 1], # i - II - iv - II
+        ]
+    elif mode == "mixolydian":
+        progs = [
+            [0, 6, 0, 3], # I - VII - I - IV
+            [0, 3, 4, 0], # I - IV - v - I
+            [0, 1, 0, 6], # I - ii - I - VII
+            [0, 4, 3, 0], # I - v - IV - I
+        ]
+    else:
+        progs = [[0, 3, 4, 0]]
+    
+    # 20% chance of fauxbourdon (parallel 1st inversion, represented here as descending degrees)
+    if random.random() < 0.20:
+        return [0, 6, 5, 4][:num_bars] if num_bars < 4 else [0, 6, 5, 4] * (num_bars // 4 + 1)
+        
+    base_prog = random.choice(progs)
+    prog = []
+    for i in range(num_bars):
+        prog.append(base_prog[i % len(base_prog)])
+    return prog
+
+def _ren_texture_dance(key_pc, scale, prog, bpm, steps, bar_steps):
+    # Homophonic block chords (Pavane/Frottola)
     notes = []
-    # FIX #12: previously this line unconditionally overwrote whatever `mode`
-    # the caller passed in with a fresh random choice, so
-    # "renaissance_dorian" / "renaissance_phrygian" / "renaissance_mixolydian"
-    # all played the exact same 3-way random roulette instead of the mode
-    # the style name promised. The function now simply uses the `mode` it
-    # was given (defaulting to "dorian" only when the caller doesn't specify
-    # one, matching the function signature's own default).
-    scale = mode
-    prog = generate_harmony(scale, length=4)
-    n_prog = len(prog)
-    bar_steps = beats_per_bar * 4
     num_bars = steps // bar_steps
-
-    R_SOP, R_ALT, R_TEN, R_BAS = 5, 4, 3, 2
-
-    MOT_DUR_SETS = [
-        [("4n", 4), ("4n", 4), ("8n", 2), ("8n", 2)],
-        [("4n", 4), ("8n", 2), ("8n", 2), ("4n", 4)],
+    rhythms = [
+        [("2n", 8), ("4n", 4), ("4n", 4)],
+        [("4n", 4), ("4n", 4), ("2n", 8)],
+        [("4n.", 6), ("8n", 2), ("4n", 4), ("4n", 4)],
+        [("4n", 4), ("8n", 2), ("8n", 2), ("4n", 4), ("4n", 4)],
     ]
-    mot_durs = random.choice(MOT_DUR_SETS)
-    while sum(span for _, span in mot_durs) > bar_steps and len(mot_durs) > 1:
-        mot_durs.pop()
-
-    mot_offsets = contour_sequence(len(mot_durs), choices=(0, 1, 2, 3, 4), max_run=2)
-    motif_steps = sum(span for _, span in mot_durs)
-    imitation_delay = min(8, bar_steps // 2)
-    alt_free_from = imitation_delay + motif_steps
-
-    def place_motif(start_step, root_deg, octave, vel_base):
-        step = start_step
-        for off, (dur, span) in zip(mot_offsets, mot_durs):
-            if step >= steps: break
-            notes.append(mk(step, scale_tone(key_pc, scale, root_deg + off, octave), dur, round(vel_base + random.uniform(-0.04, 0.04), 2), steps))
-            step += span
-
-    sop_prev, alt_prev, ten_prev = None, None, None
-
     for bar in range(num_bars):
-        deg = prog[bar % n_prog]
+        deg = prog[bar]
         s0 = bar * bar_steps
         root_pc = key_pc + SCALES[scale][deg % len(SCALES[scale])]
         qual = diatonic_quality(scale, deg)
-        is_last = (bar == num_bars - 1)
-        fifth_iv = CHORD_QUALITIES[qual][2]
+        chord_ints = CHORD_QUALITIES[qual]
+        
+        valid_rhythms = [r for r in rhythms if sum(span for _, span in r) == bar_steps]
+        bar_rhythm = random.choice(valid_rhythms) if valid_rhythms else [[("4n", 4)] * (bar_steps // 4)]
+        
+        step = s0
+        for dur, span in bar_rhythm:
+            if step >= steps: break
+            notes.append(mk(step, note_name(root_pc, 2), dur, 0.65, steps))
+            notes.append(mk(step, note_name(root_pc + random.choice([chord_ints[1], chord_ints[2]]), 3), dur, 0.55, steps))
+            notes.append(mk(step, note_name(root_pc + random.choice([chord_ints[1], chord_ints[2]]), 4), dur, 0.55, steps))
+            notes.append(mk(step, note_name(root_pc + random.choice([0, chord_ints[1], chord_ints[2]]), 5), dur, 0.65, steps))
+            step += span
+    return notes
 
-        if not is_last:
-            notes.append(mk(s0, note_name(root_pc, R_BAS), "4n", 0.60, steps))
-            if bar_steps > 4:
-                notes.append(mk(s0 + bar_steps // 2, note_name(root_pc + fifth_iv, R_BAS), "4n", 0.50, steps))
-
-        # FIX #9: the tenor voice used to keep playing notes derived from the
-        # regular progression's `deg` even on the final bar, while bass and
-        # soprano switched to the special cadential harmony below — meaning
-        # tenor was sounding a foreign scale degree right under the cadence.
-        # It now only runs its regular independent line when NOT the last bar;
-        # its cadential part is added explicitly in the `is_last` block below.
-        if not is_last:
-            ten_choices = (deg, deg+1, deg+2, deg+3, deg+4)
-            ten_start = carry_start(ten_choices, ten_prev)
-            ten_contour = contour_sequence(2, choices=ten_choices, start=ten_start, reversal_bias=0.35, max_run=3)
-            if ten_prev is not None and random.random() < 0.30:
-                notes.append(mk(s0, scale_tone(key_pc, scale, ten_prev, R_TEN), "8n", 0.45, steps))
-                notes.append(mk(s0 + 2, scale_tone(key_pc, scale, ten_prev - 1, R_TEN), "8n", 0.40, steps))
-                notes.append(mk(s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, ten_contour[-1], R_TEN), "4n", 0.42, steps))
+def _ren_texture_motet(key_pc, scale, prog, bpm, steps, bar_steps):
+    # Strict imitation (Motet style)
+    notes = []
+    num_bars = steps // bar_steps
+    mot_rhythm = [("4n", 4), ("4n", 4), ("8n", 2), ("8n", 2), ("2n", 8)]
+    mot_offsets = contour_sequence(len(mot_rhythm), choices=(0,1,2,3,4,-1,-2), max_run=2)
+    
+    voices = [
+        {"name": "Soprano", "reg": 5, "delay_bars": 0},
+        {"name": "Alto",    "reg": 4, "delay_bars": 1},
+        {"name": "Tenor",   "reg": 3, "delay_bars": 2},
+        {"name": "Bass",    "reg": 2, "delay_bars": 3},
+    ]
+    if random.random() < 0.5:
+        voices = [
+            {"name": "Tenor",   "reg": 3, "delay_bars": 0},
+            {"name": "Soprano", "reg": 5, "delay_bars": 1},
+            {"name": "Bass",    "reg": 2, "delay_bars": 2},
+            {"name": "Alto",    "reg": 4, "delay_bars": 3},
+        ]
+        
+    for v in voices:
+        prev_deg = None
+        for bar in range(num_bars):
+            if bar < v["delay_bars"]: continue
+            deg = prog[bar]
+            s0 = bar * bar_steps
+            if bar == v["delay_bars"]:
+                step = s0
+                for (dur, span), off in zip(mot_rhythm, mot_offsets):
+                    if step >= steps: break
+                    notes.append(mk(step, scale_tone(key_pc, scale, deg + off, v["reg"]), dur, 0.6, steps))
+                    step += span
+                prev_deg = deg + mot_offsets[-1]
             else:
-                notes.append(mk(s0, scale_tone(key_pc, scale, ten_contour[0], R_TEN), "2n", 0.45, steps))
+                choices = (deg, deg+1, deg-1, deg+2, deg-2)
+                contour = contour_sequence(3, choices=choices, start=carry_start(choices, prev_deg))
+                step = s0
+                notes.append(mk(step, scale_tone(key_pc, scale, contour[0], v["reg"]), "2n", 0.55, steps))
                 if bar_steps > 4:
-                    notes.append(mk(s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, ten_contour[1], R_TEN), "4n", 0.42, steps))
-            ten_prev = ten_contour[-1]
+                    notes.append(mk(step + min(8, bar_steps//2), scale_tone(key_pc, scale, contour[1], v["reg"]), "4n", 0.5, steps))
+                prev_deg = contour[-1]
+    return notes
 
-        if bar == 0:
-            place_motif(s0, deg, R_SOP, 0.65)
-            sop_prev = deg + mot_offsets[-1]
-        elif not is_last:
-            sop_choices = (deg, deg+2, deg+4, deg+6, deg+1)
-            sop_contour = contour_sequence(2, choices=sop_choices, start=carry_start(sop_choices, sop_prev))
-            notes.append(mk(s0 + min(4, bar_steps // 4), scale_tone(key_pc, scale, sop_contour[0], R_SOP), "4n", 0.65, steps))
-            if bar_steps > 4:
-                notes.append(mk(s0 + min(12, bar_steps - 4), scale_tone(key_pc, scale, sop_contour[1], R_SOP), "4n", 0.55, steps))
-            sop_prev = sop_contour[-1]
+def _ren_texture_counterpoint(key_pc, scale, prog, bpm, steps, bar_steps):
+    # Flowing counterpoint with passing tones & suspensions
+    notes = []
+    num_bars = steps // bar_steps
+    sop_prev, alt_prev, ten_prev, bas_prev = None, None, None, None
+    
+    for bar in range(num_bars):
+        deg = prog[bar]
+        s0 = bar * bar_steps
+        
+        bas_choices = (deg, deg+1, deg-1)
+        bas_idx = carry_start(bas_choices, bas_prev)
+        bas_val = bas_choices[bas_idx if bas_idx is not None else 0]
+        if random.random() < 0.3 and bar_steps >= 8:
+            notes.append(mk(s0, scale_tone(key_pc, scale, bas_val, 2), "4n", 0.6, steps))
+            notes.append(mk(s0 + 4, scale_tone(key_pc, scale, bas_val-1, 2), "4n", 0.5, steps))
+            notes.append(mk(s0 + 8, scale_tone(key_pc, scale, bas_val, 2), "2n", 0.6, steps))
+            bas_prev = bas_val
+        else:
+            notes.append(mk(s0, scale_tone(key_pc, scale, bas_val, 2), "1n" if bar_steps==16 else "2n", 0.6, steps))
+            bas_prev = bas_val
+            
+        ten_choices = (deg+2, deg+4, deg)
+        ten_idx = carry_start(ten_choices, ten_prev)
+        ten_val = ten_choices[ten_idx if ten_idx is not None else 0]
+        notes.append(mk(s0, scale_tone(key_pc, scale, ten_val, 3), "4n.", 0.55, steps))
+        notes.append(mk(s0 + 6, scale_tone(key_pc, scale, ten_val-1, 3), "8n", 0.5, steps))
+        if bar_steps >= 8:
+            notes.append(mk(s0 + 8, scale_tone(key_pc, scale, ten_val, 3), "2n", 0.55, steps))
+        ten_prev = ten_val
+        
+        alt_choices = (deg+4, deg+2, deg+6)
+        alt_idx = carry_start(alt_choices, alt_prev)
+        alt_val = alt_choices[alt_idx if alt_idx is not None else 0]
+        notes.append(mk(s0, scale_tone(key_pc, scale, alt_val, 4), "2n", 0.5, steps))
+        if bar_steps >= 8:
+            notes.append(mk(s0 + 8, scale_tone(key_pc, scale, alt_val-1, 4), "2n", 0.5, steps))
+        alt_prev = alt_val-1
+        
+        sop_choices = (deg, deg+2, deg+4, deg+7)
+        sop_idx = carry_start(sop_choices, sop_prev)
+        sop_val = sop_choices[sop_idx if sop_idx is not None else 0]
+        if bar > 0 and random.random() < 0.5: 
+            notes.append(mk(s0, scale_tone(key_pc, scale, sop_prev, 5), "4n", 0.65, steps)) 
+            notes.append(mk(s0 + 4, scale_tone(key_pc, scale, sop_val, 5), "4n", 0.6, steps))
+            if bar_steps >= 8:
+                notes.append(mk(s0 + 8, scale_tone(key_pc, scale, sop_val+1, 5), "2n", 0.6, steps))
+            sop_prev = sop_val+1
+        else:
+            notes.append(mk(s0, scale_tone(key_pc, scale, sop_val, 5), "4n", 0.6, steps))
+            notes.append(mk(s0 + 4, scale_tone(key_pc, scale, sop_val+1, 5), "4n", 0.6, steps))
+            if bar_steps >= 8:
+                notes.append(mk(s0 + 8, scale_tone(key_pc, scale, sop_val-1, 5), "2n", 0.6, steps))
+            sop_prev = sop_val-1
+    return notes
 
-        if bar == 0:
-            place_motif(s0 + imitation_delay, deg, R_ALT, 0.55)
-            alt_prev = deg + mot_offsets[-1]
-        elif s0 >= alt_free_from and not is_last:
-            alt_choices = (deg, deg+1, deg+2, deg+3, deg+4)
-            alt_contour = contour_sequence(3, choices=alt_choices, start=carry_start(alt_choices, alt_prev), reversal_bias=0.40, max_run=2)
-            notes.append(mk(s0, scale_tone(key_pc, scale, alt_contour[0], R_ALT), "4n", 0.50, steps))
-            if bar_steps > 4:
-                notes.append(mk(s0 + min(6, bar_steps // 3), scale_tone(key_pc, scale, alt_contour[1], R_ALT), "4n", 0.47, steps))
-                notes.append(mk(s0 + min(12, (bar_steps * 2) // 3), scale_tone(key_pc, scale, alt_contour[2], R_ALT), "4n", 0.45, steps))
-            alt_prev = alt_contour[-1]
-
-        if is_last and num_bars > 1 and bar_steps >= 8:
-            final_pc = key_pc
-            if mode == "phrygian":
-                flat_ii_pc = key_pc + SCALES[scale][1]
-                notes.append(mk(s0, note_name(flat_ii_pc, R_BAS), "4n", 0.65, steps))
-                notes.append(mk(s0 + bar_steps // 2, note_name(final_pc, R_BAS), "2n", 0.70, steps))
-                notes.append(mk(s0 + min(4, bar_steps // 4), scale_tone(key_pc, scale, 1, R_SOP), "4n", 0.65, steps))
-                notes.append(mk(s0 + bar_steps // 2, scale_tone(key_pc, scale, 0, R_SOP), "2n", 0.70, steps))
-                # tenor cadence: holds the 3rd of the bII chord, then resolves down to the tonic's 3rd
-                notes.append(mk(s0, scale_tone(key_pc, scale, 1+2, R_TEN), "4n", 0.45, steps))
-                notes.append(mk(s0 + bar_steps // 2, scale_tone(key_pc, scale, 2, R_TEN), "2n", 0.45, steps))
+def gen_renaissance(key_pc, scale_name, bpm, steps, beats_per_bar=4, mode="dorian"):
+    scale = mode
+    bar_steps = beats_per_bar * 4
+    num_bars = max(1, steps // bar_steps)
+    
+    prog = _ren_progression(mode, num_bars)
+    textures = [_ren_texture_dance, _ren_texture_motet, _ren_texture_counterpoint]
+    chosen_texture = random.choice(textures)
+    
+    notes = chosen_texture(key_pc, scale, prog, bpm, steps, bar_steps)
+    
+    if num_bars > 1 and bar_steps >= 8:
+        last_s0 = (num_bars - 1) * bar_steps
+        notes = [n for n in notes if n["step"] < last_s0] # Clear last bar for cadence
+        
+        final_pc = key_pc
+        R_SOP, R_ALT, R_TEN, R_BAS = 5, 4, 3, 2
+        
+        if mode == "phrygian":
+            flat_ii_pc = key_pc + SCALES[scale][1]
+            notes.append(mk(last_s0, note_name(flat_ii_pc, R_BAS), "2n", 0.65, steps))
+            notes.append(mk(last_s0 + min(8, bar_steps // 2), note_name(final_pc, R_BAS), "2n", 0.70, steps))
+            notes.append(mk(last_s0, scale_tone(key_pc, scale, 6, R_SOP), "2n", 0.65, steps))
+            notes.append(mk(last_s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, 0, R_SOP), "2n", 0.70, steps))
+            notes.append(mk(last_s0, scale_tone(key_pc, scale, 3, R_TEN), "2n", 0.5, steps))
+            notes.append(mk(last_s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, 4, R_TEN), "2n", 0.5, steps))
+        else:
+            v_pc = key_pc + SCALES[scale][4]
+            notes.append(mk(last_s0, note_name(v_pc, R_BAS), "2n", 0.65, steps))
+            notes.append(mk(last_s0 + min(8, bar_steps // 2), note_name(final_pc, R_BAS), "2n", 0.70, steps))
+            if random.random() < 0.5:
+                notes.append(mk(last_s0, scale_tone(key_pc, scale, 6, R_SOP), "4n.", 0.65, steps))
+                notes.append(mk(last_s0 + 6, scale_tone(key_pc, scale, 5, R_SOP), "8n", 0.6, steps))
+                notes.append(mk(last_s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, 0, R_SOP), "2n", 0.70, steps))
             else:
-                v_pc = key_pc + SCALES[scale][4]
-                notes.append(mk(s0, note_name(v_pc, R_BAS), "4n", 0.60, steps))
-                notes.append(mk(s0 + bar_steps // 2, note_name(final_pc, R_BAS), "2n", 0.65, steps))
-                for k, loff in enumerate([5, 6, 0]):
-                    notes.append(mk(s0 + bar_steps // 2 + k * 2, scale_tone(key_pc, scale, loff, R_SOP), "8n", max(0.40, 0.68 - k * 0.05), steps))
-                # tenor cadence: holds the 3rd of V, then resolves to the 3rd of the final tonic chord
-                notes.append(mk(s0, scale_tone(key_pc, scale, 4+2, R_TEN), "4n", 0.42, steps))
-                notes.append(mk(s0 + bar_steps // 2, scale_tone(key_pc, scale, 2, R_TEN), "2n", 0.42, steps))
+                notes.append(mk(last_s0, scale_tone(key_pc, scale, 6, R_SOP), "2n", 0.65, steps))
+                notes.append(mk(last_s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, 0, R_SOP), "2n", 0.70, steps))
+            notes.append(mk(last_s0, scale_tone(key_pc, scale, 1, R_TEN), "2n", 0.5, steps))
+            notes.append(mk(last_s0 + min(8, bar_steps // 2), scale_tone(key_pc, scale, 2, R_TEN), "2n", 0.5, steps))
     return notes
 
 
