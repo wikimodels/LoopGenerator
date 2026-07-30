@@ -106,6 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     task.loadingOverlay.style.display = 'none';
                     task.loadingOverlay.innerHTML = 'Analyzing...';
                 });
+                
+                task.ws.once('error', (err) => {
+                    console.error('WaveSurfer reload error:', err);
+                    task.loadingOverlay.innerHTML = '<span style="color:var(--danger)">Failed to load</span>';
+                });
+                
                 showToast(`Regenerated ${task.filename}`);
             } catch (err) {
                 console.error("Failed to upload regenerated audio:", err);
@@ -227,6 +233,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         const s = Math.floor(dur % 60).toString().padStart(2, '0');
                         durEl.textContent = m > 0 ? `${m}m ${s}s` : `${s}s`;
                     }
+                });
+
+                ws.on('error', (err) => {
+                    console.error('WaveSurfer error on', file.filename, err);
+                    loadingOverlay.innerHTML = '<span style="color:var(--danger)">Error loading audio</span>';
                 });
 
 
