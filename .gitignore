@@ -45,6 +45,10 @@ venv.bak/
 *.swp
 *.swo
 
+# Node
+node_modules/
+package-lock.json
+
 # Project specific
 server.log
 *.log
@@ -54,3 +58,4 @@ server.log
 # Temporary/test generated loops
 test_loop_*.json
 data/
+test_tone.js

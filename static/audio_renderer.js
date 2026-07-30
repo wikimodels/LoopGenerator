@@ -50,9 +50,9 @@ async function initSilentSynths() {
         amSynth: amSynth,
         fmSynth: fmSynth,
         piano: new Tone.Sampler({
-            urls: { "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3" },
+            urls: { "A0": "A0.mp3", "C1": "C1.mp3", "D#1": "Ds1.mp3", "F#1": "Fs1.mp3", "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3", "C6": "C6.mp3", "D#6": "Ds6.mp3", "F#6": "Fs6.mp3", "A6": "A6.mp3", "C7": "C7.mp3", "D#7": "Ds7.mp3", "F#7": "Fs7.mp3", "A7": "A7.mp3", "C8": "C8.mp3" },
             release: 1,
-            baseUrl: "https://tonejs.github.io/audio/salamander/"
+            baseUrl: "/static/audio/salamander/"
         }).connect(exportRecorderNode),
         drums: createDrumKit(exportRecorderNode)
     };
@@ -147,7 +147,7 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
         // 3. Reset Transport completely before each track.
         Tone.Transport.stop();
         Tone.Transport.cancel();
-        Tone.Transport.position = 0;
+        // Tone.Transport.position = 0; // REMOVED: setting position to 0 directly causes Tone.js internal RangeErrors (-2.27e-12)
         Tone.Transport.bpm.value = bpm;
         Tone.Transport.swing = loopData.swing || 0.0;
         Tone.Transport.swingSubdivision = "8n";
@@ -178,6 +178,11 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
                         // Micro-offset prevents PolySynth floating point crash on exact same time chords
                         const t = Math.max(0, safeTime + (idx * 0.0001));
 
+                        // Fallback if piano buffer failed to load
+                        if (currentSynth === silentSynths.piano && !silentSynths.piano.loaded) {
+                            currentSynth = silentSynths.synth;
+                        }
+
                         const trigger = (at) => {
                             if (currentSynth === silentSynths.drums) {
                                 currentSynth.triggerAttackRelease(n.note, n.duration || "8n", at, velocity);
@@ -191,10 +196,10 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
                         try {
                             trigger(t);
                         } catch (e) {
-                            if (e instanceof RangeError || e.name === 'RangeError') {
-                                // Floating-point jitter: time ended up slightly negative inside Tone.js
-                                // Retry immediately with a guaranteed-safe future time
+                            if (e instanceof RangeError || (e && e.name === 'RangeError')) {
                                 try { trigger(Tone.context.currentTime + 0.005); } catch (_) {}
+                            } else {
+                                console.warn("Tone.js warning: suppressed error:", e);
                             }
                         }
                     }
@@ -229,7 +234,8 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             return;
         }
         
-        Tone.Transport.start("+0.1");
+        // start(time, offset) explicitly defines start position without modifying global .position directly
+        Tone.Transport.start(Tone.context.currentTime + 0.1, 0);
 
         // Allow cancel to abort mid-render
         let exportTimeoutId;
