@@ -782,10 +782,11 @@ function pauseLoop(btnPlayToggle, itemEl) {
 
 function stopLoop(btnPlayToggle, btnStop, itemEl) {
     if (activeSequence) {
-        Tone.Transport.stop();
-        activeSequence.stop();
-        activeSequence.dispose();
+        try { activeSequence.stop(); } catch(e){}
+        try { activeSequence.dispose(); } catch(e){}
         activeSequence = null;
+        try { Tone.Transport.cancel(0); } catch(e){}
+        try { Tone.Transport.stop(); } catch(e){}
     }
     clearItemState(itemEl || activeItemEl);
     activeItemEl = null;
@@ -815,10 +816,11 @@ async function batchExport() {
 
     // Stop playback if playing
     if (activeSequence) {
-        Tone.Transport.stop();
-        activeSequence.stop();
-        activeSequence.dispose();
+        try { activeSequence.stop(); } catch(e){}
+        try { activeSequence.dispose(); } catch(e){}
         activeSequence = null;
+        try { Tone.Transport.cancel(0); } catch(e){}
+        try { Tone.Transport.stop(); } catch(e){}
     }
     document.querySelectorAll('.catalog-item .play').forEach(b => { 
         b.innerHTML = '<span class="material-icons">play_arrow</span>';
@@ -880,10 +882,11 @@ async function bulkExportAudio() {
 
     // Stop any playing loop
     if (activeSequence) {
-        Tone.Transport.stop();
-        activeSequence.stop();
-        activeSequence.dispose();
+        try { activeSequence.stop(); } catch(e){}
+        try { activeSequence.dispose(); } catch(e){}
         activeSequence = null;
+        try { Tone.Transport.cancel(0); } catch(e){}
+        try { Tone.Transport.stop(); } catch(e){}
     }
     document.querySelectorAll('.catalog-item .play').forEach(b => { 
         b.innerHTML = '<span class="material-icons">play_arrow</span>';
@@ -1061,10 +1064,11 @@ function openMergeModal() {
     
     // Stop any existing playback in catalog
     if (activeSequence) {
-        Tone.Transport.stop();
-        activeSequence.stop();
-        activeSequence.dispose();
+        try { activeSequence.stop(); } catch(e){}
+        try { activeSequence.dispose(); } catch(e){}
         activeSequence = null;
+        try { Tone.Transport.cancel(0); } catch(e){}
+        try { Tone.Transport.stop(); } catch(e){}
     }
     document.querySelectorAll('.catalog-item .play').forEach(b => { 
         b.innerHTML = '<span class="material-icons">play_arrow</span>';
@@ -1169,10 +1173,11 @@ async function startPreview() {
 
 function stopPreview() {
     if (previewSequence) {
-        Tone.Transport.stop();
-        previewSequence.stop();
-        previewSequence.dispose();
+        try { previewSequence.stop(); } catch(e){}
+        try { previewSequence.dispose(); } catch(e){}
         previewSequence = null;
+        try { Tone.Transport.cancel(0); } catch(e){}
+        try { Tone.Transport.stop(); } catch(e){}
     }
     isPreviewing = false;
     if (btnMergePreview) {
@@ -1260,9 +1265,10 @@ async function mergeExportFromModal() {
     Tone.Transport.start();
 
     setTimeout(async () => {
-        Tone.Transport.stop();
-        masterSequence.stop();
-        masterSequence.dispose();
+        try { masterSequence.stop(); } catch(e){}
+        try { masterSequence.dispose(); } catch(e){}
+        try { Tone.Transport.cancel(0); } catch(e){}
+        try { Tone.Transport.stop(); } catch(e){}
         
         const recording = await recorder.stop();
         mergeProgressFill.style.width = "100%";

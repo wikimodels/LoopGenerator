@@ -332,12 +332,13 @@ function setupEventListeners() {
     });
 
     stopBtn.addEventListener('click', () => {
-        Tone.Transport.stop();
         if (toneSequence) {
-            toneSequence.stop();
-            toneSequence.dispose();
+            try { toneSequence.stop(); } catch(e){}
+            try { toneSequence.dispose(); } catch(e){}
             toneSequence = null;
         }
+        try { Tone.Transport.cancel(0); } catch(e){}
+        try { Tone.Transport.stop(); } catch(e){}
         state.isPlaying = false;
         
         const playIcon = document.getElementById('play-icon');
@@ -482,7 +483,11 @@ function setupEventListeners() {
 
         // Wait for loop to finish + 1.5 seconds for audio tail (reverb/release)
         setTimeout(async () => {
-            Tone.Transport.stop();
+            if (typeof toneSequence !== 'undefined' && toneSequence) {
+                try { toneSequence.stop(); toneSequence.dispose(); toneSequence = null; } catch(e){}
+            }
+            try { Tone.Transport.cancel(0); } catch(e){}
+            try { Tone.Transport.stop(); } catch(e){}
             const recording = await recorder.stop();
             
             const filename = `${state.loopName.replace(/\s+/g, '_')}.webm`;
