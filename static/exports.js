@@ -12,6 +12,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const wavesurfers = [];
     const selectedExports = new Set();
     
+    // Insert JSON Support for Exports page
+    const btnImportPasted = document.getElementById('btn-import-pasted');
+    const jsonPasteArea = document.getElementById('json-paste-area');
+    const insertModal = document.getElementById('insert-modal');
+    
+    if (btnImportPasted) {
+        btnImportPasted.addEventListener('click', async () => {
+            const text = jsonPasteArea.value.trim();
+            if (!text) return;
+            try {
+                const data = JSON.parse(text);
+                if (!Array.isArray(data)) {
+                    showToast("Error: JSON must be an array [...]");
+                    return;
+                }
+                
+                let successCount = 0;
+                for (const loop of data) {
+                    const res = await fetch('/api/loops', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(loop)
+                    });
+                    if (res.ok) successCount++;
+                }
+                
+                showToast(`Imported ${successCount} loops!`);
+                if (insertModal) insertModal.classList.add('hidden');
+                jsonPasteArea.value = '';
+            } catch (err) {
+                showToast("Invalid JSON text");
+                console.error(err);
+            }
+        });
+    }
+    
     function updateBulkActionUI() {
         const total = document.querySelectorAll('.card-checkbox').length;
         const selected = selectedExports.size;

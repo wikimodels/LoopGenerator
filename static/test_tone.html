@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+</head>
+<body>
+    <button id="btn">Test</button>
+    <script>
+        document.getElementById('btn').addEventListener('click', async () => {
+            await Tone.start();
+            try {
+                Tone.Transport.start("+0.1");
+                console.log("Success with +0.1");
+            } catch (e) {
+                console.error("Error with +0.1:", e);
+            }
+        });
+    </script>
+</body>
+</html>

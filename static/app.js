@@ -201,6 +201,9 @@ async function initAudioContext() {
     };
     
     currentSynth = synths[state.instrument] || synths.piano;
+    
+    await Tone.loaded();
+    
     isAudioInitialized = true;
 }
 
@@ -297,9 +300,6 @@ function setupEventListeners() {
     document.body.addEventListener('click', initAudioContext, { once: true });
 
     playBtn.addEventListener('click', async () => {
-        await initAudioContext();
-        await Tone.start();
-        
         const playIcon = document.getElementById('play-icon');
         
         if (state.isPlaying) {
@@ -309,6 +309,13 @@ function setupEventListeners() {
             playBtn.classList.remove('paused');
             return;
         }
+
+        if (playIcon) playIcon.innerText = 'hourglass_empty';
+        
+        if (!isAudioInitialized) {
+            await initAudioContext();
+        }
+        await Tone.start();
         
         Tone.Transport.bpm.value = state.bpm;
         Tone.Transport.swing = state.swing;
@@ -318,7 +325,7 @@ function setupEventListeners() {
             setupSequence();
         }
         
-        Tone.Transport.start("+0.1");
+        Tone.Transport.start(Tone.now() + 0.1);
         state.isPlaying = true;
         if (playIcon) playIcon.innerText = 'pause';
         playBtn.classList.add('paused');
@@ -446,11 +453,14 @@ function setupEventListeners() {
             showToast("Please stop playback before exporting.");
             return;
         }
-        await initAudioContext();
-        await Tone.start();
         
-        showToast("Recording audio... Please wait.");
+        showToast("Preparing audio... Please wait.");
         exportBtn.disabled = true;
+
+        if (!isAudioInitialized) {
+            await initAudioContext();
+        }
+        await Tone.start();
 
         const recorder = new Tone.Recorder();
         Tone.getDestination().connect(recorder);
@@ -468,7 +478,7 @@ function setupEventListeners() {
         toneSequence.loop = 1;
 
         recorder.start();
-        Tone.Transport.start("+0.1");
+        Tone.Transport.start(Tone.now() + 0.1);
 
         // Wait for loop to finish + 1.5 seconds for audio tail (reverb/release)
         setTimeout(async () => {
@@ -686,7 +696,7 @@ function setupSequence() {
             document.querySelectorAll(`.grid-cell[data-col="${step}"]`).forEach(el => el.classList.add('playing'));
         }, time);
 
-    }, steps, "8n").start(0);
+    }, steps, "8n").start(0.001);
 }
 
 // --- API & Data logic ---
@@ -793,8 +803,8 @@ function loadLoopData(data) {
                 state.grid[r][n.step] = true;
                 state.gridMeta[r][n.step] = {
                     duration: n.duration || "8n",
-                    velocity: n.velocity !== undefined ? n.velocity : 1.0,
-                    chance: n.chance !== undefined ? n.chance : 1.0
+                    velocity: n.velocity ?? 1.0,
+                    chance: n.chance ?? 1.0
                 };
             }
         });

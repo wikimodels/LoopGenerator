@@ -179,8 +179,8 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             
             if (stepNotes[step]) {
                 stepNotes[step].forEach((n, idx) => {
-                    const chance   = n.chance   !== undefined ? n.chance   : 1.0;
-                    const velocity = n.velocity !== undefined ? n.velocity : 1.0;
+                    const chance   = n.chance ?? 1.0;
+                    const velocity = n.velocity ?? 1.0;
                     if (Math.random() <= chance) {
                         // Micro-offset prevents PolySynth floating point crash on exact same time chords
                         const t = Math.max(0, safeTime + (idx * 0.0001));
@@ -213,7 +213,7 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
                 });
             }
 
-        }, stepsArray, "8n").start(0);
+        }, stepsArray, "8n").start(0.001);
 
         // If loop is shorter than 7s, repeat it until total >= 7s
         const MIN_DURATION_SEC = 7;
@@ -242,7 +242,7 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
         }
         
         // start(time) explicitly defines start position without modifying global .position directly
-        Tone.Transport.start(Tone.context.currentTime + 0.1);
+        Tone.Transport.start(Tone.now() + 0.1);
 
         // Allow cancel to abort mid-render
         let exportTimeoutId;

@@ -41,12 +41,17 @@ class Note(BaseModel):
     step: int
     note: str
     duration: str
+    velocity: Optional[float] = None
+    chance: Optional[float] = None
 
 class Loop(BaseModel):
     name: str
     bpm: int
     instrument: str
     steps: int
+    key: Optional[str] = None
+    scale: Optional[str] = None
+    swing: Optional[float] = 0.0
     notes: List[Note]
 
 class LoopMeta(BaseModel):

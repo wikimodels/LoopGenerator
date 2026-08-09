@@ -58,10 +58,10 @@ const mergeProgressText = document.getElementById('merge-progress-text');
 const mergeProgressFill = document.getElementById('merge-progress-fill');
 
 // Insert JSON Modal Elements
-const insertModal = document.getElementById('insert-modal');
-const btnCloseInsert = document.getElementById('btn-close-insert');
-const btnImportPasted = document.getElementById('btn-import-pasted');
-const jsonPasteArea = document.getElementById('json-paste-area');
+let insertModal;
+let btnCloseInsert;
+let btnImportPasted;
+let jsonPasteArea;
 
 // Bank of words for poetic loop names
 const poeticWords = {
@@ -78,8 +78,12 @@ function generatePoeticName() {
     return `${action} ${prep} ${place}`;
 }
 
-// --- Initialization ---
 async function init() {
+    insertModal = document.getElementById('insert-modal');
+    btnCloseInsert = document.getElementById('btn-close-insert');
+    btnImportPasted = document.getElementById('btn-import-pasted');
+    jsonPasteArea = document.getElementById('json-paste-area');
+
     await fetchMeta();
     await fetchLoops();
     
@@ -223,6 +227,8 @@ async function initAudioContext() {
     // the browser tab is in the background. It outputs 100% silence.
     const silentPath = new Tone.Gain(0).toDestination();
     exportLimiter.connect(silentPath);
+
+    await Tone.loaded(); // Wait for piano buffers to finish loading
 
     isAudioInitialized = true;
 }
@@ -667,11 +673,6 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
 
     const currentId = ++playbackId;
 
-    await initAudioContext();
-    if (Tone.context.state !== 'running') await Tone.start();
-
-    if (currentId !== playbackId) return; // Abort if another play was clicked
-
     // If resuming from pause on the same loop
     if (isResuming) {
         Tone.Transport.start();
@@ -684,11 +685,16 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
         return;
     }
 
-    // Set loading state immediately
+    // Set loading state immediately before any async initialization
     activeItemEl = itemEl;
     activeLoopName = loopData.name;
     clearItemState(itemEl);
     itemEl.classList.add('is-loading');
+
+    await initAudioContext();
+    if (Tone.context.state !== 'running') await Tone.start();
+
+    if (currentId !== playbackId) return; // Abort if another play was clicked
 
     document.querySelectorAll('.catalog-item .play').forEach(b => { 
         b.innerHTML = '<span class="material-icons">play_arrow</span>';
@@ -734,14 +740,14 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
 
         if (stepNotes[step]) {
             stepNotes[step].forEach(n => {
-                let chance = n.chance !== undefined ? n.chance : 1.0;
-                let velocity = n.velocity !== undefined ? n.velocity : 1.0;
+                let chance = n.chance ?? 1.0;
+                let velocity = n.velocity ?? 1.0;
                 if (Math.random() <= chance) {
                     currentSynth.triggerAttackRelease(n.note, n.duration || "8n", safeTime, velocity);
                 }
             });
         }
-    }, stepsArray, "8n").start(0);
+    }, stepsArray, "8n").start(0.001);
 
     Tone.Transport.start();
     
