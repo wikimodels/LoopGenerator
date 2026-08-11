@@ -250,9 +250,12 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
             if (exportCancelled) {
                 clearInterval(cancelWatcher);
                 clearTimeout(exportTimeoutId);
+                // Stop sequence BEFORE transport — sequence.stop() internally calls
+                // StateTimeline.setStateAtTime(now), which must be >= 0.
+                // If Transport.stop() runs first, Tone's internal time can be ~-5e-10.
+                try { tempSequence.stop(); } catch (_) {}
+                try { tempSequence.dispose(); } catch (_) {}
                 Tone.Transport.stop();
-                tempSequence.stop();
-                tempSequence.dispose();
                 window.removeEventListener('audio_glitch', onGlitch);
                 if (recorder && recorder.state === "started") {
                     recorder.stop().then(() => resolve(null)).catch(() => resolve(null));
@@ -264,9 +267,10 @@ function exportSingleLoopSilent(loopData, overrideBpm) {
 
         exportTimeoutId = setTimeout(async () => {
             clearInterval(cancelWatcher);
+            // Stop sequence BEFORE transport (same reason as cancel path above)
+            try { tempSequence.stop(); } catch (_) {}
+            try { tempSequence.dispose(); } catch (_) {}
             Tone.Transport.stop();
-            tempSequence.stop();
-            tempSequence.dispose();
 
             // Hard safety: if recorder.stop() hangs, bail after 8 s
             let recording = null;

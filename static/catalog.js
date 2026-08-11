@@ -727,7 +727,7 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
     let loopCounter = 0;
     
     activeSequence = new Tone.Sequence((time, step) => {
-        const safeTime = Math.max(0, time);
+        const safeTime = Math.max(Tone.context.currentTime + 0.005, time);
         if (step === 0) loopCounter++;
         
         // Stop automatically after 3 loops
@@ -1155,7 +1155,7 @@ async function startPreview() {
     });
 
     previewSequence = new Tone.Sequence((time, step) => {
-        const safeTime = Math.max(0, time);
+        const safeTime = Math.max(Tone.context.currentTime + 0.005, time);
         const notesToPlay = masterStepNotes[step];
         if (notesToPlay) {
             notesToPlay.forEach(n => {
@@ -1253,7 +1253,7 @@ async function mergeExportFromModal() {
     });
 
     const masterSequence = new Tone.Sequence((time, step) => {
-        const safeTime = Math.max(0, time);
+        const safeTime = Math.max(Tone.context.currentTime + 0.005, time);
         const notesToPlay = masterStepNotes[step];
         if (notesToPlay) {
             notesToPlay.forEach(n => {
