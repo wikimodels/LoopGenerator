@@ -274,8 +274,8 @@ def delete_loop(filename: str):
 
 @app.delete("/api/clear/loops")
 def clear_loops():
-    """Delete all audio files from the Downloads\\Loops folder."""
-    downloads_dir = os.path.join(os.environ.get('USERPROFILE', os.path.expanduser('~')), 'Downloads', 'Loops')
+    """Delete all audio files from the Downloads\\AIMusicTools\\Loops folder."""
+    downloads_dir = os.path.join(os.environ.get('USERPROFILE', os.path.expanduser('~')), 'Downloads', 'AIMusicTools', 'Loops')
     count = 0
     if os.path.exists(downloads_dir):
         for f in os.listdir(downloads_dir):
@@ -343,8 +343,8 @@ os.makedirs("static", exist_ok=True)
 @app.post("/api/export_audio/local_download")
 def local_download_exports(req: DownloadRequest):
     import shutil
-    # Path to Windows Downloads folder
-    downloads_dir = os.path.join(os.environ.get('USERPROFILE', os.path.expanduser('~')), 'Downloads', 'Loops')
+    # Path to Windows Downloads folder (AIMusicTools\\Loops)
+    downloads_dir = os.path.join(os.environ.get('USERPROFILE', os.path.expanduser('~')), 'Downloads', 'AIMusicTools', 'Loops')
     os.makedirs(downloads_dir, exist_ok=True)
     
     downloaded = []
