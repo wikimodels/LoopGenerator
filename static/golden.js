@@ -413,7 +413,7 @@ function renderCatalog() {
         btnCopyJson.addEventListener('click', async () => {
             const { _filename, ...rest } = loop;
             try {
-                await navigator.clipboard.writeText(JSON.stringify(rest, null, 2));
+                await navigator.clipboard.writeText(JSON.stringify([rest], null, 2));
                 showToast(`JSON copied: ${loop._filename || loop.name}`);
             } catch (err) {
                 console.error('Copy JSON failed', err);
