@@ -406,6 +406,21 @@ function renderCatalog() {
         btnStop.disabled = true;
         btnStop.title = 'Stop';
 
+        const btnCopyJson = document.createElement('button');
+        btnCopyJson.className = 'btn icon-btn copy';
+        btnCopyJson.innerHTML = '<span class="material-icons">content_copy</span>';
+        btnCopyJson.title = 'Copy JSON';
+        btnCopyJson.addEventListener('click', async () => {
+            const { _filename, ...rest } = loop;
+            try {
+                await navigator.clipboard.writeText(JSON.stringify(rest, null, 2));
+                showToast(`JSON copied: ${loop._filename || loop.name}`);
+            } catch (err) {
+                console.error('Copy JSON failed', err);
+                showToast('Failed to copy JSON');
+            }
+        });
+
         btnPlayToggle.addEventListener('click', () => {
             if (activeSequence && activeLoopName === loop.name && Tone.Transport.state === 'started') {
                 pauseLoop(btnPlayToggle, div);
@@ -417,6 +432,7 @@ function renderCatalog() {
 
         controls.appendChild(btnPlayToggle);
         controls.appendChild(btnStop);
+        controls.appendChild(btnCopyJson);
 
         // BPM Control — same pattern as Merge Modal BPM slider
         const bpmControl = document.createElement('div');
