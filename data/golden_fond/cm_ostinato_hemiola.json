@@ -1,0 +1,179 @@
+﻿{
+    "name": "C#m_Ostinato_Hemiola",
+    "bpm": 233,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "C#",
+    "scale": "minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C#3",
+            "duration": "1m",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C#5",
+            "duration": "8n.",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 3,
+            "note": "E5",
+            "duration": "8n.",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "G#5",
+            "duration": "8n.",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 9,
+            "note": "E5",
+            "duration": "8n.",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "C#5",
+            "duration": "4n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F#2",
+            "duration": "1m",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F#4",
+            "duration": "8n.",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 19,
+            "note": "A4",
+            "duration": "8n.",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 22,
+            "note": "C#5",
+            "duration": "8n.",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 25,
+            "note": "A4",
+            "duration": "8n.",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "F#4",
+            "duration": "4n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "G#2",
+            "duration": "1m",
+            "velocity": 0.52,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D#4",
+            "duration": "8n.",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 35,
+            "note": "G#4",
+            "duration": "8n.",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 38,
+            "note": "C5",
+            "duration": "8n.",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 41,
+            "note": "G#4",
+            "duration": "8n.",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "D#4",
+            "duration": "4n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#3",
+            "duration": "1m",
+            "velocity": 0.55,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#5",
+            "duration": "8n.",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 51,
+            "note": "E5",
+            "duration": "8n.",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 54,
+            "note": "G#5",
+            "duration": "8n.",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 57,
+            "note": "E5",
+            "duration": "8n.",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "C#5",
+            "duration": "4n",
+            "velocity": 0.3,
+            "chance": null
+        }
+    ]
+}

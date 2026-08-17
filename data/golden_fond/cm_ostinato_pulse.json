@@ -1,0 +1,263 @@
+﻿{
+    "name": "C#m_Ostinato_Pulse",
+    "bpm": 240,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "C#",
+    "scale": "minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C#3",
+            "duration": "1m",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 2,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "G#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 10,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "G#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 14,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "A2",
+            "duration": "1m",
+            "velocity": 0.48,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 18,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "A5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 22,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 26,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "A5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 30,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F#2",
+            "duration": "1m",
+            "velocity": 0.48,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 34,
+            "note": "F#5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "A5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 38,
+            "note": "F#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 42,
+            "note": "F#5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "A5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 46,
+            "note": "F#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G#2",
+            "duration": "1m",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "D#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 50,
+            "note": "G#5",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 54,
+            "note": "G#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "D#5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 58,
+            "note": "G#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.24,
+            "chance": null
+        },
+        {
+            "step": 62,
+            "note": "D#5",
+            "duration": "16n",
+            "velocity": 0.22,
+            "chance": null
+        }
+    ]
+}

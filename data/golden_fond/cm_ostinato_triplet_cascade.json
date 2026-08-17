@@ -1,0 +1,354 @@
+{
+    "name": "C#m_Ostinato_Triplet_Cascade",
+    "bpm": 165,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "C#",
+    "scale": "minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C#3",
+            "duration": "1m",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 1,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 2,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 5,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 9,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 10,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 13,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 14,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "G#2",
+            "duration": "1m",
+            "velocity": 0.48,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "D#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 17,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 18,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "D#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 21,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 22,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "D#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 25,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 26,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "D#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 29,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 30,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "A2",
+            "duration": "1m",
+            "velocity": 0.48,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 33,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 34,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 37,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 38,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 41,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 42,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 45,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 46,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#3",
+            "duration": "1m",
+            "velocity": 0.52,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 49,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 50,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 53,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 54,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.24,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.24,
+            "chance": null
+        },
+        {
+            "step": 58,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.22,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "C#4",
+            "duration": "4n",
+            "velocity": 0.22,
+            "chance": null
+        }
+    ]
+}

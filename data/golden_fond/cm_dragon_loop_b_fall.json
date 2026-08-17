@@ -1,0 +1,207 @@
+{
+    "name": "C#m_Dragon_Loop_B_Fall",
+    "bpm": 230,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "C#",
+    "scale": "minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C#3",
+            "duration": "1m",
+            "velocity": 0.48,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C#4",
+            "duration": "4n",
+            "velocity": 0.25,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.22,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "G#4",
+            "duration": "4n",
+            "velocity": 0.2,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "E5",
+            "duration": "4n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "G#5",
+            "duration": "4n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "E5",
+            "duration": "4n",
+            "velocity": 0.24,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "B2",
+            "duration": "1m",
+            "velocity": 0.46,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "B4",
+            "duration": "4n",
+            "velocity": 0.25,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "D#5",
+            "duration": "4n",
+            "velocity": 0.22,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F#5",
+            "duration": "4n",
+            "velocity": 0.2,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "D#5",
+            "duration": "4n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "F#5",
+            "duration": "4n",
+            "velocity": 0.24,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "D#5",
+            "duration": "4n",
+            "velocity": 0.22,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F#2",
+            "duration": "1m",
+            "velocity": 0.46,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F#4",
+            "duration": "4n",
+            "velocity": 0.25,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.22,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "C#5",
+            "duration": "4n",
+            "velocity": 0.2,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "F#4",
+            "duration": "4n",
+            "velocity": 0.24,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.22,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G#2",
+            "duration": "1m",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#4",
+            "duration": "4n",
+            "velocity": 0.26,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.23,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G#4",
+            "duration": "4n",
+            "velocity": 0.21,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.25,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C#4",
+            "duration": "4n",
+            "velocity": 0.22,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "B3",
+            "duration": "4n",
+            "velocity": 0.2,
+            "chance": null
+        }
+    ]
+}

@@ -1,0 +1,263 @@
+﻿{
+    "name": "C#m_Ostinato_RisingSequence",
+    "bpm": 195,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "C#",
+    "scale": "minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C#3",
+            "duration": "1m",
+            "velocity": 0.48,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 2,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "C#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 10,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 14,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F#3",
+            "duration": "1m",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F#4",
+            "duration": "16n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 18,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 22,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "F#4",
+            "duration": "16n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 26,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 30,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.3,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "G#3",
+            "duration": "1m",
+            "velocity": 0.52,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 34,
+            "note": "C4",
+            "duration": "16n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "D#5",
+            "duration": "16n",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 38,
+            "note": "C4",
+            "duration": "16n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 42,
+            "note": "C4",
+            "duration": "16n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "D#5",
+            "duration": "16n",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 46,
+            "note": "C4",
+            "duration": "16n",
+            "velocity": 0.32,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "A3",
+            "duration": "1m",
+            "velocity": 0.55,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.36,
+            "chance": null
+        },
+        {
+            "step": 50,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.36,
+            "chance": null
+        },
+        {
+            "step": 54,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.36,
+            "chance": null
+        },
+        {
+            "step": 58,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.36,
+            "chance": null
+        },
+        {
+            "step": 62,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.34,
+            "chance": null
+        }
+    ]
+}
