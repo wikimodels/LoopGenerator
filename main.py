@@ -283,10 +283,16 @@ def delete_loop(filename: str):
         filepath = os.path.join(search_dir, safe_filename)
         if os.path.exists(filepath):
             os.remove(filepath)
-            meta = load_meta()
-            if safe_filename in meta:
-                del meta[safe_filename]
-                save_meta(meta)
+            # Keep metadata if the same-named file still exists in the other
+            # directory (e.g. a catalog copy of a golden loop): deleting the
+            # copy must not wipe the golden original's rating/stars.
+            other_dirs = [d for d in (LOOPS_DIR, GOLDEN_DIR) if d != search_dir]
+            still_exists = any(os.path.exists(os.path.join(d, safe_filename)) for d in other_dirs)
+            if not still_exists:
+                meta = load_meta()
+                if safe_filename in meta:
+                    del meta[safe_filename]
+                    save_meta(meta)
             return {"status": "success"}
     raise HTTPException(status_code=404, detail="File not found")
 
