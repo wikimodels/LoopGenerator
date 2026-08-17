@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import json
 import os
+import shutil
 import uuid
 
 from melodies_generator import generate_loop as _ml_generate, STYLE_META
@@ -112,6 +113,23 @@ def get_golden(response: Response):
             except Exception:
                 pass
     return loops
+
+@app.post("/api/golden/{filename}/copy")
+def copy_golden_to_loops(filename: str, response: Response):
+    """Copy a golden loop into the shared loops catalog (golden copy stays)."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    safe = os.path.basename(filename)
+    src = os.path.join(GOLDEN_DIR, safe)
+    if not os.path.isfile(src):
+        raise HTTPException(status_code=404, detail="Golden loop not found")
+    base, ext = os.path.splitext(safe)
+    dest = os.path.join(LOOPS_DIR, safe)
+    counter = 1
+    while os.path.exists(dest):
+        counter += 1
+        dest = os.path.join(LOOPS_DIR, f"{base}_{counter}{ext}")
+    shutil.copy2(src, dest)
+    return {"ok": True, "filename": os.path.basename(dest)}
 
 @app.post("/api/loops")
 def save_loop(loop: Loop):

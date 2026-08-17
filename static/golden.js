@@ -421,6 +421,25 @@ function renderCatalog() {
             }
         });
 
+        const btnCopyToCatalog = document.createElement('button');
+        btnCopyToCatalog.className = 'btn icon-btn copy-to-catalog';
+        btnCopyToCatalog.innerHTML = '<span class="material-icons">file_copy</span>';
+        btnCopyToCatalog.title = 'Copy to catalog';
+        btnCopyToCatalog.addEventListener('click', async () => {
+            try {
+                const res = await fetch(`/api/golden/${encodeURIComponent(loop._filename)}/copy`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.ok) {
+                    showToast(`Copied to catalog: ${data.filename}`);
+                } else {
+                    showToast(`Failed to copy: ${data.detail || res.status}`);
+                }
+            } catch (err) {
+                console.error('Copy to catalog failed', err);
+                showToast('Failed to copy to catalog');
+            }
+        });
+
         btnPlayToggle.addEventListener('click', () => {
             if (activeSequence && activeLoopName === loop.name && Tone.Transport.state === 'started') {
                 pauseLoop(btnPlayToggle, div);
@@ -433,6 +452,7 @@ function renderCatalog() {
         controls.appendChild(btnPlayToggle);
         controls.appendChild(btnStop);
         controls.appendChild(btnCopyJson);
+        controls.appendChild(btnCopyToCatalog);
 
         // BPM Control — same pattern as Merge Modal BPM slider
         const bpmControl = document.createElement('div');
