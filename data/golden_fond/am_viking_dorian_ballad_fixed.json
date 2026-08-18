@@ -1,0 +1,116 @@
+{
+    "name": "Am_Viking_Dorian_Ballad_Fixed",
+    "bpm": 203,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "A",
+    "scale": "Dorian",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "A1",
+            "duration": "2n.",
+            "velocity": 0.55,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "E3",
+            "duration": "2n.",
+            "velocity": 0.4,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "A3",
+            "duration": "2n",
+            "velocity": 0.42,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "G3",
+            "duration": "4n",
+            "velocity": 0.36,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "A3",
+            "duration": "2n",
+            "velocity": 0.4,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "A1",
+            "duration": "2n.",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "E3",
+            "duration": "2n.",
+            "velocity": 0.38,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "C4",
+            "duration": "2n",
+            "velocity": 0.4,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "F#3",
+            "duration": "4n",
+            "velocity": 0.38,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "A3",
+            "duration": "2n",
+            "velocity": 0.38,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G1",
+            "duration": "2n.",
+            "velocity": 0.52,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "D3",
+            "duration": "2n.",
+            "velocity": 0.4,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G3",
+            "duration": "2n",
+            "velocity": 0.42,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "F#3",
+            "duration": "4n",
+            "velocity": 0.4,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "B3",
+            "duration": "4n",
+            "velocity": 0.38,
+            "chance": null
+        }
+    ]
+}

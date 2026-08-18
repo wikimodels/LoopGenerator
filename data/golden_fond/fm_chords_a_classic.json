@@ -1,0 +1,123 @@
+{
+    "name": "F#m_Chords_A_Classic",
+    "bpm": 231,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "F#",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "F#2",
+            "duration": "1m",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "A4",
+            "duration": "1m",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C#5",
+            "duration": "1m",
+            "velocity": 0.62,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "F#5",
+            "duration": "1m",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "D3",
+            "duration": "1m",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "A4",
+            "duration": "1m",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "D5",
+            "duration": "1m",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F#5",
+            "duration": "1m",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "B2",
+            "duration": "1m",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F#4",
+            "duration": "1m",
+            "velocity": 0.55,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "A4",
+            "duration": "1m",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D5",
+            "duration": "1m",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#3",
+            "duration": "1m",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "E#4",
+            "duration": "1m",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G#4",
+            "duration": "1m",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#5",
+            "duration": "1m",
+            "velocity": 0.62,
+            "chance": null
+        }
+    ]
+}
