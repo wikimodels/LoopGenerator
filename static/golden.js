@@ -5,6 +5,7 @@ let selectedLoops = new Set();
 let isAudioInitialized = false;
 let currentSearchQuery = '';
 let currentStarFilter = 0;
+let currentSearchMode = 'name'; // 'name' | 'comment'
 
 // Audio state
 let synths = {};
@@ -62,6 +63,14 @@ let insertModal;
 let btnCloseInsert;
 let btnImportPasted;
 let jsonPasteArea;
+
+// Comment Modal Elements
+const commentModal = document.getElementById('comment-modal');
+const btnCloseCommentModal = document.getElementById('btn-close-comment-modal');
+const commentLoopName = document.getElementById('comment-loop-name');
+const commentTextarea = document.getElementById('comment-textarea');
+const btnSaveComment = document.getElementById('btn-save-comment');
+let commentLoop = null;
 
 // Bank of words for poetic loop names
 const poeticWords = {
@@ -260,6 +269,37 @@ function showToast(msg) {
     setTimeout(() => { toastEl.classList.add('hidden'); }, 3000);
 }
 
+// --- Comment Modal Logic ---
+function openCommentModal(loop) {
+    commentLoop = loop;
+    commentLoopName.textContent = loop.name;
+    commentTextarea.value = loop.comment || '';
+    commentModal.classList.remove('hidden');
+    commentTextarea.focus();
+}
+
+function closeCommentModal() {
+    commentModal.classList.add('hidden');
+    commentLoop = null;
+}
+
+async function saveComment() {
+    if (!commentLoop) return;
+    commentLoop.comment = commentTextarea.value.trim();
+    try {
+        await fetch(`/api/loops/${encodeURIComponent(commentLoop._filename)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(commentLoop)
+        });
+        showToast('Comment saved!');
+        closeCommentModal();
+    } catch (e) {
+        console.error('Failed to save comment', e);
+        showToast('Failed to save comment');
+    }
+}
+
 // --- Data Fetching & Rendering ---
 async function fetchLoops() {
     try {
@@ -278,8 +318,13 @@ function renderCatalog() {
         // Search only (no star filter — all tracks here are 5-star)
         if (currentSearchQuery) {
             const query = currentSearchQuery.toLowerCase();
-            const textToSearch = `${loop.name} ${loop.instrument}`.toLowerCase();
-            if (!textToSearch.includes(query)) return false;
+            if (currentSearchMode === 'comment') {
+                const textToSearch = `${loop.comment || ''}`.toLowerCase();
+                if (!textToSearch.includes(query)) return false;
+            } else {
+                const textToSearch = `${loop.name}`.toLowerCase();
+                if (!textToSearch.includes(query)) return false;
+            }
         }
         return true;
     });
@@ -449,10 +494,17 @@ function renderCatalog() {
         });
         btnStop.addEventListener('click', () => stopLoop(btnPlayToggle, btnStop, div));
 
+        const btnComment = document.createElement('button');
+        btnComment.className = 'btn icon-btn comment';
+        btnComment.innerHTML = '<span class="material-icons">info</span>';
+        btnComment.title = 'Comment';
+        btnComment.addEventListener('click', () => openCommentModal(loop));
+
         controls.appendChild(btnPlayToggle);
         controls.appendChild(btnStop);
         controls.appendChild(btnCopyJson);
         controls.appendChild(btnCopyToCatalog);
+        controls.appendChild(btnComment);
 
         // BPM Control — same pattern as Merge Modal BPM slider
         const bpmControl = document.createElement('div');
@@ -538,10 +590,38 @@ function setupEventListeners() {
 
     // Search
     const searchInput = document.getElementById('search-input');
+    const searchClear = document.getElementById('search-clear');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             currentSearchQuery = e.target.value;
+            if (searchClear) searchClear.classList.toggle('hidden', !e.target.value);
             renderCatalog();
+        });
+    }
+    if (searchClear) {
+        searchClear.addEventListener('click', () => {
+            currentSearchQuery = '';
+            searchInput.value = '';
+            searchClear.classList.add('hidden');
+            renderCatalog();
+            searchInput.focus();
+        });
+    }
+
+    // Search mode toggle
+    const searchModeToggle = document.getElementById('search-mode-toggle');
+    if (searchModeToggle) {
+        searchModeToggle.querySelectorAll('.search-mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentSearchMode = btn.dataset.mode;
+                searchModeToggle.querySelectorAll('.search-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+                if (searchInput) {
+                    searchInput.placeholder = currentSearchMode === 'comment'
+                        ? 'Search comments...'
+                        : 'Search golden loops...';
+                }
+                renderCatalog();
+            });
         });
     }
 
@@ -585,6 +665,19 @@ function setupEventListeners() {
         btnCloseInsert.addEventListener('click', () => {
             insertModal.classList.add('hidden');
         });
+    }
+
+    // Comment modal wiring
+    if (btnCloseCommentModal) {
+        btnCloseCommentModal.addEventListener('click', closeCommentModal);
+    }
+    if (commentModal) {
+        commentModal.addEventListener('click', (e) => {
+            if (e.target === commentModal) closeCommentModal();
+        });
+    }
+    if (btnSaveComment) {
+        btnSaveComment.addEventListener('click', saveComment);
     }
 
     if (insertModal) {

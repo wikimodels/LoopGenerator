@@ -54,6 +54,7 @@ class Loop(BaseModel):
     scale: Optional[str] = None
     swing: Optional[float] = 0.0
     notes: List[Note]
+    comment: Optional[str] = None  # free-form user text (loop info)
 
 class LoopMeta(BaseModel):
     rating: Optional[int] = 0      # 0-5 stars
@@ -152,8 +153,12 @@ def save_loop(loop: Loop):
         filename = f"{base_name}_{counter}.json"
         filepath = os.path.join(LOOPS_DIR, filename)
         
+    data = loop.dict()
+    if data.get("comment") is None:
+        data["comment"] = ""
+
     with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(loop.dict(), f, indent=4)
+        json.dump(data, f, indent=4)
     return {"status": "success", "filename": filename}
 
 
@@ -173,8 +178,17 @@ def update_loop(filename: str, loop: Loop):
     if not filepath:
         raise HTTPException(status_code=404, detail="Loop not found")
 
+    data = loop.dict()
+    if data.get("comment") is None:
+        # Payload carried no comment — keep whatever was already on disk
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                data["comment"] = json.load(f).get("comment", "")
+        except Exception:
+            data["comment"] = ""
+
     with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(loop.dict(), f, indent=4)
+        json.dump(data, f, indent=4)
     return {"status": "success", "filename": safe_filename}
 
 

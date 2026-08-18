@@ -27,7 +27,12 @@
                     <h2>Your Loops</h2>
                     <div class="header-filters">
                         <div class="search-wrapper">
-                            <input type="text" id="search-input" class="search-input" placeholder="Search loops...">
+                            <input type="text" id="search-input" class="search-input" placeholder="Search loops..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button id="search-clear" class="search-clear hidden" title="Clear search"><span class="material-icons">close</span></button>
+                        </div>
+                        <div class="search-mode-toggle" id="search-mode-toggle" title="Search mode">
+                            <button class="search-mode-btn active" data-mode="name">Name</button>
+                            <button class="search-mode-btn" data-mode="comment">Comment</button>
                         </div>
                         <div class="star-filter" id="star-filter" title="Filter by rating">
                             <span class="star" data-value="1">★</span>
@@ -128,6 +133,25 @@
                         <span class="material-icons">download</span> Download
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comment Modal -->
+    <div id="comment-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2>Loop Comment</h2>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="btn-save-comment" class="btn primary">
+                        <span class="material-icons">save</span> Save
+                    </button>
+                    <button id="btn-close-comment-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p id="comment-loop-name" style="margin-bottom:0.5rem;font-size:1rem;color:var(--text-main);font-weight:500;"></p>
+                <textarea id="comment-textarea" class="input-text large-textarea" placeholder="Write any notes about this loop..."></textarea>
             </div>
         </div>
     </div>
