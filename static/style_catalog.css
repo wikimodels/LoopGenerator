@@ -377,6 +377,29 @@
     box-shadow: 0 1px 4px rgba(109, 40, 217, 0.4);
 }
 
+/* Bulk Comment Modal */
+.bulk-comment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.bulk-comment-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.35rem;
+}
+
+.bulk-comment-grid .large-textarea {
+    height: 220px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 .star-filter {
     display: flex;
     gap: 2px;
@@ -413,7 +436,8 @@
     align-items: center;
     height: 21px;
     flex: 1;
-    justify-content: center;
+    justify-content: flex-start;   /* hug the left edge */
+    max-width: 26%;                /* keep it short so buttons can breathe */
     opacity: 0.85;
 }
 

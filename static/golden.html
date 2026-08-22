@@ -32,7 +32,7 @@
                     <h2>Golden Fund</h2>
                     <div class="header-filters">
 <div class="search-wrapper">
-                            <input type="text" id="search-input" class="search-input" placeholder="Search golden loops..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <input type="text" id="search-input" class="search-input" placeholder="Search names in golden..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                             <button id="search-clear" class="search-clear hidden" title="Clear search"><span class="material-icons">close</span></button>
                         </div>
                         <div class="search-mode-toggle" id="search-mode-toggle" title="Search mode">
@@ -57,6 +57,7 @@
                         <button id="btn-merge-download" class="btn success" disabled><span class="material-icons">call_merge</span> Merge &amp; Download</button>
                         <button id="btn-download-selected" class="btn primary" disabled><span class="material-icons">archive</span> Download ZIP</button>
                         <button id="btn-export-audio" class="btn accent" disabled><span class="material-icons">audio_file</span> Export Audio</button>
+                        <button id="btn-bulk-comment" class="btn neutral"><span class="material-icons">notes</span> Bulk Comment Update</button>
                     </div>
                     <div class="selection-info">
                         <label class="custom-checkbox-wrapper">
@@ -102,6 +103,9 @@
             <div class="modal-header">
                 <h2>Loop Comment</h2>
                 <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="btn-clear-comment" class="btn neutral">
+                        <span class="material-icons">delete_sweep</span> Clear All
+                    </button>
                     <button id="btn-save-comment" class="btn primary">
                         <span class="material-icons">save</span> Save
                     </button>
@@ -111,6 +115,36 @@
             <div class="modal-body">
                 <p id="comment-loop-name" style="margin-bottom:0.5rem;font-size:1rem;color:var(--text-main);font-weight:500;"></p>
                 <textarea id="comment-textarea" class="input-text large-textarea" placeholder="Write any notes about this loop..."></textarea>
+            </div>
+        </div>
+    </div>
+    <!-- Bulk Comment Modal -->
+    <div id="bulk-comment-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2>Bulk Comment Update</h2>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="btn-clear-bulk-comment" class="btn neutral">
+                        <span class="material-icons">delete_sweep</span> Clear All
+                    </button>
+                    <button id="btn-run-bulk-comment" class="btn primary">
+                        <span class="material-icons">save</span> Update
+                    </button>
+                    <button id="btn-close-bulk-comment" class="modal-close-btn"><span class="material-icons">close</span></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p>Paste track names (<strong>one per line</strong>) and the comment text. The text is appended after a blank line at the end of each matched loop's comment.</p>
+                <div class="bulk-comment-grid">
+                    <div class="bulk-comment-col">
+                        <label class="bulk-comment-label">Tracks</label>
+                        <textarea id="bulk-tracks-area" class="input-text large-textarea" placeholder="Track name 1&#10;Track name 2"></textarea>
+                    </div>
+                    <div class="bulk-comment-col">
+                        <label class="bulk-comment-label">Comment</label>
+                        <textarea id="bulk-comment-area" class="input-text large-textarea" placeholder="Comment text..."></textarea>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

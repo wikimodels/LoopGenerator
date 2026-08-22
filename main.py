@@ -214,6 +214,10 @@ class RenameRequest(BaseModel):
 class DownloadRequest(BaseModel):
     filenames: list[str]
 
+class BulkCommentRequest(BaseModel):
+    tracks: List[str]   # loop names, one per entry
+    comment: str        # text appended to each matched loop
+
 @app.get("/api/styles")
 def get_styles():
     """Return list of available generation styles."""
@@ -341,6 +345,51 @@ def clear_catalog():
             os.remove(os.path.join(LOOPS_DIR, f))
             count += 1
     return {"status": "ok", "deleted": count}
+
+@app.post("/api/bulk_comment")
+def bulk_comment(req: BulkCommentRequest):
+    """Append comment text to every loop (catalog + golden) matching the given names.
+
+    New text is appended AFTER a blank line at the end of the existing comment.
+    """
+    names = [t.strip() for t in req.tracks if t.strip()]
+    wanted = {}                      # lower -> original (dedupe, keep first spelling)
+    for n in names:
+        wanted.setdefault(n.lower(), n)
+    total = len(names)
+    updated_keys = set()
+
+    meta_filename = os.path.basename(META_FILE)
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+        for f in os.listdir(search_dir):
+            if not f.endswith(".json") or f == meta_filename:
+                continue
+            filepath = os.path.join(search_dir, f)
+            try:
+                with open(filepath, "r", encoding="utf-8") as jf:
+                    data = json.load(jf)
+            except Exception:
+                continue
+            key = str(data.get("name", "")).strip().lower()
+            if key not in wanted:
+                continue
+            old = str(data.get("comment") or "").rstrip()
+            new_text = req.comment.strip()
+            data["comment"] = f"{old}\n\n{new_text}" if old else new_text
+            try:
+                with open(filepath, "w", encoding="utf-8") as jf:
+                    json.dump(data, jf, indent=4, ensure_ascii=False)
+                updated_keys.add(key)   # same name in loops/ and golden/ counts once
+            except Exception:
+                pass
+
+    not_found = [orig for low, orig in wanted.items() if low not in updated_keys]
+    return {
+        "status": "ok",
+        "requested": total,
+        "updated": len(updated_keys),
+        "not_found": not_found,
+    }
 
 @app.get("/api/meta")
 def get_meta():

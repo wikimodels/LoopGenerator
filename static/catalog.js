@@ -72,6 +72,14 @@ const commentTextarea = document.getElementById('comment-textarea');
 const btnSaveComment = document.getElementById('btn-save-comment');
 let commentLoop = null;
 
+// Bulk Comment Modal Elements
+const bulkCommentModal = document.getElementById('bulk-comment-modal');
+const btnCloseBulkComment = document.getElementById('btn-close-bulk-comment');
+const bulkTracksArea = document.getElementById('bulk-tracks-area');
+const bulkCommentArea = document.getElementById('bulk-comment-area');
+const btnRunBulkComment = document.getElementById('btn-run-bulk-comment');
+const btnBulkComment = document.getElementById('btn-bulk-comment');
+
 // Bank of words for poetic loop names
 const poeticWords = {
     actions: ["Echoes", "Dancing", "Lost", "Shadows", "Rhythm", "Whispers", "Memories", "Footsteps", "Dreams", "Visions", "Signals", "Voices", "Secrets", "Illusions", "Sparks", "Fragments", "Awakening", "Journey", "Falling", "Floating", "Drifting", "Running", "Hiding", "Waiting", "Breathing", "Fading", "Glowing", "Vibrations", "Pulses", "Glimmers"],
@@ -593,8 +601,8 @@ function setupEventListeners() {
                 searchModeToggle.querySelectorAll('.search-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
                 if (searchInput) {
                     searchInput.placeholder = currentSearchMode === 'comment'
-                        ? 'Search comments...'
-                        : 'Search loops...';
+                        ? 'Search comments in catalog...'
+                        : 'Search names in catalog...';
                 }
                 renderCatalog();
             });
@@ -669,6 +677,66 @@ function setupEventListeners() {
     }
     if (btnSaveComment) {
         btnSaveComment.addEventListener('click', saveComment);
+    }
+    const btnClearComment = document.getElementById('btn-clear-comment');
+    if (btnClearComment) {
+        btnClearComment.addEventListener('click', () => {
+            commentTextarea.value = '';
+        });
+    }
+
+    // Bulk comment modal wiring
+    if (btnBulkComment) {
+        btnBulkComment.addEventListener('click', () => {
+            bulkTracksArea.value = '';
+            bulkCommentArea.value = '';
+            bulkCommentModal.classList.remove('hidden');
+        });
+    }
+    if (btnCloseBulkComment) {
+        btnCloseBulkComment.addEventListener('click', () => bulkCommentModal.classList.add('hidden'));
+    }
+    const btnClearBulkComment = document.getElementById('btn-clear-bulk-comment');
+    if (btnClearBulkComment) {
+        btnClearBulkComment.addEventListener('click', () => {
+            bulkTracksArea.value = '';
+            bulkCommentArea.value = '';
+        });
+    }
+    if (bulkCommentModal) {
+        bulkCommentModal.addEventListener('click', (e) => {
+            if (e.target === bulkCommentModal) bulkCommentModal.classList.add('hidden');
+        });
+    }
+    if (btnRunBulkComment) {
+        btnRunBulkComment.addEventListener('click', async () => {
+            const names = bulkTracksArea.value.split('\n').map(s => s.trim()).filter(Boolean);
+            const commentText = bulkCommentArea.value.trim();
+            if (!names.length || !commentText) {
+                showToast('Enter track names and comment text');
+                return;
+            }
+            btnRunBulkComment.disabled = true;
+            try {
+                const res = await fetch('/api/bulk_comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tracks: names, comment: commentText })
+                });
+                const data = await res.json();
+                showToast(`Updated ${data.updated}/${data.requested}`);
+                if (data.not_found && data.not_found.length) {
+                    console.warn('Bulk update — tracks not found:', data.not_found);
+                }
+                bulkCommentModal.classList.add('hidden');
+                fetchLoops(); // refresh comments in UI
+            } catch (err) {
+                console.error('Bulk comment failed', err);
+                showToast('Bulk update failed');
+            } finally {
+                btnRunBulkComment.disabled = false;
+            }
+        });
     }
 
     if (insertModal) {
