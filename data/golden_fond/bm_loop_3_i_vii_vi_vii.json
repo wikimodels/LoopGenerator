@@ -1,6 +1,6 @@
 {
     "name": "Bm_loop_3_i_VII_VI_VII",
-    "bpm": 222,
+    "bpm": 95,
     "instrument": "piano",
     "steps": 64,
     "key": "B",
@@ -147,5 +147,6 @@
             "velocity": 0.8,
             "chance": null
         }
-    ]
+    ],
+    "comment": "fuck"
 }
