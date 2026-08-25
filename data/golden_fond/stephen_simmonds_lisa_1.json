@@ -1,6 +1,6 @@
 {
     "name": "Stephen_Simmonds_Lisa_1",
-    "bpm": 237,
+    "bpm": 182,
     "instrument": "piano",
     "steps": 388,
     "key": "Fm",
@@ -1148,5 +1148,6 @@
             "velocity": 0.24,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

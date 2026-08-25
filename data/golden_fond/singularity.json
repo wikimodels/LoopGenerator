@@ -1,6 +1,6 @@
 {
     "name": "Singularity",
-    "bpm": 206,
+    "bpm": 178,
     "instrument": "piano",
     "steps": 272,
     "key": "Bb",
@@ -931,5 +931,6 @@
             "velocity": 0.7,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

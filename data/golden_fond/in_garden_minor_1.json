@@ -1,6 +1,6 @@
 {
-    "name": "In_Garden_1_Minor",
-    "bpm": 231,
+    "name": "In_Garden_Minor_1",
+    "bpm": 97,
     "instrument": "piano",
     "steps": 224,
     "key": "A",
@@ -686,5 +686,6 @@
             "velocity": 0.5,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

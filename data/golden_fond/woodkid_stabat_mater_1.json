@@ -1,6 +1,6 @@
 {
     "name": "Woodkid_Stabat Mater_1",
-    "bpm": 141,
+    "bpm": 155,
     "instrument": "piano",
     "steps": 128,
     "key": "C",
@@ -427,5 +427,6 @@
             "velocity": 0.75,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

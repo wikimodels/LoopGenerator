@@ -483,8 +483,8 @@ def delete_export_audio(filename: str):
 def rename_export_audio(filename: str, req: RenameRequest):
     safe_filename = os.path.basename(filename)
     safe_new = os.path.basename(req.new_filename)
-    if not safe_new.endswith(".webm"):
-        safe_new += ".webm"
+    if not safe_new.endswith((".webm", ".wav", ".mp3")):
+        safe_new += ".wav"
         
     old_path = os.path.join(EXPORTS_DIR, safe_filename)
     new_path = os.path.join(EXPORTS_DIR, safe_new)
@@ -497,8 +497,8 @@ def rename_export_audio(filename: str, req: RenameRequest):
     os.rename(old_path, new_path)
     
     # Update corresponding JSON file in loops or golden_fond so we don't break Regeneration
-    old_base = safe_filename[:-5] # remove .webm
-    new_base = safe_new[:-5]
+    old_base = os.path.splitext(safe_filename)[0]
+    new_base = os.path.splitext(safe_new)[0]
     
     import json
     import re

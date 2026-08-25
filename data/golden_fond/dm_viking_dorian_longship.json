@@ -1,29 +1,29 @@
 {
-    "name": "Gm_Viking_Dorian_Sacrifice_Fixed",
-    "bpm": 199,
+    "name": "Dm_Viking_Dorian_Longship",
+    "bpm": 78,
     "instrument": "piano",
     "steps": 64,
-    "key": "G",
+    "key": "D",
     "scale": "Dorian",
     "swing": 0.0,
     "notes": [
         {
             "step": 0,
-            "note": "G1",
+            "note": "D1",
             "duration": "2n.",
             "velocity": 0.56,
             "chance": null
         },
         {
             "step": 0,
-            "note": "D3",
+            "note": "A2",
             "duration": "2n.",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 0,
-            "note": "G3",
+            "note": "D3",
             "duration": "2n",
             "velocity": 0.42,
             "chance": null
@@ -32,85 +32,86 @@
             "step": 8,
             "note": "F3",
             "duration": "4n",
-            "velocity": 0.36,
+            "velocity": 0.38,
             "chance": null
         },
         {
             "step": 16,
-            "note": "G3",
+            "note": "D3",
             "duration": "2n",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 24,
-            "note": "Bb3",
+            "note": "F3",
             "duration": "4n",
+            "velocity": 0.36,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D1",
+            "duration": "2n.",
+            "velocity": 0.52,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "A2",
+            "duration": "2n.",
             "velocity": 0.38,
             "chance": null
         },
         {
             "step": 32,
-            "note": "G1",
-            "duration": "2n.",
-            "velocity": 0.5,
-            "chance": null
-        },
-        {
-            "step": 32,
-            "note": "D3",
-            "duration": "2n.",
-            "velocity": 0.38,
-            "chance": null
-        },
-        {
-            "step": 32,
-            "note": "E3",
+            "note": "C4",
             "duration": "2n",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 40,
-            "note": "D3",
+            "note": "B3",
             "duration": "4n",
-            "velocity": 0.34,
+            "velocity": 0.38,
             "chance": null
         },
         {
             "step": 48,
-            "note": "F1",
+            "note": "C1",
             "duration": "2n.",
-            "velocity": 0.52,
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G2",
+            "duration": "2n.",
+            "velocity": 0.38,
             "chance": null
         },
         {
             "step": 48,
             "note": "C3",
-            "duration": "2n.",
+            "duration": "2n",
             "velocity": 0.4,
             "chance": null
         },
         {
-            "step": 48,
-            "note": "F3",
-            "duration": "2n",
-            "velocity": 0.42,
-            "chance": null
-        },
-        {
             "step": 56,
-            "note": "E3",
+            "note": "B3",
             "duration": "4n",
-            "velocity": 0.36,
+            "velocity": 0.38,
             "chance": null
         },
         {
             "step": 60,
-            "note": "D3",
+            "note": "A2",
             "duration": "4n",
-            "velocity": 0.38,
+            "velocity": 0.36,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

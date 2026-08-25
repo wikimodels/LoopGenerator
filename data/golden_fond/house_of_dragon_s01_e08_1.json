@@ -1,6 +1,6 @@
 {
     "name": "House_of_Dragon_S01_E08_1",
-    "bpm": 207,
+    "bpm": 177,
     "instrument": "piano",
     "steps": 216,
     "key": "B",
@@ -616,5 +616,6 @@
             "velocity": 0.78,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

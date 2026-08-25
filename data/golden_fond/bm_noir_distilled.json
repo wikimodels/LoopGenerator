@@ -1,6 +1,6 @@
 {
     "name": "Bm_Noir_Distilled",
-    "bpm": 193,
+    "bpm": 99,
     "instrument": "piano",
     "steps": 64,
     "key": "B",
@@ -217,5 +217,6 @@
             "velocity": 0.48,
             "chance": null
         }
-    ]
+    ],
+    "comment": "JAZZ ULTRA SLOW Cello"
 }

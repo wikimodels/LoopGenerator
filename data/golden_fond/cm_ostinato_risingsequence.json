@@ -1,6 +1,6 @@
 {
     "name": "C#m_Ostinato_RisingSequence",
-    "bpm": 195,
+    "bpm": 77,
     "instrument": "piano",
     "steps": 64,
     "key": "C#",
@@ -259,5 +259,6 @@
             "velocity": 0.34,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

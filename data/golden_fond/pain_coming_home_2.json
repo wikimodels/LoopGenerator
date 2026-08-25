@@ -1,6 +1,6 @@
 {
     "name": "Pain_Coming_Home_2",
-    "bpm": 207,
+    "bpm": 191,
     "instrument": "piano",
     "steps": 144,
     "key": "E",
@@ -623,5 +623,6 @@
             "velocity": 0.84,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

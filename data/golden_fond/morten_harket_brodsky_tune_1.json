@@ -1,6 +1,6 @@
 {
     "name": "Morten_Harket_Brodsky_Tune_1",
-    "bpm": 199,
+    "bpm": 182,
     "instrument": "piano",
     "steps": 208,
     "key": "F#",
@@ -630,5 +630,6 @@
             "velocity": 0.8,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

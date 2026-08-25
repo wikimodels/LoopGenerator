@@ -1,17 +1,22 @@
 // audio_renderer.js
-// Shared audio rendering logic for all pages
+// Shared audio rendering logic for all pages.
+//
+// РЕНДЕР ЭКСПОРТА — ОФЛАЙНОВЫЙ (Tone.Offline), не в реальном времени.
+// Старый путь (Tone.Recorder + MediaRecorder поверх живого контекста) был
+// источником битых файлов: сворачивание таба душило setTimeout'ы, запись
+// обрезалась или оставалась пустой, webm не содержал duration. Офлайн-рендер
+// детерминирован: быстрее реального времени, не зависит от видимости вкладки,
+// а результат проверяется объективно (длительность + не-тишина) с ретраем.
 
 // Global guard: Tone.js can throw RangeError("Value must be within [0, Infinity]")
 // asynchronously from WebAudio scheduler — uncatchable via try/catch.
-// We swallow ONLY this specific error so it never breaks the export flow.
 window.addEventListener('unhandledrejection', (e) => {
     if (e.reason && (e.reason instanceof RangeError || e.reason.name === 'RangeError')) {
-        e.preventDefault(); // suppress console error + don't crash
+        e.preventDefault();
         window.dispatchEvent(new Event('audio_glitch'));
     }
 });
 
-// Also catch synchronous WebAudio errors bubbling up to window
 window.addEventListener('error', (e) => {
     if (e.error && (e.error instanceof RangeError || e.error.name === 'RangeError')) {
         e.preventDefault();
@@ -21,11 +26,16 @@ window.addEventListener('error', (e) => {
 
 
 let silentSynths = {};
-let recorder = null;
-let exportLimiter = null;
-let exportRecorderNode = null;
 let isSharedAudioInitialized = false;
 let exportCancelled = false;
+
+const SALAMANDER_URLS = { "A0": "A0.mp3", "C1": "C1.mp3", "D#1": "Ds1.mp3", "F#1": "Fs1.mp3", "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3", "C6": "C6.mp3", "D#6": "Ds6.mp3", "F#6": "Fs6.mp3", "A6": "A6.mp3", "C7": "C7.mp3", "D#7": "Ds7.mp3", "F#7": "Fs7.mp3", "A7": "A7.mp3", "C8": "C8.mp3" };
+
+const MIME = {
+    '.mp3': 'audio/mpeg',
+    '.wav': 'audio/wav',
+    '.webm': 'audio/webm'
+};
 
 async function initSilentSynths() {
     if (isSharedAudioInitialized) return;
@@ -33,268 +43,314 @@ async function initSilentSynths() {
         await Tone.start();
     }
 
-    const silentGain = new Tone.Gain(0).toDestination();
-    exportLimiter = new Tone.Limiter(-1).connect(silentGain);
-    exportRecorderNode = new Tone.Volume(0).connect(exportLimiter);
-
-    const synth = new Tone.PolySynth(Tone.Synth).connect(exportRecorderNode);
-    synth.maxPolyphony = 64;
-    
-    const amSynth = new Tone.PolySynth(Tone.AMSynth).connect(exportRecorderNode);
-    amSynth.maxPolyphony = 64;
-    
-    const fmSynth = new Tone.PolySynth(Tone.FMSynth).connect(exportRecorderNode);
-    fmSynth.maxPolyphony = 64;
-
+    // Живые инструменты больше не нужны для экспорта (рендер офлайновый),
+    // но инициализация прогревает кэш сэмплов фортепиано (LRU-кэш Tone),
+    // чтобы офлайновый Sampler собирался мгновенно и без сети.
     const pianoPromise = new Promise(resolve => {
         const sampler = new Tone.Sampler({
-            urls: { "A0": "A0.mp3", "C1": "C1.mp3", "D#1": "Ds1.mp3", "F#1": "Fs1.mp3", "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3", "C6": "C6.mp3", "D#6": "Ds6.mp3", "F#6": "Fs6.mp3", "A6": "A6.mp3", "C7": "C7.mp3", "D#7": "Ds7.mp3", "F#7": "Fs7.mp3", "A7": "A7.mp3", "C8": "C8.mp3" },
+            urls: SALAMANDER_URLS,
             release: 1,
             baseUrl: "/audio/salamander/",
             onload: () => resolve(sampler)
-        }).connect(exportRecorderNode);
+        }).toDestination();
     });
 
     silentSynths = {
-        synth: synth,
-        amSynth: amSynth,
-        fmSynth: fmSynth,
-        piano: await pianoPromise,
-        drums: createDrumKit(exportRecorderNode)
+        piano: await pianoPromise
     };
 
     isSharedAudioInitialized = true;
 }
 
-function createDrumKit(outputNode) {
-    const dest = outputNode || Tone.getDestination();
-    const mk = (s) => { s.connect(dest); return s; };
+function exportSingleLoopSilent(loopData, overrideBpm) {
+    return (async () => {
+        const maxAttempts = 3;
+        let lastErr = null;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            if (exportCancelled) return null;
+            try {
+                const buffer = await renderLoopOffline(loopData, overrideBpm);
+
+                // ── Объективная верификация результата ──
+                const expectedSec = loopExpectedDuration(loopData, overrideBpm);
+                if (!buffer || !buffer.duration) throw new Error('empty render');
+                if (buffer.duration < expectedSec * 0.9) {
+                    throw new Error(`render too short: ${buffer.duration.toFixed(2)}s < ${expectedSec.toFixed(2)}s`);
+                }
+                const peak = bufferPeak(buffer);
+                if ((loopData.notes || []).length > 0 && peak < 0.0001) {
+                    throw new Error(`silent render (peak=${peak.toExponential(1)})`);
+                }
+
+                return await encodeRenderedAudio(buffer);
+            } catch (e) {
+                lastErr = e;
+                console.warn(`[Export] attempt ${attempt}/${maxAttempts} failed: ${e.message}`);
+                await new Promise(r => setTimeout(r, 200));
+            }
+        }
+        console.error(`[Export] giving up after ${maxAttempts} attempts: ${lastErr && lastErr.message}`);
+        return null;
+    })();
+}
+
+// ─── Offline rendering core ──────────────────────────────────────────────────
+
+function loopTiming(loopData, overrideBpm) {
+    const bpm = overrideBpm || loopData.bpm || 120;
+    // Each step = one "8n" (eighth note): steps * 30 / bpm seconds.
+    const durationSec = loopData.steps * 30 / bpm;
+    const MIN_DURATION_SEC = 7;
+    const loopCount = durationSec < MIN_DURATION_SEC
+        ? Math.ceil(MIN_DURATION_SEC / durationSec)
+        : 1;
+    return { bpm, durationSec, loopCount };
+}
+
+function loopExpectedDuration(loopData, overrideBpm) {
+    const { durationSec, loopCount } = loopTiming(loopData, overrideBpm);
+    return durationSec * loopCount + RENDER_TAIL_SEC;
+}
+
+const RENDER_TAIL_SEC = 1.0; // хвост на release сэмплов после последнего шага
+
+function bufferPeak(buffer) {
+    let peak = 0;
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+        const data = buffer.getChannelData(ch);
+        for (let i = 0; i < data.length; i++) {
+            const v = Math.abs(data[i]);
+            if (v > peak) peak = v;
+        }
+    }
+    return peak;
+}
+
+async function renderLoopOffline(loopData, overrideBpm) {
+    await initSilentSynths(); // прогрев кэша сэмплов
+
+    try {
+        const loadTimeout = new Promise((_, rej) =>
+            setTimeout(() => rej(new Error('load timeout')), 10000)
+        );
+        await Promise.race([Tone.loaded(), loadTimeout]);
+    } catch (e) {
+        console.warn('renderLoopOffline: sample load timeout, rendering anyway', e);
+    }
+
+    const { bpm, loopCount } = loopTiming(loopData, overrideBpm);
+    const totalDurationSec = loopTiming(loopData, overrideBpm).durationSec * loopCount + RENDER_TAIL_SEC;
+
+    const instrument = loopData.instrument;
+    const swing = loopData.swing || 0.0;
+
+    const stepNotes = {};
+    (loopData.notes || []).forEach(n => {
+        if (!stepNotes[n.step]) stepNotes[n.step] = [];
+        stepNotes[n.step].push(n);
+    });
+    const stepsArray = Array.from({ length: loopData.steps }, (_, i) => i);
+
+    return await Tone.Offline(async (offlineCtx) => {
+        // Все инструменты создаются ВНУТРИ офлайн-контекста.
+        const limiter = new Tone.Limiter(-1).toDestination();
+        const bus = new Tone.Volume(0).connect(limiter);
+
+        const synth = new Tone.PolySynth(Tone.Synth).connect(bus);
+        synth.maxPolyphony = 64;
+        const amSynth = new Tone.PolySynth(Tone.AMSynth).connect(bus);
+        amSynth.maxPolyphony = 64;
+        const fmSynth = new Tone.PolySynth(Tone.FMSynth).connect(bus);
+        fmSynth.maxPolyphony = 64;
+
+        // Сэмплы уже в LRU-кэше Tone (прогреты initSilentSynths), поэтому
+        // Sampler собирается из кэша и onload срабатывает почти мгновенно.
+        const piano = await new Promise((resolve) => {
+            const s = new Tone.Sampler({
+                urls: SALAMANDER_URLS,
+                release: 1,
+                baseUrl: "/audio/salamander/",
+                onload: () => resolve(s)
+            }).connect(bus);
+            if (s.loaded) resolve(s); // защита от гонки onload
+        });
+
+        const drums = createOfflineDrumKit(bus);
+
+        let currentSynth = { synth, amSynth, fmSynth, piano, drums }[instrument] || piano;
+
+        // ВАЖНО: Tone 14.8 держит свой Transport у каждого контекста.
+        // Глобальный Tone.Transport может указывать на живой контекст —
+        // управляем именно офлайн-транспортом, иначе рендер будет пустым.
+        const transport = (offlineCtx && offlineCtx.transport)
+            ? offlineCtx.transport
+            : (typeof Tone.getTransport === 'function' ? Tone.getTransport() : Tone.Transport);
+
+        transport.bpm.value = bpm;
+        transport.swing = swing;
+        transport.swingSubdivision = "8n";
+
+        const tempSequence = new Tone.Sequence((time, step) => {
+            if (!stepNotes[step]) return;
+            stepNotes[step].forEach((n, idx) => {
+                const chance = n.chance ?? 1.0;
+                const velocity = n.velocity ?? 1.0;
+                if (Math.random() <= chance) {
+                    const t = time + (idx * 0.0001); // микро-оффсет для аккордов
+                    try {
+                        currentSynth.triggerAttackRelease(n.note, n.duration || "8n", t, velocity);
+                    } catch (_) {}
+                }
+            });
+        }, stepsArray, "8n").start(0.001);
+
+        tempSequence.loop = loopCount > 1 ? loopCount - 1 : false;
+
+        // Офлайн-транспорт не стартует сам — запускаем явно от начала рендера.
+        transport.start(0);
+    }, totalDurationSec);
+}
+
+/** Стационарный драм-кит для офлайна: без setTimeout/dispose (в офлайне
+ *  реального времени нет) — синтезаторы живут до конца рендера. */
+function createOfflineDrumKit(outputNode) {
+    const kick = new Tone.MembraneSynth({
+        pitchDecay: 0.05,
+        octaves: 4,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4 }
+    }).connect(outputNode);
+    const snare = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.2 }
+    }).connect(outputNode);
+    const hh = new Tone.MetalSynth({
+        frequency: 200,
+        envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+        harmonicity: 5.1,
+        modulationIndex: 32,
+        resonance: 4000,
+        octaves: 1.5
+    }).connect(outputNode);
+    hh.volume.value = -12;
 
     return {
         triggerAttackRelease: (note, duration, time, velocity) => {
-            if (note.includes('C1')) {
-                const kick = mk(new Tone.MembraneSynth({
-                    pitchDecay: 0.05,
-                    octaves: 4,
-                    oscillator: { type: 'sine' },
-                    envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4 }
-                }));
-                kick.triggerAttackRelease("C1", "8n", time, velocity);
-                setTimeout(() => kick.dispose(), 2000);
-            } else if (note.includes('D1')) {
-                const snare = mk(new Tone.NoiseSynth({
-                    noise: { type: 'white' },
-                    envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.2 }
-                }));
-                snare.triggerAttackRelease("16n", time, velocity);
-                setTimeout(() => snare.dispose(), 2000);
-            } else if (note.includes('F#1')) {
-                const hh = mk(new Tone.MetalSynth({
-                    frequency: 200,
-                    envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
-                    harmonicity: 5.1,
-                    modulationIndex: 32,
-                    resonance: 4000,
-                    octaves: 1.5
-                }));
-                hh.volume.value = -12;
-                hh.triggerAttackRelease("32n", time, velocity);
-                setTimeout(() => hh.dispose(), 2000);
-            }
+            if (note.includes('C1')) kick.triggerAttackRelease("C1", "8n", time, velocity);
+            else if (note.includes('D1')) snare.triggerAttackRelease("16n", time, velocity);
+            else if (note.includes('F#1')) hh.triggerAttackRelease("32n", time, velocity);
         }
     };
 }
 
-function exportSingleLoopSilent(loopData, overrideBpm) {
-    return new Promise((resolve) => {
-        let attempt = 0;
-        const maxAttempts = 3;
+// ─── Output encoding (MP3 через lamejs, фолбэк — WAV) ───────────────────────
 
-        async function tryExport() {
-            attempt++;
-            let glitchDetected = false;
-            const onGlitch = () => { glitchDetected = true; };
-            window.addEventListener('audio_glitch', onGlitch);
+/** Целевое расширение экспорта. Определяется один раз: mp3, если lamejs
+ *  загружен, иначе wav. Все вызывающие страницы обязаны использовать
+ *  EXPORT_EXT для имён файлов. */
+let _exportExt = null;
+function exportExt() {
+    if (_exportExt === null) {
+        _exportExt = (typeof lamejs !== 'undefined') ? 'mp3' : 'wav';
+    }
+    return _exportExt;
+}
 
-            await initSilentSynths();
-        
-        const currentSynth = silentSynths[loopData.instrument] || silentSynths.piano;
-        const bpm = overrideBpm || loopData.bpm || 120;
+const MP3_KBPS = 192;
 
-        // 1. Wait for all audio samples to load (piano Sampler loads from CDN).
+function floatToInt16(f32) {
+    const out = new Int16Array(f32.length);
+    for (let i = 0; i < f32.length; i++) {
+        const s = Math.max(-1, Math.min(1, f32[i]));
+        out[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+    return out;
+}
+
+async function encodeRenderedAudio(buffer) {
+    if (typeof lamejs !== 'undefined') {
         try {
-            const loadTimeout = new Promise((_, rej) =>
-                setTimeout(() => rej(new Error('load timeout')), 10000)
-            );
-            await Promise.race([Tone.loaded(), loadTimeout]);
+            return audioBufferToMp3(buffer);
         } catch (e) {
-            console.warn('exportSingleLoopSilent: sample load timeout, exporting anyway', e);
+            console.warn('[Export] MP3 encode failed, falling back to WAV:', e.message);
         }
+    }
+    return new Blob([audioBufferToWav(buffer)], { type: 'audio/wav' });
+}
 
-        if (exportCancelled) { resolve(null); return; }
+/** AudioBuffer -> MP3 Blob (lamejs). Энкодер принимает блоки по кратные
+ *  1152 сэмплов; последний вызов — flush(). */
+function audioBufferToMp3(buffer) {
+    const numCh = Math.min(2, buffer.numberOfChannels);
+    const sampleRate = buffer.sampleRate;
+    const encoder = new lamejs.Mp3Encoder(numCh, sampleRate, MP3_KBPS);
 
-        if (Tone.context.state !== 'running') {
-            await Tone.context.resume();
-        }
+    const channels = [];
+    for (let ch = 0; ch < numCh; ch++) channels.push(floatToInt16(buffer.getChannelData(ch)));
 
-        // 2. Fresh Tone.Recorder for every track.
-        if (recorder) {
-            try { 
-                if (recorder.state === "started") {
-                    await recorder.stop(); 
-                }
-            } catch (_) {}
-            try { recorder.dispose(); } catch (_) {}
-        }
-        recorder = new Tone.Recorder();
-        exportRecorderNode.disconnect();
-        exportRecorderNode.connect(exportLimiter); // Keep connected to hardware silently
-        exportRecorderNode.connect(recorder);
+    const blockSize = 1152;
+    const data = [];
+    for (let i = 0; i < channels[0].length; i += blockSize) {
+        const left = channels[0].subarray(i, i + blockSize);
+        const right = numCh > 1 ? channels[1].subarray(i, i + blockSize) : null;
+        const chunk = numCh > 1 ? encoder.encodeBuffer(left, right) : encoder.encodeBuffer(left);
+        if (chunk.length > 0) data.push(new Uint8Array(chunk));
+    }
+    const end = encoder.flush();
+    if (end.length > 0) data.push(new Uint8Array(end));
 
-        // 3. Reset Transport completely before each track.
-        Tone.Transport.stop();
-        Tone.Transport.cancel();
-        // Tone.Transport.position = 0; // REMOVED: setting position to 0 directly causes Tone.js internal RangeErrors (-2.27e-12)
-        Tone.Transport.bpm.value = bpm;
-        Tone.Transport.swing = loopData.swing || 0.0;
-        Tone.Transport.swingSubdivision = "8n";
+    return new Blob(data, { type: 'audio/mpeg' });
+}
 
-        const stepsArray = Array.from({length: loopData.steps}, (_, i) => i);
-        const stepNotes = {};
-        loopData.notes.forEach(n => {
-            if (!stepNotes[n.step]) stepNotes[n.step] = [];
-            stepNotes[n.step].push(n);
-        });
+// ─── WAV encoding (фолбэк) ───────────────────────────────────────────────────
 
-        // Each step = one "8n" (eighth note). durationSec = steps * 30 / bpm
-        const durationSec = loopData.steps * 30 / bpm;
+/** AudioBuffer -> 16-bit PCM WAV ArrayBuffer. */
+function audioBufferToWav(buffer, bitDepth = 16) {
+    const numCh = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const format = bitDepth === 32 ? 3 : 1; // 1 = PCM, 3 = float
+    const bytesPerSample = bitDepth / 8;
+    const blockAlign = numCh * bytesPerSample;
 
-        const tempSequence = new Tone.Sequence((time, step) => {
-            // Hard clamp: never schedule behind audioContext.currentTime.
-            // Tone.js internally converts transport time → AudioContext time; floating-point
-            // rounding can produce tiny negatives (-2e-12) that WebAudio rejects asynchronously
-            // (uncatchable with try/catch). Pinning to currentTime+0.005 eliminates the issue.
-            const minSafe = Tone.context.currentTime + 0.005;
-            const safeTime = Math.max(minSafe, time);
-            
-            if (stepNotes[step]) {
-                stepNotes[step].forEach((n, idx) => {
-                    const chance   = n.chance ?? 1.0;
-                    const velocity = n.velocity ?? 1.0;
-                    if (Math.random() <= chance) {
-                        // Micro-offset prevents PolySynth floating point crash on exact same time chords
-                        const t = Math.max(0, safeTime + (idx * 0.0001));
+    const data = [];
+    for (let ch = 0; ch < numCh; ch++) data.push(buffer.getChannelData(ch));
+    const len = data[0].length;
 
-                        // Fallback if piano buffer failed to load
-                        if (currentSynth === silentSynths.piano && !silentSynths.piano.loaded) {
-                            currentSynth = silentSynths.synth;
-                        }
+    const dataSize = len * blockAlign;
+    const ab = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(ab);
 
-                        const trigger = (at) => {
-                            if (currentSynth === silentSynths.drums) {
-                                currentSynth.triggerAttackRelease(n.note, n.duration || "8n", at, velocity);
-                            } else if (currentSynth.triggerAttackRelease) {
-                                currentSynth.triggerAttackRelease(n.note, n.duration || "8n", at, velocity);
-                            } else if (currentSynth.triggerAttack) {
-                                currentSynth.triggerAttack(n.note, at);
-                            }
-                        };
+    const writeStr = (off, s) => {
+        for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i));
+    };
 
-                        try {
-                            trigger(t);
-                        } catch (e) {
-                            if (e instanceof RangeError || (e && e.name === 'RangeError')) {
-                                try { trigger(Tone.context.currentTime + 0.005); } catch (_) {}
-                            } else {
-                                console.warn("Tone.js warning: suppressed error:", e);
-                            }
-                        }
-                    }
-                });
-            }
+    writeStr(0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    writeStr(8, 'WAVE');
+    writeStr(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numCh, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitDepth, true);
+    writeStr(36, 'data');
+    view.setUint32(40, dataSize, true);
 
-        }, stepsArray, "8n").start(0.001);
-
-        // If loop is shorter than 7s, repeat it until total >= 7s
-        const MIN_DURATION_SEC = 7;
-        const loopCount = durationSec < MIN_DURATION_SEC
-            ? Math.ceil(MIN_DURATION_SEC / durationSec)
-            : 1;
-        const totalDurationSec = durationSec * loopCount;
-
-        if (loopCount > 1) {
-            tempSequence.loop = loopCount - 1;  // Tone.js loop=N means "repeat N times" (plays N+1 total)
-        } else {
-            tempSequence.loop = false;
-        }
-
-        // 4. Start recorder, then wait 150 ms pre-roll so MediaRecorder is
-        //    guaranteed in 'recording' state before audio starts flowing.
-        recorder.start();
-        await new Promise(res => setTimeout(res, 150));
-        
-        if (exportCancelled) {
-            try { await recorder.stop(); } catch (_) {}
-            tempSequence.dispose();
-            window.removeEventListener('audio_glitch', onGlitch);
-            resolve(null);
-            return;
-        }
-        
-        // start(time) explicitly defines start position without modifying global .position directly
-        Tone.Transport.start(Tone.now() + 0.1);
-
-        // Allow cancel to abort mid-render
-        let exportTimeoutId;
-        const cancelWatcher = setInterval(() => {
-            if (exportCancelled) {
-                clearInterval(cancelWatcher);
-                clearTimeout(exportTimeoutId);
-                // Stop sequence BEFORE transport — sequence.stop() internally calls
-                // StateTimeline.setStateAtTime(now), which must be >= 0.
-                // If Transport.stop() runs first, Tone's internal time can be ~-5e-10.
-                try { tempSequence.stop(); } catch (_) {}
-                try { tempSequence.dispose(); } catch (_) {}
-                Tone.Transport.stop();
-                window.removeEventListener('audio_glitch', onGlitch);
-                if (recorder && recorder.state === "started") {
-                    recorder.stop().then(() => resolve(null)).catch(() => resolve(null));
-                } else {
-                    resolve(null);
-                }
-            }
-        }, 250);
-
-        exportTimeoutId = setTimeout(async () => {
-            clearInterval(cancelWatcher);
-            // Stop sequence BEFORE transport (same reason as cancel path above)
-            try { tempSequence.stop(); } catch (_) {}
-            try { tempSequence.dispose(); } catch (_) {}
-            Tone.Transport.stop();
-
-            // Hard safety: if recorder.stop() hangs, bail after 8 s
-            let recording = null;
-            if (recorder && recorder.state === "started") {
-                const hardTimeout = new Promise(res => setTimeout(() => res(null), 8000));
-                recording = await Promise.race([recorder.stop(), hardTimeout]);
-            }
-
-            window.removeEventListener('audio_glitch', onGlitch);
-
-            if (glitchDetected && attempt < maxAttempts) {
-                console.warn(`[Export] Audio glitch detected on attempt ${attempt}, regenerating track...`);
-                // Give WebAudio a moment to clean up before retrying
-                setTimeout(tryExport, 100);
+    let off = 44;
+    for (let i = 0; i < len; i++) {
+        for (let ch = 0; ch < numCh; ch++) {
+            let s = Math.max(-1, Math.min(1, data[ch][i]));
+            if (bitDepth === 16) {
+                view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                off += 2;
             } else {
-                if (glitchDetected) {
-                    console.error(`[Export] Track still glitched after ${maxAttempts} attempts. Giving up.`);
-                }
-                resolve(recording);
+                view.setFloat32(off, s, true);
+                off += 4;
             }
-        }, (totalDurationSec + 1.5) * 1000);
-        
-        } // end of tryExport()
-        
-        tryExport();
-    });
+        }
+    }
+    return ab;
 }

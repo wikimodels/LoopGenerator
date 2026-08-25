@@ -463,51 +463,36 @@ function setupEventListeners() {
         }
         await Tone.start();
 
-        const recorder = new Tone.Recorder();
-        Tone.getDestination().connect(recorder);
+        // Офлайн-рендер: не зависит от видимой вкладки/таймеров и
+        // верифицируется (длительность + не-тишина) внутри рендерера.
+        const blob = await exportSingleLoopSilent({
+            instrument: state.instrument,
+            steps: state.steps,
+            notes: state.notes,
+            bpm: state.bpm,
+            swing: state.swing
+        });
 
-        Tone.Transport.bpm.value = state.bpm;
-        Tone.Transport.swing = state.swing;
-        Tone.Transport.swingSubdivision = "8n";
-        setupSequence();
-        
-        // 8n = 2 steps per beat. 
-        const beats = state.steps / 2;
-        const durationSec = beats * (60 / state.bpm);
-
-        // Tell sequence to only loop once
-        toneSequence.loop = 1;
-
-        recorder.start();
-        Tone.Transport.start(Tone.now() + 0.1);
-
-        // Wait for loop to finish + 1.5 seconds for audio tail (reverb/release)
-        setTimeout(async () => {
-            if (typeof toneSequence !== 'undefined' && toneSequence) {
-                try { toneSequence.stop(); toneSequence.dispose(); toneSequence = null; } catch(e){}
-            }
-            try { Tone.Transport.cancel(0); } catch(e){}
-            try { Tone.Transport.stop(); } catch(e){}
-            const recording = await recorder.stop();
-            
-            const filename = `${state.loopName.replace(/\s+/g, '_')}.webm`;
-            
-            // Upload to backend
-            try {
-                await fetch(`/api/export_audio/${filename}`, {
-                    method: 'POST',
-                    body: recording
-                });
-            } catch (err) {
-                console.error("Failed to upload audio to backend:", err);
-            }
-
+        if (!blob) {
             exportBtn.disabled = false;
-            showToast("Export complete and saved to backend!");
-            
-            // Reset looping for normal playback
-            toneSequence.loop = true;
-        }, (durationSec + 1.5) * 1000);
+            showToast("Export failed after 3 attempts. See console.");
+            return;
+        }
+
+        const filename = `${state.loopName.replace(/\s+/g, '_')}.${exportExt()}`;
+
+        // Upload to backend
+        try {
+            await fetch(`/api/export_audio/${filename}`, {
+                method: 'POST',
+                body: blob
+            });
+        } catch (err) {
+            console.error("Failed to upload audio to backend:", err);
+        }
+
+        exportBtn.disabled = false;
+        showToast("Export complete and saved to backend!");
     });
 
     insertBtn.addEventListener('click', () => {

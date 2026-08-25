@@ -1,148 +1,141 @@
 {
-    "name": "Em_DarkJazz_Midnight_Walk_Fixed",
-    "bpm": 190,
+    "name": "Dm_DarkJazz_Empty_Bar",
+    "bpm": 82,
     "instrument": "piano",
     "steps": 64,
-    "key": "E",
+    "key": "D",
     "scale": "Minor",
-    "swing": 10.0,
+    "swing": 9.0,
     "notes": [
         {
             "step": 0,
-            "note": "E1",
+            "note": "D1",
             "duration": "4n",
             "velocity": 0.5,
             "chance": null
         },
         {
             "step": 0,
-            "note": "G3",
+            "note": "F3",
             "duration": "2n",
             "velocity": 0.42,
             "chance": null
         },
         {
             "step": 0,
-            "note": "B3",
+            "note": "A3",
             "duration": "2n",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 0,
-            "note": "D4",
+            "note": "C4",
             "duration": "2n",
             "velocity": 0.36,
             "chance": null
         },
         {
             "step": 4,
-            "note": "F#2",
+            "note": "G2",
             "duration": "4n",
             "velocity": 0.38,
             "chance": null
         },
         {
             "step": 8,
-            "note": "G2",
+            "note": "A2",
             "duration": "4n",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 12,
-            "note": "B2",
+            "note": "C3",
             "duration": "4n",
             "velocity": 0.42,
             "chance": null
         },
         {
             "step": 16,
-            "note": "A1",
+            "note": "G1",
             "duration": "4n",
             "velocity": 0.48,
             "chance": null
         },
         {
             "step": 16,
-            "note": "B3",
-            "duration": "2n",
-            "velocity": 0.35,
-            "chance": 0.75
-        },
-        {
-            "step": 16,
-            "note": "C4",
+            "note": "A#3",
             "duration": "2n",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 16,
-            "note": "E4",
+            "note": "D4",
             "duration": "2n",
             "velocity": 0.38,
             "chance": null
         },
         {
             "step": 16,
-            "note": "G4",
+            "note": "F4",
             "duration": "2n",
             "velocity": 0.34,
             "chance": 0.8
         },
         {
             "step": 20,
-            "note": "C2",
+            "note": "D2",
             "duration": "4n",
             "velocity": 0.36,
             "chance": null
         },
         {
             "step": 24,
-            "note": "D2",
+            "note": "E2",
             "duration": "4n",
             "velocity": 0.38,
             "chance": null
         },
         {
             "step": 28,
-            "note": "F#2",
+            "note": "G2",
             "duration": "4n",
             "velocity": 0.44,
             "chance": null
         },
         {
             "step": 32,
-            "note": "B1",
+            "note": "A#1",
             "duration": "4n",
             "velocity": 0.5,
             "chance": null
         },
         {
             "step": 32,
-            "note": "D#4",
+            "note": "C4",
             "duration": "2n",
-            "velocity": 0.36,
-            "chance": null
+            "velocity": 0.32,
+            "chance": 0.85
         },
         {
             "step": 32,
-            "note": "F#3",
+            "note": "D4",
             "duration": "2n",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 32,
-            "note": "A3",
+            "note": "F4",
             "duration": "2n",
             "velocity": 0.38,
             "chance": null
         },
         {
             "step": 32,
-            "note": "C4",
+            "note": "A4",
             "duration": "2n",
             "velocity": 0.34,
             "chance": null
@@ -156,66 +149,81 @@
         },
         {
             "step": 40,
-            "note": "F#2",
+            "note": "A2",
             "duration": "4n",
             "velocity": 0.38,
             "chance": null
         },
         {
             "step": 44,
-            "note": "D#2",
+            "note": "C#2",
             "duration": "4n",
             "velocity": 0.4,
             "chance": null
         },
         {
+            "step": 44,
+            "note": "G3",
+            "duration": "4n",
+            "velocity": 0.36,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "C#4",
+            "duration": "4n",
+            "velocity": 0.34,
+            "chance": null
+        },
+        {
             "step": 48,
-            "note": "E1",
+            "note": "D1",
             "duration": "4n",
             "velocity": 0.48,
             "chance": null
         },
         {
             "step": 48,
-            "note": "G3",
+            "note": "F3",
             "duration": "2n",
             "velocity": 0.42,
             "chance": null
         },
         {
             "step": 48,
-            "note": "B3",
+            "note": "A3",
             "duration": "2n",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 48,
-            "note": "D4",
+            "note": "C4",
             "duration": "2n",
             "velocity": 0.36,
             "chance": null
         },
         {
             "step": 52,
-            "note": "B2",
+            "note": "A2",
             "duration": "4n",
             "velocity": 0.38,
             "chance": null
         },
         {
             "step": 56,
-            "note": "A2",
+            "note": "G2",
             "duration": "4n",
             "velocity": 0.4,
             "chance": null
         },
         {
             "step": 60,
-            "note": "B1",
+            "note": "C#2",
             "duration": "4n",
             "velocity": 0.44,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

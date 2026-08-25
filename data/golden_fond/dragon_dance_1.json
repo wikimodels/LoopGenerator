@@ -1,6 +1,6 @@
 {
     "name": "Dragon_Dance_1",
-    "bpm": 219,
+    "bpm": 79,
     "instrument": "piano",
     "steps": 192,
     "key": "G",
@@ -567,5 +567,6 @@
             "velocity": 0.8,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

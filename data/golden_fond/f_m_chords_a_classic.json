@@ -1,6 +1,6 @@
 {
-    "name": "F#m_Chords_B_Suspended",
-    "bpm": 222,
+    "name": "F_m_Chords_A_Classic",
+    "bpm": 231,
     "instrument": "piano",
     "steps": 64,
     "key": "F#",
@@ -11,75 +11,82 @@
             "step": 0,
             "note": "F#2",
             "duration": "1m",
-            "velocity": 0.72,
+            "velocity": 0.75,
             "chance": null
         },
         {
             "step": 0,
-            "note": "C#4",
+            "note": "A4",
             "duration": "1m",
-            "velocity": 0.55,
+            "velocity": 0.6,
             "chance": null
         },
         {
             "step": 0,
-            "note": "F#4",
+            "note": "C#5",
+            "duration": "1m",
+            "velocity": 0.62,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "F#5",
+            "duration": "1m",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "D3",
+            "duration": "1m",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "A4",
             "duration": "1m",
             "velocity": 0.58,
             "chance": null
         },
         {
-            "step": 0,
-            "note": "A4",
+            "step": 16,
+            "note": "D5",
             "duration": "1m",
             "velocity": 0.6,
             "chance": null
         },
         {
             "step": 16,
-            "note": "C#3",
-            "duration": "1m",
-            "velocity": 0.68,
-            "chance": null
-        },
-        {
-            "step": 16,
-            "note": "G#4",
-            "duration": "1m",
-            "velocity": 0.56,
-            "chance": null
-        },
-        {
-            "step": 16,
-            "note": "C#5",
+            "note": "F#5",
             "duration": "1m",
             "velocity": 0.6,
             "chance": null
         },
         {
             "step": 32,
-            "note": "D3",
+            "note": "B2",
             "duration": "1m",
-            "velocity": 0.66,
+            "velocity": 0.68,
             "chance": null
         },
         {
             "step": 32,
             "note": "F#4",
             "duration": "1m",
-            "velocity": 0.54,
+            "velocity": 0.55,
             "chance": null
         },
         {
             "step": 32,
             "note": "A4",
             "duration": "1m",
-            "velocity": 0.56,
+            "velocity": 0.58,
             "chance": null
         },
         {
             "step": 32,
-            "note": "C#5",
+            "note": "D5",
             "duration": "1m",
             "velocity": 0.58,
             "chance": null
@@ -88,14 +95,14 @@
             "step": 48,
             "note": "C#3",
             "duration": "1m",
-            "velocity": 0.7,
+            "velocity": 0.72,
             "chance": null
         },
         {
             "step": 48,
             "note": "E#4",
             "duration": "1m",
-            "velocity": 0.6,
+            "velocity": 0.58,
             "chance": null
         },
         {
@@ -107,10 +114,11 @@
         },
         {
             "step": 48,
-            "note": "B4",
+            "note": "C#5",
             "duration": "1m",
             "velocity": 0.62,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

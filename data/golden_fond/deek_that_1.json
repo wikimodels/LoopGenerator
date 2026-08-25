@@ -1,6 +1,6 @@
 {
     "name": "Deek_That_1",
-    "bpm": 203,
+    "bpm": 89,
     "instrument": "piano",
     "steps": 64,
     "key": "A",
@@ -350,5 +350,6 @@
             "velocity": 0.75,
             "chance": null
         }
-    ]
+    ],
+    "comment": "JAZZ ULTRA SLOW Cello"
 }

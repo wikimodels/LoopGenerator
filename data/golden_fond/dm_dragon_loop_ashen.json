@@ -1,6 +1,6 @@
 {
-    "name": "Dm_Dragon_Loop_Ashen_Fixed",
-    "bpm": 239,
+    "name": "Dm_Dragon_Loop_Ashen",
+    "bpm": 80,
     "instrument": "piano",
     "steps": 64,
     "key": "D",
@@ -168,5 +168,6 @@
             "velocity": 0.42,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

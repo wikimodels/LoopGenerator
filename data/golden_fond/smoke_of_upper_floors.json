@@ -1,6 +1,6 @@
 {
     "name": "Smoke_Of_Upper_Floors",
-    "bpm": 194,
+    "bpm": 178,
     "instrument": "piano",
     "steps": 272,
     "key": "B",
@@ -665,5 +665,6 @@
             "velocity": 0.98,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

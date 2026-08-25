@@ -1,6 +1,6 @@
 {
     "name": "Deek_That_2",
-    "bpm": 203,
+    "bpm": 77,
     "instrument": "piano",
     "steps": 64,
     "key": "A",
@@ -301,5 +301,6 @@
             "velocity": 0.75,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

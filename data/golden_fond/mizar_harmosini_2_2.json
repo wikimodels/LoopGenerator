@@ -1,6 +1,6 @@
 {
     "name": "Mizar_Harmosini_2",
-    "bpm": 212,
+    "bpm": 100,
     "instrument": "piano",
     "steps": 128,
     "key": "C",
@@ -567,5 +567,6 @@
             "velocity": 0.74,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

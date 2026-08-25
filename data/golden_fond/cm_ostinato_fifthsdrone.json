@@ -1,6 +1,6 @@
 {
     "name": "C#m_Ostinato_FifthsDrone",
-    "bpm": 227,
+    "bpm": 86,
     "instrument": "piano",
     "steps": 64,
     "key": "C#",
@@ -203,5 +203,6 @@
             "velocity": 0.28,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

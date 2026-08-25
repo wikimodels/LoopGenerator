@@ -1,6 +1,6 @@
 {
     "name": "Woodkid_Stabat_Mater_F_Minor",
-    "bpm": 240,
+    "bpm": 203,
     "instrument": "piano",
     "steps": 128,
     "key": "F",
@@ -294,5 +294,6 @@
             "velocity": 0.75,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

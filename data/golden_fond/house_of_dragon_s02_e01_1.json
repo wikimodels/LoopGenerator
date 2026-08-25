@@ -1,6 +1,6 @@
 {
     "name": "House_of_Dragon_S02_E01_1",
-    "bpm": 240,
+    "bpm": 192,
     "instrument": "piano",
     "steps": 224,
     "key": "C#",
@@ -672,5 +672,6 @@
             "velocity": 0.28,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

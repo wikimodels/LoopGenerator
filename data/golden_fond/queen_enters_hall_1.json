@@ -1,6 +1,6 @@
 {
     "name": "Queen_Enters_Hall_1",
-    "bpm": 215,
+    "bpm": 182,
     "instrument": "piano",
     "steps": 288,
     "key": "B",
@@ -1183,5 +1183,6 @@
             "velocity": 0.95,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

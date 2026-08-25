@@ -1,6 +1,6 @@
 {
     "name": "Noroyal_Not_About_Love_1",
-    "bpm": 168,
+    "bpm": 189,
     "instrument": "piano",
     "steps": 216,
     "key": "G",
@@ -630,5 +630,6 @@
             "velocity": 0.85,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

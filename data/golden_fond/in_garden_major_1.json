@@ -1,6 +1,6 @@
 {
-    "name": "In_Garden_1_Major",
-    "bpm": 199,
+    "name": "In_Garden_Major_1",
+    "bpm": 97,
     "instrument": "piano",
     "steps": 192,
     "key": "G",
@@ -581,5 +581,6 @@
             "velocity": 0.75,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

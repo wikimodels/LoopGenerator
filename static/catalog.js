@@ -1038,7 +1038,7 @@ async function batchExport() {
         // Add to ZIP (skip if export bailed out)
         if (blob) {
             const cleanName = loop.name.replace(/[^a-zA-Z0-9_-]/g, '_') || 'loop';
-            zip.file(`${cleanName}.webm`, blob);
+            zip.file(`${cleanName}.${exportExt()}`, blob);
         }
     }
 
@@ -1167,7 +1167,7 @@ async function bulkExportAudio() {
 
         // Download immediately
         const cleanName = loop.name.replace(/[^a-zA-Z0-9_-]/g, '_') || 'loop';
-        const filename = `${cleanName}.webm`;
+        const filename = `${cleanName}.${exportExt()}`;
         
         // Upload to backend
         try {
@@ -1480,7 +1480,7 @@ async function mergeExportFromModal() {
         }
         
         const generatedName = selectedBaseName.replace(/\s+/g, '_');
-        a.download = `---Loop_${generatedName}.webm`;
+        a.download = `---Loop_${generatedName}.${exportExt()}`;
         a.click();
         URL.revokeObjectURL(url);
         

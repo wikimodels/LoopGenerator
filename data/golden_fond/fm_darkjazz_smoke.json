@@ -1,5 +1,5 @@
 {
-    "name": "Fm_DarkJazz_Smoke_Fixed",
+    "name": "Fm_DarkJazz_Smoke",
     "bpm": 194,
     "instrument": "piano",
     "steps": 64,
@@ -203,5 +203,6 @@
             "velocity": 0.42,
             "chance": null
         }
-    ]
+    ],
+    "comment": ""
 }

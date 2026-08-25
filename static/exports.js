@@ -129,13 +129,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const blob = await exportSingleLoopSilent(task.loopData);
         if (blob) {
             try {
-                await fetch(`/api/export_audio/${task.filename}`, {
+                // Новый рендер пишется под именем актуального формата экспорта
+                const newName = task.filename.replace(/\.(webm|wav|mp3)$/i, '') + '.' + exportExt();
+                await fetch(`/api/export_audio/${newName}`, {
                     method: 'POST',
                     body: blob
                 });
-                
+
                 // Reload wavesurfer
-                task.ws.load(`/exports/${encodeURIComponent(task.filename)}?t=${Date.now()}`);
+                task.ws.load(`/exports/${encodeURIComponent(newName)}?t=${Date.now()}`);
                 
                 // Keep loading overlay until ready
                 task.ws.once('ready', () => {
@@ -209,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 ` : '';
 
-                const displayName = file.filename.replace(/\.webm$/i, '');
+                const displayName = file.filename.replace(/\.(webm|wav|mp3)$/i, '');
 
                 card.innerHTML = `
                     <div class="export-info">
