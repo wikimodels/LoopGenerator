@@ -15,10 +15,12 @@ app = FastAPI()
 DATA_DIR = "data"
 LOOPS_DIR = os.path.join(DATA_DIR, "loops")
 GOLDEN_DIR = os.path.join(DATA_DIR, "golden_fond")
+ARCHIVE_DIR = os.path.join(DATA_DIR, "archive")
 INSTRUCTIONS_DIR = os.path.join(DATA_DIR, "instructions")
 EXPORTS_DIR = os.path.join(DATA_DIR, "audio_exports")
 os.makedirs(LOOPS_DIR, exist_ok=True)
 os.makedirs(GOLDEN_DIR, exist_ok=True)
+os.makedirs(ARCHIVE_DIR, exist_ok=True)
 os.makedirs(INSTRUCTIONS_DIR, exist_ok=True)
 os.makedirs(EXPORTS_DIR, exist_ok=True)
 
@@ -175,6 +177,7 @@ class Loop(BaseModel):
     swing: Optional[float] = 0.0
     notes: List[Note]
     comment: Optional[str] = None  # free-form user text (loop info)
+    style: Optional[str] = None    # display style label (empty = hide in row)
 
 class LoopMeta(BaseModel):
     rating: Optional[int] = 0      # 0-5 stars
@@ -234,6 +237,49 @@ def get_golden(response: Response):
             except Exception:
                 pass
     return loops
+
+@app.get("/api/archive")
+def get_archive(response: Response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    loops = []
+    for filename in os.listdir(ARCHIVE_DIR):
+        if filename.endswith(".json"):
+            filepath = os.path.join(ARCHIVE_DIR, filename)
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    data["_filename"] = filename
+                    data["_archive"] = True
+                    loops.append(data)
+            except Exception:
+                pass
+    return loops
+
+@app.post("/api/archive/{filename}/send")
+def send_to_archive(filename: str):
+    """Отправить трек из Golden Fund в архив (файл переезжает)."""
+    safe = os.path.basename(filename)
+    src = os.path.join(GOLDEN_DIR, safe)
+    dst = os.path.join(ARCHIVE_DIR, safe)
+    if not os.path.exists(src):
+        raise HTTPException(status_code=404, detail="Track not found in Golden")
+    if os.path.exists(dst):
+        raise HTTPException(status_code=400, detail="Already in archive")
+    shutil.move(src, dst)
+    return {"status": "ok", "archived": safe}
+
+@app.post("/api/archive/{filename}/restore")
+def restore_from_archive(filename: str):
+    """Вернуть трек из архива обратно в Golden Fund."""
+    safe = os.path.basename(filename)
+    src = os.path.join(ARCHIVE_DIR, safe)
+    dst = os.path.join(GOLDEN_DIR, safe)
+    if not os.path.exists(src):
+        raise HTTPException(status_code=404, detail="Track not found in archive")
+    if os.path.exists(dst):
+        raise HTTPException(status_code=400, detail="Track with same filename already in Golden")
+    shutil.move(src, dst)
+    return {"status": "ok", "restored": safe}
 
 @app.post("/api/golden/{filename}/copy")
 def copy_golden_to_loops(filename: str, response: Response):
@@ -295,7 +341,7 @@ def save_loop(loop: Loop):
 def _get_existing_names():
     """Возвращает множество всех имён треков (без расширения) в обоих каталогах."""
     names = set()
-    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR, ARCHIVE_DIR]:
         for f in os.listdir(search_dir):
             if f.endswith(".json") and f != os.path.basename(META_FILE):
                 try:
@@ -331,7 +377,7 @@ def update_loop(filename: str, loop: Loop):
         raise HTTPException(status_code=400, detail="Reserved filename")
         
     filepath = None
-    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR, ARCHIVE_DIR]:
         candidate = os.path.join(search_dir, safe_filename)
         if os.path.exists(candidate):
             filepath = candidate
@@ -492,7 +538,7 @@ def delete_loop(filename: str):
     if safe_filename == os.path.basename(META_FILE):
         raise HTTPException(status_code=400, detail="Cannot delete metadata file")
 
-    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR, ARCHIVE_DIR]:
         filepath = os.path.join(search_dir, safe_filename)
         if os.path.exists(filepath):
             os.remove(filepath)
@@ -555,7 +601,7 @@ def bulk_comment(req: BulkCommentRequest):
     updated_keys = set()
 
     meta_filename = os.path.basename(META_FILE)
-    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR, ARCHIVE_DIR]:
         for f in os.listdir(search_dir):
             if not f.endswith(".json") or f == meta_filename:
                 continue
@@ -698,7 +744,7 @@ def rename_export_audio(filename: str, req: RenameRequest):
     import json
     import re
     
-    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR, ARCHIVE_DIR]:
         for f in os.listdir(search_dir):
             if f.endswith(".json"):
                 fp = os.path.join(search_dir, f)

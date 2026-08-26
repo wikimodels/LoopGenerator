@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golden Fund - LoopGenerator</title>
+    <title>Archive - LoopGenerator</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="style_catalog.css">
     <link rel="stylesheet" href="style_modal.css">
@@ -30,10 +30,10 @@
         <main class="main-content catalog-main">
             <div class="catalog-header">
                 <div class="header-title-row">
-                    <h2>Golden Fund</h2>
+                    <h2>Archive</h2>
                     <div class="header-filters">
 <div class="search-wrapper">
-                            <input type="text" id="search-input" class="search-input" placeholder="Search names in golden..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <input type="text" id="search-input" class="search-input" placeholder="Search names in archive..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                             <button id="search-clear" class="search-clear hidden" title="Clear search"><span class="material-icons">close</span></button>
                         </div>
                         <div class="search-mode-toggle" id="search-mode-toggle" title="Search mode">
@@ -72,8 +72,8 @@
                         <button id="btn-download-selected" class="btn primary" disabled><span class="material-icons">archive</span> Download ZIP</button>
                         <button id="btn-export-audio" class="btn accent" disabled><span class="material-icons">audio_file</span> Export Audio</button>
                         <button id="btn-bulk-comment" class="btn neutral"><span class="material-icons">notes</span> Bulk Comment Update</button>
-                        <button id="btn-archive-selected" class="btn neutral" disabled title="Send selected tracks to Archive">
-                            <span class="material-icons">archive</span> Archive
+                        <button id="btn-golden-selected" class="btn neutral" disabled title="Back to Golden">
+                            <span class="material-icons">unarchive</span> Golden
                         </button>
                     </div>
                     <div class="selection-info">
@@ -199,6 +199,6 @@
             <button id="btn-cancel-export" class="btn danger"><span class="material-icons">close</span> Cancel</button>
         </div>
     </div>
-    <script src="golden.js"></script>
+    <script src="archive.js"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@ let selectedLoops = new Set();
 let isAudioInitialized = false;
 let currentSearchQuery = '';
 let currentStarFilter = 0;
-let currentSearchMode = 'name'; // 'name' | 'comment'
+let currentSearchMode = 'name'; // 'name' | 'comment' | 'style'
 
 // Audio state
 let synths = {};
@@ -38,6 +38,7 @@ const toastEl = document.getElementById('toast');
 
 // Export Audio Overlay Elements
 const btnExportAudio = document.getElementById('btn-export-audio');
+const btnArchiveSelected = document.getElementById('btn-archive-selected');
 const exportOverlay = document.getElementById('export-overlay');
 const exportCurrentTrack = document.getElementById('export-current-track');
 const exportProgressFill = document.getElementById('export-progress-fill');
@@ -69,6 +70,15 @@ const commentModal = document.getElementById('comment-modal');
 const btnCloseCommentModal = document.getElementById('btn-close-comment-modal');
 const commentLoopName = document.getElementById('comment-loop-name');
 const commentTextarea = document.getElementById('comment-textarea');
+const styleInput = document.getElementById('style-input');
+if (styleInput) {
+    styleInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveComment();
+        }
+    });
+}
 const btnSaveComment = document.getElementById('btn-save-comment');
 let commentLoop = null;
 
@@ -284,6 +294,7 @@ function openCommentModal(loop) {
     commentLoop = loop;
     commentLoopName.textContent = loop.name;
     commentTextarea.value = loop.comment || '';
+    if (styleInput) styleInput.value = loop.style || '';
     commentModal.classList.remove('hidden');
     commentTextarea.focus();
 }
@@ -296,6 +307,7 @@ function closeCommentModal() {
 async function saveComment() {
     if (!commentLoop) return;
     commentLoop.comment = commentTextarea.value.trim();
+    if (styleInput) commentLoop.style = styleInput.value.trim();
     try {
         await fetch(`/api/loops/${encodeURIComponent(commentLoop._filename)}`, {
             method: 'PUT',
@@ -304,6 +316,7 @@ async function saveComment() {
         });
         showToast('Comment saved!');
         closeCommentModal();
+        await fetchLoops(); // перерисовать таблицу с новым style/comment
     } catch (e) {
         console.error('Failed to save comment', e);
         showToast('Failed to save comment');
@@ -330,6 +343,9 @@ function renderCatalog() {
             const query = currentSearchQuery.toLowerCase();
             if (currentSearchMode === 'comment') {
                 const textToSearch = `${loop.comment || ''}`.toLowerCase();
+                if (!textToSearch.includes(query)) return false;
+            } else if (currentSearchMode === 'style') {
+                const textToSearch = `${loop.style || ''}`.toLowerCase();
                 if (!textToSearch.includes(query)) return false;
             } else {
                 const textToSearch = `${loop.name}`.toLowerCase();
@@ -445,7 +461,7 @@ function renderCatalog() {
         metaEl.className = 'item-meta';
         metaEl.innerHTML = `
             <span><span class="material-icons">speed</span> ${loop.bpm} BPM</span>
-            <span><span class="material-icons">piano</span> ${loop.instrument}</span>
+            ${loop.style ? `<span><span class="material-icons">style</span> ${loop.style}</span>` : ''}
             <span><span class="material-icons">straighten</span> ${loop.steps} steps</span>
         `;
 
@@ -752,6 +768,7 @@ function updateSelection() {
     if (btnMergeDownload) btnMergeDownload.disabled = selectedLoops.size === 0;
     if (btnExportAudio) btnExportAudio.disabled = selectedLoops.size === 0;
     btnDelete.disabled = selectedLoops.size === 0;
+    if (btnArchiveSelected) btnArchiveSelected.disabled = selectedLoops.size === 0;
     
     if (filteredLoops.length === 0) {
         checkAll.checked = false;
@@ -806,6 +823,8 @@ function setupEventListeners() {
                 if (searchInput) {
                     searchInput.placeholder = currentSearchMode === 'comment'
                         ? 'Search comments in golden...'
+                        : currentSearchMode === 'style'
+                        ? 'Search styles in golden...'
                         : 'Search names in golden...';
                 }
                 renderCatalog();
@@ -817,6 +836,7 @@ function setupEventListeners() {
 
     btnDownload.addEventListener('click', batchExport);
     btnDelete.addEventListener('click', bulkDelete);
+    if (btnArchiveSelected) btnArchiveSelected.addEventListener('click', bulkArchive);
     if (btnExportAudio) btnExportAudio.addEventListener('click', bulkExportAudio);
     if (btnCancelExport) btnCancelExport.addEventListener('click', () => { exportCancelled = true; });
 
@@ -1702,6 +1722,25 @@ async function mergeExportFromModal() {
         }, 1500);
 
     }, (durationSec + 1.5) * 1000);
+}
+
+async function bulkArchive() {
+    if (selectedLoops.size === 0) return;
+    if (!confirm(`Send ${selectedLoops.size} track(s) to Archive?`)) return;
+
+    if (btnArchiveSelected) btnArchiveSelected.disabled = true;
+    let archived = 0;
+    for (const filename of selectedLoops) {
+        try {
+            const res = await fetch(`/api/archive/${encodeURIComponent(filename)}/send`, { method: 'POST' });
+            if (res.ok) archived++;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    showToast(`Archived ${archived} track(s).`);
+    selectedLoops.clear();
+    await fetchLoops();
 }
 
 async function bulkDelete() {

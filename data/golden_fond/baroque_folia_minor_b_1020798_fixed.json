@@ -512,5 +512,6 @@
             "chance": null
         }
     ],
-    "comment": "Anti-buzz fix: shortened duration to 8n on 22 repeated same-pitch accompaniment notes (the sustained inner drone re-triggering every step: D4-D4, C#4-C#4, G3-G3, A#3-A#3 chains) to open a short release gap before each re-attack, preventing sample-tail phase buzz. Bass and melody untouched \u2014 they don't repeat pitch back-to-back in this pattern."
+    "comment": "Anti-buzz fix: shortened duration to 8n on 22 repeated same-pitch accompaniment notes (the sustained inner drone re-triggering every step: D4-D4, C#4-C#4, G3-G3, A#3-A#3 chains) to open a short release gap before each re-attack, preventing sample-tail phase buzz. Bass and melody untouched \u2014 they don't repeat pitch back-to-back in this pattern.",
+    "style": "baroque folia"
 }

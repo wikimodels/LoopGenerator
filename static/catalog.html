@@ -34,6 +34,7 @@
                         <div class="search-mode-toggle" id="search-mode-toggle" title="Search mode">
                             <button class="search-mode-btn active" data-mode="name">Name</button>
                             <button class="search-mode-btn" data-mode="comment">Comment</button>
+                            <button class="search-mode-btn" data-mode="style">Style</button>
                         </div>
                         <div class="star-filter" id="star-filter" title="Filter by rating">
                             <span class="star" data-value="1">★</span>
@@ -169,6 +170,10 @@
                 </div>
             </div>
             <div class="modal-body">
+                <div style="margin-bottom:0.75rem;">
+                    <label for="style-input" style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Style</label>
+                    <input type="text" id="style-input" class="style-input" placeholder="e.g. Baroque, Jazz, Lo-Fi...">
+                </div>
                 <p id="comment-loop-name" style="margin-bottom:0.5rem;font-size:1rem;color:var(--text-main);font-weight:500;"></p>
                 <textarea id="comment-textarea" class="input-text large-textarea" placeholder="Write any notes about this loop..."></textarea>
             </div>

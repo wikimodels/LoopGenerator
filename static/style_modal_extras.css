@@ -44,3 +44,23 @@
     border: 1px solid var(--border-color);
     margin-top: 1rem;
 }
+
+/* Style input в Comment-модалке — в одном стиле с .large-textarea */
+.style-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.875rem;
+    padding: 0.65rem 1rem;
+    margin-top: 4px;
+    background-color: #0f172a;
+    border: 2px dashed var(--border-color);
+    border-radius: 4px;
+    color: var(--text-main);
+    outline: none;
+    transition: border-color 0.2s;
+}
+.style-input:focus {
+    border-color: var(--primary);
+    border-style: solid;
+}

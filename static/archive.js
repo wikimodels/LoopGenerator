@@ -38,6 +38,7 @@ const toastEl = document.getElementById('toast');
 
 // Export Audio Overlay Elements
 const btnExportAudio = document.getElementById('btn-export-audio');
+const btnGoldenSelected = document.getElementById('btn-golden-selected');
 const exportOverlay = document.getElementById('export-overlay');
 const exportCurrentTrack = document.getElementById('export-current-track');
 const exportProgressFill = document.getElementById('export-progress-fill');
@@ -174,8 +175,8 @@ async function setRating(filename, rating) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ rating: newRating })
         });
-        // Track moved to/from golden_fond — reload to reflect change
-        if (newRating === 5 || current === 5) {
+        // If rating dropped below 5, track moved back to loops/ — refresh golden list
+        if (newRating !== 5) {
             await fetchLoops();
         }
     } catch(e) { console.error('Failed to save rating', e); }
@@ -325,11 +326,11 @@ async function saveComment() {
 // --- Data Fetching & Rendering ---
 async function fetchLoops() {
     try {
-        const res = await fetch(`/api/loops?t=${Date.now()}`);
+        const res = await fetch(`/api/archive?t=${Date.now()}`);
         loopsData = await res.json();
         renderCatalog();
     } catch (e) {
-        console.error("Failed to fetch loops", e);
+        console.error("Failed to fetch archive loops", e);
     }
 }
 
@@ -337,7 +338,7 @@ function renderCatalog() {
     catalogList.innerHTML = '';
     
     filteredLoops = loopsData.filter(loop => {
-        // Search
+        // Search only (no star filter — all tracks here are 5-star)
         if (currentSearchQuery) {
             const query = currentSearchQuery.toLowerCase();
             if (currentSearchMode === 'comment') {
@@ -351,17 +352,21 @@ function renderCatalog() {
                 if (!textToSearch.includes(query)) return false;
             }
         }
-        // Star Filter
-        if (currentStarFilter > 0) {
-            const rating = (loopMeta[loop._filename] || {}).rating || 0;
-            if (rating !== currentStarFilter) return false;
-        }
         // Hide loops already used by the selected artist
         const hideUsedEl = document.getElementById('hide-used');
         if (hideUsedEl && hideUsedEl.checked && currentArtist &&
             (artists[currentArtist] || []).includes(loop.name)) return false;
         return true;
     });
+
+    if (filteredLoops.length === 0) {
+        catalogList.innerHTML = `
+            <div class="empty-golden">
+                <span class="material-icons">star_border</span>
+                <p>Archive is empty.<br>Send tracks here using the <strong>archive</strong> button in Golden Fund.</p>
+            </div>`;
+        return;
+    }
 
     filteredLoops.forEach(loop => {
         const div = document.createElement('div');
@@ -497,6 +502,25 @@ function renderCatalog() {
             }
         });
 
+        const btnCopyToCatalog = document.createElement('button');
+        btnCopyToCatalog.className = 'btn icon-btn copy-to-catalog';
+        btnCopyToCatalog.innerHTML = '<span class="material-icons">file_copy</span>';
+        btnCopyToCatalog.title = 'Copy to catalog';
+        btnCopyToCatalog.addEventListener('click', async () => {
+            try {
+                const res = await fetch(`/api/golden/${encodeURIComponent(loop._filename)}/copy`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.ok) {
+                    showToast(`Copied to catalog: ${data.filename}`);
+                } else {
+                    showToast(`Failed to copy: ${data.detail || res.status}`);
+                }
+            } catch (err) {
+                console.error('Copy to catalog failed', err);
+                showToast('Failed to copy to catalog');
+            }
+        });
+
         btnPlayToggle.addEventListener('click', () => {
             if (activeSequence && activeLoopName === loop.name && Tone.Transport.state === 'started') {
                 pauseLoop(btnPlayToggle, div);
@@ -515,6 +539,7 @@ function renderCatalog() {
         controls.appendChild(btnPlayToggle);
         controls.appendChild(btnStop);
         controls.appendChild(btnCopyJson);
+        controls.appendChild(btnCopyToCatalog);
         controls.appendChild(btnComment);
 
         // BPM Control — same pattern as Merge Modal BPM slider
@@ -572,7 +597,6 @@ function renderCatalog() {
     });
     updateSelection();
 }
-
 
 // ─── Artists: usage tracking ────────────────────────────────────────────────
 let artists = {};  // { artist: [loop names] }
@@ -744,6 +768,7 @@ function updateSelection() {
     if (btnMergeDownload) btnMergeDownload.disabled = selectedLoops.size === 0;
     if (btnExportAudio) btnExportAudio.disabled = selectedLoops.size === 0;
     btnDelete.disabled = selectedLoops.size === 0;
+    if (btnGoldenSelected) btnGoldenSelected.disabled = selectedLoops.size === 0;
     
     if (filteredLoops.length === 0) {
         checkAll.checked = false;
@@ -797,35 +822,21 @@ function setupEventListeners() {
                 searchModeToggle.querySelectorAll('.search-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
                 if (searchInput) {
                     searchInput.placeholder = currentSearchMode === 'comment'
-                        ? 'Search comments in catalog...'
+                        ? 'Search comments in archive...'
                         : currentSearchMode === 'style'
-                        ? 'Search styles in catalog...'
-                        : 'Search names in catalog...';
+                        ? 'Search styles in archive...'
+                        : 'Search names in archive...';
                 }
                 renderCatalog();
             });
         });
     }
 
-    // Header Star Filter
-    const starFilterEl = document.getElementById('star-filter');
-    if (starFilterEl) {
-        starFilterEl.querySelectorAll('.star').forEach(star => {
-            star.addEventListener('click', (e) => {
-                const val = parseInt(e.target.dataset.value);
-                currentStarFilter = currentStarFilter === val ? 0 : val;
-                
-                // update UI
-                starFilterEl.querySelectorAll('.star').forEach((s, idx) => {
-                    s.classList.toggle('filled', idx < currentStarFilter);
-                });
-                renderCatalog();
-            });
-        });
-    }
+    // No star filter on Golden Fund page — all tracks here are 5-star
 
     btnDownload.addEventListener('click', batchExport);
     btnDelete.addEventListener('click', bulkDelete);
+    if (btnGoldenSelected) btnGoldenSelected.addEventListener('click', bulkRestore);
     if (btnExportAudio) btnExportAudio.addEventListener('click', bulkExportAudio);
     if (btnCancelExport) btnCancelExport.addEventListener('click', () => { exportCancelled = true; });
 
@@ -1113,7 +1124,7 @@ async function playLoop(loopData, btnPlayToggle, btnStop, itemEl) {
     let loopCounter = 0;
     
     activeSequence = new Tone.Sequence((time, step) => {
-        const safeTime = Math.max(Tone.context.currentTime + 0.005, time);
+        const safeTime = Math.max(0, time);
         if (step === 0) loopCounter++;
         
         // Stop automatically after 3 loops
@@ -1378,7 +1389,7 @@ async function bulkExportAudio() {
         // Download immediately
         const cleanName = loop.name.replace(/[^a-zA-Z0-9_-]/g, '_') || 'loop';
         const filename = `${cleanName}.${exportExt()}`;
-        
+
         // Upload to backend
         try {
             await fetch(`/api/export_audio/${filename}`, {
@@ -1413,7 +1424,7 @@ async function bulkExportAudio() {
         }, 800);
     } else {
         exportCurrentTrack.textContent = 'Done! \u2713';
-        // Вариант А: автопометка использованных для выбранного артиста
+        // Вариант А: автопометка использованных для выбранного исполнителя
         if (currentArtist && exportedNames.length) apiMarkUsed(currentArtist, exportedNames, true);
         else if (!currentArtist && exportedNames.length) showToast('Tip: select an artist to track usage');
         setTimeout(() => {
@@ -1426,7 +1437,6 @@ async function bulkExportAudio() {
         }, 800);
     }
 }
-
 
 // --- Merge Modal Logic ---
 
@@ -1547,7 +1557,7 @@ async function startPreview() {
     });
 
     previewSequence = new Tone.Sequence((time, step) => {
-        const safeTime = Math.max(Tone.context.currentTime + 0.005, time);
+        const safeTime = Math.max(0, time);
         const notesToPlay = masterStepNotes[step];
         if (notesToPlay) {
             notesToPlay.forEach(n => {
@@ -1645,7 +1655,7 @@ async function mergeExportFromModal() {
     });
 
     const masterSequence = new Tone.Sequence((time, step) => {
-        const safeTime = Math.max(Tone.context.currentTime + 0.005, time);
+        const safeTime = Math.max(0, time);
         const notesToPlay = masterStepNotes[step];
         if (notesToPlay) {
             notesToPlay.forEach(n => {
@@ -1712,6 +1722,25 @@ async function mergeExportFromModal() {
         }, 1500);
 
     }, (durationSec + 1.5) * 1000);
+}
+
+async function bulkRestore() {
+    if (selectedLoops.size === 0) return;
+    if (!confirm(`Restore ${selectedLoops.size} track(s) to Golden Fund?`)) return;
+
+    if (btnGoldenSelected) btnGoldenSelected.disabled = true;
+    let restored = 0;
+    for (const filename of selectedLoops) {
+        try {
+            const res = await fetch(`/api/archive/${encodeURIComponent(filename)}/restore`, { method: 'POST' });
+            if (res.ok) restored++;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    showToast(`Restored ${restored} track(s) to Golden.`);
+    selectedLoops.clear();
+    await fetchLoops();
 }
 
 async function bulkDelete() {
