@@ -102,6 +102,8 @@ async function init() {
     jsonPasteArea = document.getElementById('json-paste-area');
 
     await fetchMeta();
+    await loadArtists();
+    setupArtistControls();
     await fetchLoops();
     
     // Generate 72 bars dynamically
@@ -339,6 +341,10 @@ function renderCatalog() {
             const rating = (loopMeta[loop._filename] || {}).rating || 0;
             if (rating !== currentStarFilter) return false;
         }
+        // Hide loops already used by the selected artist
+        const hideUsedEl = document.getElementById('hide-used');
+        if (hideUsedEl && hideUsedEl.checked && currentArtist &&
+            (artists[currentArtist] || []).includes(loop.name)) return false;
         return true;
     });
 
@@ -385,6 +391,7 @@ function renderCatalog() {
             const newName = nameEl.textContent.trim();
             if (newName && newName !== loop.name) {
                 const oldFilename = loop._filename;
+                const oldName = loop.name;
                 loop.name = newName;
                 try {
                     const res = await fetch('/api/loops', {
@@ -393,7 +400,7 @@ function renderCatalog() {
                         body: JSON.stringify(loop)
                     });
                     const result = await res.json();
-                    if (result.status === 'success') {
+                    if (res.ok && result.status === 'success') {
                         const newFilename = result.filename;
                         if (newFilename !== oldFilename) {
                             await fetch(`/api/loops/${oldFilename}`, { method: 'DELETE' });
@@ -407,6 +414,11 @@ function renderCatalog() {
                         }
                         showToast("Name updated!");
                         fetchLoops(); // Reload fully
+                    } else {
+                        const detail = result.detail || `HTTP ${res.status}`;
+                        alert(`Cannot rename to "${newName}": ${detail}`);
+                        loop.name = oldName;
+                        nameEl.textContent = oldName;
                     }
                 } catch (e) {
                     console.error(e);
@@ -533,12 +545,181 @@ function renderCatalog() {
         div.appendChild(info);
         div.appendChild(controls);
         div.appendChild(stars);
+        const badgeContainer = document.createElement('div');
+        badgeContainer.className = 'used-badge-container';
+        const usedBadge = buildUsedBadge(loop);
+        if (usedBadge) badgeContainer.appendChild(usedBadge);
+        div.appendChild(badgeContainer);
         div.appendChild(bpmControl);
         div.appendChild(chkWrapper);
 
         catalogList.appendChild(div);
     });
     updateSelection();
+}
+
+
+// ─── Artists: usage tracking ────────────────────────────────────────────────
+let artists = {};  // { artist: [loop names] }
+let currentArtist = localStorage.getItem('lg_artist') || '';
+
+function usedArtistsOf(loopName) {
+    return Object.keys(artists).filter((a) => (artists[a] || []).includes(loopName));
+}
+
+async function loadArtists() {
+    try {
+        const res = await fetch('/api/artists');
+        artists = await res.json();
+    } catch (e) {
+        console.error('Failed to load artists', e);
+        artists = {};
+    }
+    populateArtistSelect();
+}
+
+function populateArtistSelect() {
+    const sel = document.getElementById('artist-select');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— no artist —</option>';
+    Object.keys(artists).sort().forEach((a) => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        opt.textContent = a;
+        sel.appendChild(opt);
+    });
+    sel.value = artists.hasOwnProperty(currentArtist) || currentArtist === '' ? currentArtist : '';
+    if (sel.value !== currentArtist) {
+        currentArtist = sel.value;
+        localStorage.setItem('lg_artist', currentArtist);
+    }
+    // Восстановить состояние чекбокса «Hide used»
+    const hideChk = document.getElementById('hide-used');
+    if (hideChk) {
+        const saved = localStorage.getItem('lg_hide_used');
+        hideChk.checked = saved === 'true';
+    }
+}
+
+async function apiMarkUsed(artist, loopNames, used) {
+    try {
+        const res = await fetch('/api/artists/mark', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ artist, loops: loopNames, used })
+        });
+        if (!res.ok) throw new Error('http ' + res.status);
+        const fresh = await (await fetch('/api/artists')).json();
+        artists = fresh;
+        populateArtistSelect();
+        return true;
+    } catch (e) {
+        console.error('artists/mark failed', e);
+        showToast('Failed to update artist list');
+        return false;
+    }
+}
+
+function setupArtistControls() {
+    const sel = document.getElementById('artist-select');
+    const addBtn = document.getElementById('artist-add');
+    const hideChk = document.getElementById('hide-used');
+    if (!sel || !addBtn || !hideChk) return;
+
+    sel.addEventListener('change', () => {
+        currentArtist = sel.value;
+        localStorage.setItem('lg_artist', currentArtist);
+        renderCatalog();
+    });
+
+    addBtn.addEventListener('click', async () => {
+        const name = (prompt('New artist name:') || '').trim();
+        if (!name) return;
+        if (artists.hasOwnProperty(name)) {
+            showToast('Artist already exists: ' + name);
+            return;
+        }
+        // пустой loops создаёт запись исполнителя на бэкенде
+        if (await apiMarkUsed(name, [], true)) {
+            showToast('Artist added: ' + name);
+        }
+    });
+
+    hideChk.addEventListener('change', () => {
+        localStorage.setItem('lg_hide_used', hideChk.checked);
+        renderCatalog();
+    });
+    wireUsedModalClose();
+}
+
+function buildUsedBadge(loop) {
+    const el = document.createElement('span');
+    // Бейдж только если ТЕКУЩИЙ исполнитель использовал этот луп.
+    // Чужие пометки на карточке не показываем (полный список — в модалке).
+    if (!currentArtist || !(artists[currentArtist] || []).includes(loop.name)) {
+        return null; // пустой бейдж не рендерим вообще
+    }
+    el.className = 'used-badge mine';
+    el.textContent = 'used';
+    el.title = 'Click: where "' + loop.name + '" was used';
+    el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openUsedModal(loop);
+    });
+    return el;
+}
+
+function openUsedModal(loop) {
+    document.getElementById('used-loop-name').textContent = loop.name;
+    renderUsedList(loop);
+    document.getElementById('artist-used-modal').classList.remove('hidden');
+}
+
+function closeUsedModal() {
+    document.getElementById('artist-used-modal').classList.add('hidden');
+}
+
+function wireUsedModalClose() {
+    const btn = document.getElementById('btn-close-used-modal');
+    const modal = document.getElementById('artist-used-modal');
+    if (!btn || !modal) return;
+    btn.addEventListener('click', closeUsedModal);
+    modal.addEventListener('mousedown', (e) => {
+        if (e.target === modal) closeUsedModal();
+    });
+}
+
+function renderUsedList(loop) {
+    const list = document.getElementById('used-artists-list');
+    list.innerHTML = '';
+    const names = usedArtistsOf(loop.name);
+    if (!names.length) {
+        list.innerHTML = '<p style="color:var(--text-muted,#888);">Not used by anyone.</p>';
+        return;
+    }
+    names.sort((a, b) => (a === currentArtist ? -1 : b === currentArtist ? 1 : a.localeCompare(b)))
+        .forEach((a) => {
+        const row = document.createElement('div');
+        row.className = 'used-row' + (a === currentArtist ? ' mine' : '');
+        row.innerHTML = '<span class="material-icons">person</span>' +
+            '<span class="used-artist-name"></span>' +
+            (a === currentArtist ? '<span class="used-you-tag">current</span>' : '');
+        row.querySelector('.used-artist-name').textContent = a;
+        const del = document.createElement('button');
+        del.className = 'btn icon-btn danger';
+        del.title = 'Remove "' + loop.name + '" from used list of "' + a + '"';
+        del.innerHTML = '<span class="material-icons">close</span>';
+        del.addEventListener('click', async () => {
+            if (!confirm('Remove "' + loop.name + '" from used list of "' + a + '"?')) return;
+            if (await apiMarkUsed(a, [loop.name], false)) {
+                showToast('Unmarked: ' + loop.name + ' (' + a + ')');
+                renderUsedList(loop);
+                renderCatalog();
+            }
+        });
+        row.appendChild(del);
+        list.appendChild(row);
+    });
 }
 
 function updateSelection() {
@@ -759,20 +940,29 @@ function setupEventListeners() {
                 }
                 
                 let successCount = 0;
+                const failed = [];
                 for (const loop of data) {
                     const res = await fetch('/api/loops', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(loop)
                     });
-                    if (res.ok) successCount++;
+                    if (res.ok) { successCount++; continue; }
+                    let detail = `HTTP ${res.status}`;
+                    try { const j = await res.json(); if (j.detail) detail = j.detail; } catch (e) {}
+                    failed.push(`${loop.name || 'unnamed'}: ${detail}`);
                 }
                 
                 showToast(`Imported ${successCount} loops!`);
+                if (failed.length) {
+                    alert(`Some tracks were NOT imported (${failed.length}):\n\n` + failed.join('\n'));
+                }
                 fetchLoops(); // refresh catalog
                 
-                insertModal.classList.add('hidden');
-                jsonPasteArea.value = ''; // clear after success
+                if (!failed.length) {
+                    insertModal.classList.add('hidden');
+                    jsonPasteArea.value = ''; // clear after success
+                }
             } catch (err) {
                 showToast("Invalid JSON text");
                 console.error(err);
@@ -1087,6 +1277,7 @@ async function bulkExportAudio() {
     if (loopsToExport.length === 0) return;
 
     exportCancelled = false;
+    const exportedNames = [];
 
     // Populate track list in overlay
     exportTrackList.innerHTML = '';
@@ -1179,6 +1370,8 @@ async function bulkExportAudio() {
             console.error("Failed to upload audio to backend:", err);
         }
 
+        exportedNames.push(loop.name);
+
         // Mark as done
         if (trackItem) {
             trackItem.querySelector('.export-track-status').textContent = 'check_circle';
@@ -1201,6 +1394,9 @@ async function bulkExportAudio() {
         }, 800);
     } else {
         exportCurrentTrack.textContent = 'Done! \u2713';
+        // Вариант А: автопометка использованных для выбранного артиста
+        if (currentArtist && exportedNames.length) apiMarkUsed(currentArtist, exportedNames, true);
+        else if (!currentArtist && exportedNames.length) showToast('Tip: select an artist to track usage');
         setTimeout(() => {
             exportOverlay.classList.add('hidden');
             showToast(`Exported ${total} track(s) successfully!`);

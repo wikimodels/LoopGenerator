@@ -119,6 +119,7 @@ btnGenerate.addEventListener("click", async () => {
     const totalCombos = selectedStyles.length * keys.length * meters.length * stepsArr.length;
     let completed = 0;
     let successCount = 0;
+    const failedGens = [];
 
     btnGenerate.disabled = true;
     btnGenerate.innerHTML = '<span class="material-icons">hourglass_empty</span> Generating Batch...';
@@ -149,6 +150,9 @@ btnGenerate.addEventListener("click", async () => {
                         });
                         
                         if (!res.ok) {
+                            let detail = `HTTP ${res.status}`;
+                            try { const j = await res.json(); if (j.detail) detail = j.detail; } catch (e) {}
+                            failedGens.push(`${style} ${key}: ${detail}`);
                             console.error(`Error generating ${style} in ${key}`);
                         } else {
                             successCount++;
@@ -164,6 +168,9 @@ btnGenerate.addEventListener("click", async () => {
         }
     }
 
+    if (failedGens.length) {
+        alert(`Some generations failed (${failedGens.length}):\n\n` + failedGens.join('\n'));
+    }
     if (successCount === totalCombos) {
         resultMeta.innerHTML = `<strong>Done!</strong> Generated ${totalCombos} tracks and added them to the Catalog.`;
     } else {

@@ -29,6 +29,7 @@
         ${navLink('index.html', 'piano', 'Editor', 'secondary')}
         ${navLink('catalog.html', 'library_music', 'Catalog', 'secondary')}
         ${navLink('golden.html', 'star', 'Golden', 'accent')}
+        ${navLink('artists.html', 'group', 'Artists', 'secondary')}
         ${navLink('exports.html', 'graphic_eq', 'Exports', 'neutral')}
         ${navLink('generate.html', 'auto_awesome', 'Generate', 'primary')}
     </nav>
@@ -70,6 +71,7 @@
                 <div style="display:flex;justify-content:space-between;margin-bottom:.5rem;align-items:flex-end;">
                     <div id="instructions-tabs" class="tabs-container" style="display:flex;gap:8px;flex-wrap:wrap;">
                         <button class="btn secondary active" data-tab="default">Default Prompt</button>
+                        <button class="btn secondary" data-tab="correction">Correction Prompt</button>
                     </div>
                     <button id="btn-copy-prompt" class="btn secondary" style="transform:scale(.8);transform-origin:right center;white-space:nowrap;">
                         <span class="material-icons">content_copy</span> Copy Prompt
@@ -193,13 +195,38 @@ Output JSON within markdown code tags. Suggestions/explanations outside the bloc
 
         if (!btnOpen || !modal) return;
 
+        const tabs = document.getElementById('instructions-tabs');
+        const promptText = document.getElementById('ai-prompt-text');
+        const DEFAULT_PROMPT = promptEl ? promptEl.value : '';
+        const CORRECTION_PROMPT = `Проведи полную аудио-инженерную и гармоническую коррекцию JSON-паттерна.
+
+
+Overlap Cleanup: устрани дубли одной и той же ноты на одном шаге с разной длительностью (оставляй более длинную).
+Register Range: мелодия строго в диапазоне A4–D5, не короче 8n на нотах выше A4. Ноты октавы 6+ — недопустимы.
+Voice Leading & Harmony: используй только диатонические аккорды тональности (с допущением гармонического минора). Любой аккорд вне этого списка — замени на ближайший диатонический той же функции. Разнеси голоса минимум на малую терцию, чтобы избежать наложения тембров.
+Velocity: бас 0.65–0.70, аккомпанемент 0.26–0.30, мелодия 0.48–0.52, самые высокие ноты — нижняя граница диапазона.
+Убери все "chance" — 100% детерминированное исполнение.
+Название +"_Fixed".
+Верни только готовый JSON.`;
+
+        function activateTab(btn, text) {
+            tabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (promptEl) promptEl.value = text;
+        }
+
+        // Static tabs: Default / Correction
+        const defaultBtn = tabs.querySelector('[data-tab="default"]');
+        const correctionBtn = tabs.querySelector('[data-tab="correction"]');
+        if (defaultBtn) defaultBtn.addEventListener('click', () => activateTab(defaultBtn, DEFAULT_PROMPT));
+        if (correctionBtn) correctionBtn.addEventListener('click', () => activateTab(correctionBtn, CORRECTION_PROMPT));
+
         btnOpen.addEventListener('click', async () => {
             // Load style-specific instructions from API if available
             try {
                 const res = await fetch('/api/instructions');
                 if (res.ok) {
                     const instructions = await res.json();
-                    const tabs = document.getElementById('instructions-tabs');
                     if (tabs && instructions.length > 0) {
                         instructions.forEach(inst => {
                             if (!tabs.querySelector(`[data-tab="${inst.name}"]`)) {

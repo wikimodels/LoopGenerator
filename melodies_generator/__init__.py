@@ -81,8 +81,9 @@ def generate_loop(style, key, name=None, bpm=BPM_DEFAULT, steps=None, beats_per_
     _MINOR_MODES = {"natural_minor", "harmonic_minor", "melodic_minor_asc",
                     "dorian", "phrygian", "locrian", "blues"}
     scale_label = "Minor" if meta["scale"] in _MINOR_MODES else "Major"
+    display_key = key.replace('#', '_Sharp_').replace('b', '_Flat_')
     return {
-        "name": name or f"{style.replace('_',' ').title()} in {key}",
+        "name": name or f"{style.replace('_',' ').title()} in {display_key}",
         "bpm": bpm, "instrument": "piano", "steps": steps,
         "key": key, "scale": scale_label, "swing": meta["swing"], "notes": notes,
         "style": style,

@@ -40,6 +40,18 @@
                             <button class="search-mode-btn active" data-mode="name">Name</button>
                             <button class="search-mode-btn" data-mode="comment">Comment</button>
                         </div>
+
+                        <div class="artist-filter" title="Artist usage tracking">
+                            <span class="material-icons">person</span>
+                            <select id="artist-select" class="artist-select">
+                                <option value="">— no artist —</option>
+                            </select>
+                            <button id="artist-add" class="btn icon-btn artist-add-btn" title="Add new artist"><span class="material-icons">person_add</span></button>
+                            <label class="artist-hide-used" title="Hide loops already used by the selected artist">
+                                <input type="checkbox" id="hide-used">
+                                <span class="material-icons">visibility_off</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="action-bar-content">
@@ -150,6 +162,21 @@
         </div>
     </div>
     <!-- Insert JSON modal injected by navbar.js -->
+
+    <!-- Artist Used Modal -->
+    <div id="artist-used-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Used By</h2>
+                <button id="btn-close-used-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="used-loop-name" style="margin-bottom:0.75rem;font-size:1rem;color:var(--text-main);font-weight:500;"></p>
+                <div id="used-artists-list"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast hidden">Message</div>
     <div id="export-overlay" class="export-overlay hidden">
         <div class="export-overlay-card">

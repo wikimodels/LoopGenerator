@@ -38,7 +38,127 @@ def save_meta(meta: dict):
     with open(META_FILE, "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2, ensure_ascii=False)
 
+# ─── Artists: какие лупы уже использованы каким исполнителем ────────────────
+# data/artists.json: { "Artist": ["Loop name 1", "Loop name 2"], ... }
+ARTISTS_FILE = os.path.join(DATA_DIR, "artists.json")
+
+def load_artists() -> dict:
+    if os.path.exists(ARTISTS_FILE):
+        try:
+            with open(ARTISTS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_artists(data: dict):
+    with open(ARTISTS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+class ArtistMarkRequest(BaseModel):
+    artist: str
+    loops: List[str] = []
+    used: bool  # true = пометить использованным, false = снять пометку
+
+@app.get("/api/artists")
+def get_artists():
+    """{artist: [loop names]} — для селектора и бейджей 'used'."""
+    return load_artists()
+
+@app.post("/api/artists/mark")
+def mark_artist_loops(req: ArtistMarkRequest):
+    """Пометить/снять лупы как использованные исполнителем.
+    Пустой loops создаёт исполнителя (пустая запись)."""
+    artist = req.artist.strip()
+    if not artist:
+        raise HTTPException(status_code=400, detail="Empty artist name")
+    data = load_artists()
+    entry = data.setdefault(artist, [])
+    changed = 0
+    for name in req.loops:
+        if req.used and name not in entry:
+            entry.append(name)
+            changed += 1
+        elif not req.used and name in entry:
+            entry.remove(name)
+            changed += 1
+    save_artists(data)
+    return {"status": "success", "changed": changed}
+
+
 class Note(BaseModel):
+    step: int
+    note: str
+    duration: str
+    velocity: Optional[float] = None
+    chance: Optional[float] = None
+
+
+# ── New Artists endpoints for Artists page ──────────────────────────────────
+class ArtistCreateRequest(BaseModel):
+    name: str
+
+class ArtistRenameRequest(BaseModel):
+    old_name: str
+    new_name: str
+
+class ArtistTracksRequest(BaseModel):
+    artist: str
+    tracks: List[str]
+
+@app.post("/api/artists")
+def create_artist(req: ArtistCreateRequest):
+    """Создать нового исполнителя."""
+    name = req.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Empty artist name")
+    data = load_artists()
+    if name in data:
+        raise HTTPException(status_code=400, detail="Artist already exists")
+    data[name] = []
+    save_artists(data)
+    return {"status": "success", "artist": name}
+
+@app.post("/api/artists/rename")
+def rename_artist(req: ArtistRenameRequest):
+    """Переименовать исполнителя."""
+    old_name = req.old_name.strip()
+    new_name = req.new_name.strip()
+    if not old_name or not new_name:
+        raise HTTPException(status_code=400, detail="Names cannot be empty")
+    if old_name == new_name:
+        raise HTTPException(status_code=400, detail="Names are identical")
+    data = load_artists()
+    if old_name not in data:
+        raise HTTPException(status_code=404, detail="Artist not found")
+    if new_name in data:
+        raise HTTPException(status_code=400, detail="Artist with new name already exists")
+    data[new_name] = data.pop(old_name)
+    save_artists(data)
+    return {"status": "success", "old_name": old_name, "new_name": new_name}
+
+@app.delete("/api/artists/{name}")
+def delete_artist(name: str):
+    """Удалить исполнителя."""
+    name = name.strip()
+    data = load_artists()
+    if name not in data:
+        raise HTTPException(status_code=404, detail="Artist not found")
+    del data[name]
+    save_artists(data)
+    return {"status": "success", "deleted": name}
+
+@app.post("/api/artists/tracks")
+def save_artist_tracks(req: ArtistTracksRequest):
+    """Сохранить список треков для исполнителя."""
+    artist = req.artist.strip()
+    tracks = req.tracks
+    data = load_artists()
+    if artist not in data:
+        raise HTTPException(status_code=404, detail="Artist not found")
+    data[artist] = tracks
+    save_artists(data)
+    return {"status": "success", "artist": artist, "count": len(tracks)}
     step: int
     note: str
     duration: str
@@ -145,7 +265,17 @@ def save_loop(loop: Loop):
     if filename == os.path.basename(META_FILE):
         raise HTTPException(status_code=400, detail="Reserved filename")
         
+    # Проверка уникальности имени в ОБОИХ каталогах
+    existing_names = _get_existing_names()
     base_name = safe_name.replace(' ', '_').lower()
+    filename = f"{base_name}.json"
+    filepath = os.path.join(LOOPS_DIR, filename)
+    
+    # Проверка уникальности имени (по display name)
+    if loop.name in _get_existing_names():
+        raise HTTPException(status_code=400, detail=f"Track with name '{loop.name}' already exists")
+    
+    # Файл: проверка коллизий имени файла
     filepath = os.path.join(LOOPS_DIR, filename)
     counter = 1
     while os.path.exists(filepath):
@@ -160,6 +290,38 @@ def save_loop(loop: Loop):
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
     return {"status": "success", "filename": filename}
+
+
+def _get_existing_names():
+    """Возвращает множество всех имён треков (без расширения) в обоих каталогах."""
+    names = set()
+    for search_dir in [LOOPS_DIR, GOLDEN_DIR]:
+        for f in os.listdir(search_dir):
+            if f.endswith(".json") and f != os.path.basename(META_FILE):
+                try:
+                    with open(os.path.join(search_dir, f), "r", encoding="utf-8") as jf:
+                        data = json.load(jf)
+                        if "name" in data:
+                            names.add(data["name"])
+                except Exception:
+                    pass
+    return names
+
+
+def _update_artists_on_rename(old_name: str, new_name: str):
+    """Обновляет artists.json при переименовании трека."""
+    try:
+        artists = load_artists()
+        changed = False
+        for artist, tracks in artists.items():
+            if old_name in tracks:
+                idx = tracks.index(old_name)
+                tracks[idx] = new_name
+                changed = True
+        if changed:
+            save_artists(artists)
+    except Exception:
+        pass
 
 
 @app.put("/api/loops/{filename}")
@@ -180,15 +342,44 @@ def update_loop(filename: str, loop: Loop):
 
     data = loop.dict()
     if data.get("comment") is None:
-        # Payload carried no comment — keep whatever was already on disk
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 data["comment"] = json.load(f).get("comment", "")
         except Exception:
             data["comment"] = ""
 
+    # Проверка уникальности нового имени
+    new_name = data.get("name", "").strip()
+    if not new_name:
+        raise HTTPException(status_code=400, detail="Empty track name")
+    
+    existing_names = _get_existing_names()
+    # Исключаем текущий трек из проверки (он будет переименован)
+    old_name = None
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            old_name = json.load(f).get("name", "")
+    except Exception:
+        pass
+    existing_names.discard(old_name)
+    
+    if new_name in existing_names:
+        raise HTTPException(status_code=400, detail=f"Track with name '{new_name}' already exists")
+
+    # Обновляем данные
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
+    
+    # Если имя изменилось — обновляем artists.json и, при необходимости, переименовываем файл
+    if new_name != old_name:
+        _update_artists_on_rename(old_name, new_name)
+        # Переименование файла (если нужно, чтобы filename соответствовал name)
+        new_filename = re.sub(r'[^a-zA-Z0-9_-]', '_', new_name).lower() + ".json"
+        new_filepath = os.path.join(os.path.dirname(filepath), new_filename)
+        if not os.path.exists(new_filepath) and new_filename != safe_filename:
+            os.rename(filepath, new_filepath)
+            safe_filename = new_filename
+
     return {"status": "success", "filename": safe_filename}
 
 
@@ -277,6 +468,10 @@ def generate_loop_endpoint(req: GenerateRequest):
         safe = "".join(c for c in loop["name"] if c.isalnum() or c in " -_").strip()
         base = safe.replace(" ", "_").lower() or f"loop_{uuid.uuid4().hex[:8]}"
         
+    # Проверка уникальности display name в обоих каталогах
+    if loop["name"] in _get_existing_names():
+        raise HTTPException(status_code=400, detail=f"Track with name '{loop['name']}' already exists")
+    
     filename = f"{base}.json"
     filepath = os.path.join(LOOPS_DIR, filename)
     ctr = 1

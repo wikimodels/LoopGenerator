@@ -868,9 +868,11 @@ async function saveLoop() {
             body: JSON.stringify(data)
         });
         const result = await res.json();
-        if (result.status === 'success') {
+        if (res.ok && result.status === 'success') {
             showToast("Loop saved!");
             fetchLoops(); // Refresh catalog
+        } else {
+            alert((result.detail || `HTTP ${res.status}`));
         }
     } catch (e) {
         console.error(e);

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artists - LoopGenerator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_catalog.css">
+    <link rel="stylesheet" href="style_modal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+    <script src="audio_renderer.js?v=3"></script>
+    <script src="navbar.js" defer></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navbar injected by navbar.js -->
+
+        <main class="main-content catalog-main">
+            <div class="catalog-header">
+                <div class="header-title-row">
+                    <h2>Artists</h2>
+                    <div class="header-filters">
+                        <div class="search-wrapper">
+                            <input type="text" id="search-input" class="search-input" placeholder="Search artists..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button id="search-clear" class="search-clear hidden" title="Clear search"><span class="material-icons">close</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-bar-content">
+                    <div class="action-buttons">
+                        <button id="btn-add-artist" class="btn primary" title="Add new artist">
+                            <span class="material-icons">person_add</span> Add Artist
+                        </button>
+                        <button id="btn-delete-selected-artists" class="btn danger" disabled>
+                            <span class="material-icons">delete</span> Delete Selected
+                        </button>
+                        <div class="selection-info">
+                            <label class="custom-checkbox-wrapper">
+                                <input type="checkbox" id="check-all-artists">
+                                <span class="checkmark"></span>
+                                Select All
+                            </label>
+                            <span><span id="selected-artist-count">0</span> selected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="artists-list" class="catalog-list">
+                <!-- Artists rendered here via JS -->
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Artist Tracks Modal -->
+    <div id="artist-tracks-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2 id="modal-artist-name">Artist Tracks</h2>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="btn-copy-tracks" class="btn neutral" title="Copy all track names">
+                        <span class="material-icons">content_copy</span> Copy All
+                    </button>
+                    <button id="btn-save-tracks" class="btn primary" title="Save tracks">
+                        <span class="material-icons">save</span> Save
+                    </button>
+                    <button id="btn-close-tracks-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <textarea id="artist-tracks-textarea" class="input-text large-textarea" style="min-height:420px;resize:vertical;white-space:pre;width:96%;" placeholder="One track name per line..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">Message</div>
+
+    <script src="artists.js?v=2"></script>
+</body>
+</html>

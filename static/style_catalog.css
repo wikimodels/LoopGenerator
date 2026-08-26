@@ -883,3 +883,464 @@
     text-align: right;
 }
 
+
+/* ─── Artist usage tracking ─────────────────────────────────────────────── */
+.artist-filter {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 6px 16px;
+    margin-left: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+}
+.artist-filter .material-icons { font-size: 18px; color: var(--text-muted, #888); }
+.artist-select {
+    background: var(--bg-secondary, #222);
+    color: var(--text-main, #eee);
+    border: none;
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 0.85rem;
+    width: auto;
+    min-width: 140px;
+    max-width: 320px;
+}
+/* Выделенный стиль: двойная ширина выпадающего списка артистов.
+   ID-селектор — чтобы никакие общие правила его не перебили. */
+select#artist-select {
+    width: 380px;
+    min-width: 380px;
+    max-width: 380px;
+}
+.artist-add-btn { padding: 2px; }
+.artist-hide-used {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--text-muted, #888);
+}
+.artist-hide-used input { display: none; }
+.artist-hide-used .material-icons { font-size: 18px; }
+.artist-hide-used input:checked + .material-icons { color: var(--accent, #7aa2f7); }
+
+.used-badge {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    background: rgba(255, 180, 60, 0.15);
+    color: #ffb43c;
+    border: 1px solid rgba(255, 180, 60, 0.35);
+    width: fit-content;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.used-badge.mine { cursor: pointer; }
+.used-badge.mine:hover { background: rgba(255, 90, 70, 0.2); color: #ff5a46; border-color: rgba(255, 90, 70, 0.5); }
+
+/* ─── Artist used modal ─────────────────────────────────────────────────── */
+.used-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 6px;
+}
+.used-row .material-icons { font-size: 18px; color: var(--text-muted, #888); }
+.used-row.mine { border-color: rgba(255, 180, 60, 0.5); background: rgba(255, 180, 60, 0.07); }
+.used-row.mine > .material-icons:first-child { color: #ffb43c; }
+.used-artist-name { flex: 1; font-weight: 500; }
+.used-you-tag {
+    font-size: 0.68rem;
+    padding: 1px 7px;
+    border-radius: 8px;
+    background: rgba(255, 180, 60, 0.15);
+    color: #ffb43c;
+    margin-right: 8px;
+}
+/* ─── Reserved space for used badge ──────────────────────────────────────── */
+.used-badge-container {
+    min-width: 70px;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+}
+
+/* ─── Artists Page Styles ─────────────────────────────────────────────────── */
+.artist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.22rem 0.55rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s, border-left 0.2s, box-shadow 0.2s;
+}
+.artist-item:hover {
+    background-color: var(--bg-color);
+}
+.artist-item .custom-checkbox-wrapper {
+    flex-shrink: 0;
+}
+.artist-info {
+    flex: 1;
+    min-width: 0;
+}
+.artist-name {
+    font-weight: 500;
+    color: var(--text-main, #eee);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 8px;
+}
+.artist-name:hover {
+    color: var(--accent, #7aa2f7);
+}
+.artist-name:focus {
+    outline: 2px solid var(--accent, #7aa2f7);
+    border-radius: 2px;
+}
+.artist-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-muted, #888);
+}
+.artist-meta .material-icons {
+    font-size: 18px;
+    vertical-align: middle;
+    color: var(--text-muted, #888);
+}
+.tracks-btn {
+    padding: 2px;
+    opacity: 0.6;
+    transition: opacity 0.15s, color 0.15s;
+}
+.tracks-btn:hover {
+    opacity: 1;
+    color: var(--accent, #7aa2f7);
+}
+.artist-item.selected {
+    border-left: 2px solid var(--accent, #7aa2f7);
+}
+
+/* Artist Tracks Modal */
+.artist-tracks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color, #333);
+}
+.artist-tracks-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+.artist-tracks-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.artist-tracks-search {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+/* Tracks Modal Grid */
+.tracks-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    height: 400px;
+    overflow: hidden;
+}
+.tracks-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.tracks-column h3 {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #888);
+    font-weight: 500;
+}
+.tracks-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.tracks-list.scrollable {
+    max-height: 340px;
+}
+.track-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: var(--bg-secondary, #222);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    transition: background 0.15s;
+}
+.track-row:hover {
+    background: var(--bg-tertiary, #2a2a2a);
+}
+.track-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    color: var(--text-main, #eee);
+}
+.track-row .btn {
+    padding: 4px;
+    min-width: 28px;
+    height: 28px;
+}
+.track-row .btn .material-icons {
+    font-size: 16px;
+}
+.available-track .add-track-btn {
+    color: var(--success, #4ade80);
+}
+.current-track .remove-track-btn {
+    color: var(--danger, #f7768e);
+}
+.empty {
+    text-align: center;
+    color: var(--text-muted, #888);
+    padding: 20px;
+    font-size: 0.85rem;
+}
+
+
+/* Artist Tracks Modal specific */
+.artist-tracks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color, #333);
+}
+.artist-tracks-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+.artist-tracks-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.artist-tracks-search {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+/* Tracks Modal Grid */
+.tracks-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    height: 400px;
+    overflow: hidden;
+}
+.tracks-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.tracks-column h3 {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #888);
+    font-weight: 500;
+}
+.tracks-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.tracks-list.scrollable {
+    max-height: 340px;
+}
+.track-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: var(--bg-secondary, #222);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    transition: background 0.15s;
+}
+.track-row:hover {
+    background: var(--bg-tertiary, #2a2a2a);
+}
+.track-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    color: var(--text-main, #eee);
+}
+.track-row .btn {
+    padding: 4px;
+    min-width: 28px;
+    height: 28px;
+}
+.track-row .btn .material-icons {
+    font-size: 16px;
+}
+.available-track .add-track-btn {
+    color: var(--success, #4ade80);
+}
+.current-track .remove-track-btn {
+    color: var(--danger, #f7768e);
+}
+.empty {
+    text-align: center;
+    color: var(--text-muted, #888);
+    padding: 20px;
+    font-size: 0.85rem;
+}
+
+
+/* Artist Tracks Modal specific */
+.artist-tracks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color, #333);
+}
+.artist-tracks-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+.artist-tracks-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.artist-tracks-search {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+/* Tracks Modal Grid */
+.tracks-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    height: 400px;
+    overflow: hidden;
+}
+.tracks-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.tracks-column h3 {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #888);
+    font-weight: 500;
+}
+.tracks-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.tracks-list.scrollable {
+    max-height: 340px;
+}
+.track-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: var(--bg-secondary, #222);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    transition: background 0.15s;
+}
+.track-row:hover {
+    background: var(--bg-tertiary, #2a2a2a);
+}
+.track-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    color: var(--text-main, #eee);
+}
+.track-row .btn {
+    padding: 4px;
+    min-width: 28px;
+    height: 28px;
+}
+.track-row .btn .material-icons {
+    font-size: 16px;
+}
+.available-track .add-track-btn {
+    color: var(--success, #4ade80);
+}
+.current-track .remove-track-btn {
+    color: var(--danger, #f7768e);
+}
+.empty {
+    text-align: center;
+    color: var(--text-muted, #888);
+    padding: 20px;
+    font-size: 0.85rem;
+}
+
+/* ─── Modal actions row (right-aligned buttons, как в других модалах) ────── */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+.modal-actions .btn {
+    min-width: 100px;
+}
+
+
+/* ─── Artist tracks modal textarea ───────────────────────────────────────── */
+#artist-tracks-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
