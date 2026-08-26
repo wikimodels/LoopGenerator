@@ -198,16 +198,21 @@ Output JSON within markdown code tags. Suggestions/explanations outside the bloc
         const tabs = document.getElementById('instructions-tabs');
         const promptText = document.getElementById('ai-prompt-text');
         const DEFAULT_PROMPT = promptEl ? promptEl.value : '';
-        const CORRECTION_PROMPT = `Проведи полную аудио-инженерную и гармоническую коррекцию JSON-паттерна.
+        const CORRECTION_PROMPT = `Мастер-промт: Аудио-инженерная и гармоническая коррекция JSON-паттерна
+
+Проведи полную аудио-инженерную и гармоническую коррекцию этого JSON-паттерна.
 
 
 Overlap Cleanup: устрани дубли одной и той же ноты на одном шаге с разной длительностью (оставляй более длинную).
 Register Range: мелодия строго в диапазоне A4–D5, не короче 8n на нотах выше A4. Ноты октавы 6+ — недопустимы.
 Voice Leading & Harmony: используй только диатонические аккорды тональности (с допущением гармонического минора). Любой аккорд вне этого списка — замени на ближайший диатонический той же функции. Разнеси голоса минимум на малую терцию, чтобы избежать наложения тембров.
-Velocity: бас 0.65–0.70, аккомпанемент 0.26–0.30, мелодия 0.48–0.52, самые высокие ноты — нижняя граница диапазона.
-Убери все "chance" — 100% детерминированное исполнение.
-Название +"_Fixed".
-Верни только готовый JSON.`;
+Velocity Curve: бас 0.65–0.70, аккомпанемент 0.26–0.30, мелодия 0.48–0.52, самые высокие ноты — нижняя граница диапазона.
+Anti-Buzz Gap: если два соседних по времени звука аккомпанемента имеют одинаковую высоту (retrigger), сократи длительность первого на один уровень (4n→8n, 8n→16n), оставляя паузу перед повтором. Не применяй это правило, если следующая нота имеет другую высоту.
+Фиксация паттерна: удали все вероятностные параметры ("chance") — 100% детерминированное исполнение.
+К названию трека добавь суффикс _Fixed (если его ещё нет).
+
+
+Верни только готовый исправленный JSON.`;
 
         function activateTab(btn, text) {
             tabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
@@ -309,6 +314,65 @@ Velocity: бас 0.65–0.70, аккомпанемент 0.26–0.30, мелод
             });
         });
     }
+
+    // ── Insert JSON: общая валидация документа (используется страницами) ────
+    // Возвращает массив строк-проблем; пустой массив = документ валиден.
+    window.validateLoopsImport = async function (data) {
+        const problems = [];
+        if (!Array.isArray(data)) {
+            problems.push('Формат: документ должен быть JSON-массивом [...], получено: ' +
+                (data === null ? 'null' : Array.isArray(data) ? 'array' : typeof data));
+            return problems;
+        }
+        if (data.length === 0) {
+            problems.push('Формат: массив пуст — нечего импортировать.');
+            return problems;
+        }
+
+        // Имена уже существующих треков (оба каталога)
+        const existing = new Set();
+        try {
+            const [a, b] = await Promise.all([fetch('/api/loops'), fetch('/api/golden')]);
+            if (a.ok) (await a.json()).forEach(l => { if (l && l.name) existing.add(l.name); });
+            if (b.ok) (await b.json()).forEach(l => { if (l && l.name) existing.add(l.name); });
+        } catch (_) {}
+
+        const seen = new Set();
+        data.forEach((item, i) => {
+            const label = (item && typeof item === 'object' && item.name) ? `"${item.name}"` : `элемент #${i + 1}`;
+            if (!item || typeof item !== 'object' || Array.isArray(item)) {
+                problems.push(`${label}: не является объектом`);
+                return;
+            }
+            if (typeof item.name !== 'string' || !item.name.trim())
+                problems.push(`${label}: поле "name" отсутствует или пустое`);
+            if (typeof item.bpm !== 'number' || !Number.isFinite(item.bpm) || item.bpm <= 0)
+                problems.push(`${label}: поле "bpm" должно быть положительным числом`);
+            if (!Number.isInteger(item.steps) || item.steps <= 0)
+                problems.push(`${label}: поле "steps" должно быть целым числом > 0`);
+            if (item.instrument !== undefined && typeof item.instrument !== 'string')
+                problems.push(`${label}: поле "instrument" должно быть строкой`);
+            if (!Array.isArray(item.notes)) {
+                problems.push(`${label}: поле "notes" отсутствует или не является массивом`);
+            } else {
+                const badNote = item.notes.findIndex(n =>
+                    !n || typeof n !== 'object' ||
+                    !Number.isInteger(n.step) || n.step < 0 ||
+                    typeof n.note !== 'string' || !n.note.trim() ||
+                    typeof n.duration !== 'string' || !n.duration.trim());
+                if (badNote >= 0)
+                    problems.push(`${label}: невалидная нота в "notes" (индекс ${badNote}) — нужны step:int>=0, note:"C4", duration:"8n"`);
+            }
+            if (item.name && typeof item.name === 'string') {
+                if (seen.has(item.name))
+                    problems.push(`Дубль внутри документа: "${item.name}" встречается больше одного раза`);
+                seen.add(item.name);
+                if (existing.has(item.name))
+                    problems.push(`Дубль с существующими треками: "${item.name}" уже есть в каталоге/golden`);
+            }
+        });
+        return problems;
+    };
 
     // Wire modals after DOM is ready
     if (document.readyState === 'loading') {

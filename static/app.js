@@ -528,8 +528,10 @@ function setupEventListeners() {
         if (!text) return;
         try {
             const data = JSON.parse(text);
-            if (!Array.isArray(data)) {
-                showToast("Error: JSON must be an array [...]");
+            const problems = window.validateLoopsImport ? await window.validateLoopsImport(data) : [];
+            if (problems.length) {
+                alert('Insert JSON: документ не прошёл валидацию:\n\n' + problems.join('\n') +
+                      '\n\nИмпорт отменён — исправьте документ и повторите.');
                 return;
             }
             
