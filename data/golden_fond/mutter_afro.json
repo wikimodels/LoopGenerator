@@ -1,6 +1,6 @@
 {
     "name": "Mutter_Afro",
-    "bpm": 194,
+    "bpm": 180,
     "instrument": "piano",
     "steps": 224,
     "key": "F#",
@@ -1043,5 +1043,7 @@
             "velocity": 0.7,
             "chance": null
         }
-    ]
+    ],
+    "comment": "",
+    "style": null
 }

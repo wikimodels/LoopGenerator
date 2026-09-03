@@ -1,0 +1,223 @@
+{
+    "name": "Organ_Fandango_Sub_Bass_Groove",
+    "bpm": 227,
+    "instrument": "synth",
+    "steps": 128,
+    "key": "F#",
+    "scale": "Minor",
+    "swing": 5.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "F#2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C#3",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "F#2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "A2",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "E2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "B2",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "E2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "G#2",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "A2",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "D2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "F#2",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#2",
+            "duration": "2n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G#2",
+            "duration": "2n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "C#2",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F#2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "C#3",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "F#2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 76,
+            "note": "A2",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "E2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "B2",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "E2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 92,
+            "note": "G#2",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "A2",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "D2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 108,
+            "note": "F#2",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "C#2",
+            "duration": "2n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "G#2",
+            "duration": "2n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 124,
+            "note": "E2",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        }
+    ],
+    "comment": "\u0413\u043b\u0443\u0431\u043e\u043a\u0438\u0439 \u0431\u0430\u0441\u043e\u0432\u044b\u0439 Afro-House \u0433\u0440\u0443\u0432",
+    "style": null
+}

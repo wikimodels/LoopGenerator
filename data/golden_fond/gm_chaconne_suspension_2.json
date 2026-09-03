@@ -1,6 +1,6 @@
 {
     "name": "Gm_Chaconne_Suspension",
-    "bpm": 195,
+    "bpm": 191,
     "instrument": "lute",
     "steps": 64,
     "key": "G",
@@ -148,5 +148,6 @@
             "chance": null
         }
     ],
-    "comment": "G minor chaconne with stepwise melodic descent/ascent and high peak tension resolving to D major"
+    "comment": "G minor chaconne with stepwise melodic descent/ascent and high peak tension resolving to D major",
+    "style": null
 }

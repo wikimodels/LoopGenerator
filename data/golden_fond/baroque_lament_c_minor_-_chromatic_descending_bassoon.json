@@ -1,0 +1,160 @@
+{
+    "name": "Baroque Lament C Minor - Chromatic Descending Bassoon",
+    "bpm": 228,
+    "instrument": "bassoon",
+    "steps": 128,
+    "key": "C",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C2",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "G3",
+            "duration": "4n.",
+            "velocity": 0.61,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "G#3",
+            "duration": "8n",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "G3",
+            "duration": "4n",
+            "velocity": 0.63,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "F3",
+            "duration": "4n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "B1",
+            "duration": "2n",
+            "velocity": 0.64,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D#3",
+            "duration": "4n.",
+            "velocity": 0.62,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.59,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "D#3",
+            "duration": "4n",
+            "velocity": 0.61,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "D3",
+            "duration": "4n",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "A#1",
+            "duration": "2n",
+            "velocity": 0.63,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "D3",
+            "duration": "4n.",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 76,
+            "note": "D#3",
+            "duration": "8n",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "D3",
+            "duration": "4n",
+            "velocity": 0.62,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "C3",
+            "duration": "4n",
+            "velocity": 0.59,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "G1",
+            "duration": "2n",
+            "velocity": 0.67,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "B2",
+            "duration": "4n",
+            "velocity": 0.63,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 108,
+            "note": "D3",
+            "duration": "8n",
+            "velocity": 0.61,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "G2",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "B2",
+            "duration": "2n",
+            "velocity": 0.64,
+            "chance": null
+        }
+    ],
+    "comment": "\u041b\u0430\u043c\u0435\u043d\u0442 \u0441 \u0431\u0430\u0441\u043e\u0432\u043e\u0439 \u0442\u0435\u043c\u043e\u0439 \u0445\u0440\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0433\u043e \u0441\u043f\u0443\u0441\u043a\u0430 (Lamento Bass) \u0438 \u044d\u043a\u0441\u043f\u0440\u0435\u0441\u0441\u0438\u0432\u043d\u044b\u043c\u0438 \u0432\u043e\u0441\u044c\u043c\u044b\u043c\u0438 \u043e\u043f\u0435\u0432\u0430\u043d\u0438\u044f\u043c\u0438 \u0443 \u0444\u0430\u0433\u043e\u0442\u0430.",
+    "style": "Baroque Chamber"
+}

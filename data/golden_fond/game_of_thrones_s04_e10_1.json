@@ -1,6 +1,6 @@
 {
     "name": "Game_of_Thrones_S04_E10_1",
-    "bpm": 240,
+    "bpm": 224,
     "instrument": "piano",
     "steps": 372,
     "key": "Bb",
@@ -1057,5 +1057,7 @@
             "velocity": 0.28,
             "chance": null
         }
-    ]
+    ],
+    "comment": "",
+    "style": null
 }

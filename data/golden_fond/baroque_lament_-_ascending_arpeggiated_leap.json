@@ -1,0 +1,293 @@
+{
+    "name": "Baroque Lament - Ascending Arpeggiated Leap",
+    "bpm": 218,
+    "instrument": "viola",
+    "steps": 128,
+    "key": "G",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "G2",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "D3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "Bb3",
+            "duration": "2n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "G3",
+            "duration": "4n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "Bb3",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "D4",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "Eb2",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "G3",
+            "duration": "2n",
+            "velocity": 0.66,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "Bb3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "Eb4",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "D4",
+            "duration": "4n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "C4",
+            "duration": "4n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F2",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "C3",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F3",
+            "duration": "4n",
+            "velocity": 0.66,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "A3",
+            "duration": "4n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "C4",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "D2",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "F#3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "A3",
+            "duration": "2n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "D4",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C4",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "Bb3",
+            "duration": "4n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "C2",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "Eb3",
+            "duration": "2n",
+            "velocity": 0.66,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "G3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "Eb4",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "D4",
+            "duration": "4n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 76,
+            "note": "C4",
+            "duration": "4n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "D2",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "F#3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "A3",
+            "duration": "2n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "A3",
+            "duration": "4n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 84,
+            "note": "C4",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "D4",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "G2",
+            "duration": "1n",
+            "velocity": 0.82,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D3",
+            "duration": "1n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "G3",
+            "duration": "1n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "Bb3",
+            "duration": "1n",
+            "velocity": 0.75,
+            "chance": null
+        }
+    ],
+    "comment": "",
+    "style": "Baroque Viola Ascending"
+}

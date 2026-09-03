@@ -1,6 +1,6 @@
 {
     "name": "Baroque Lament C Minor Track 6 Viola da Gamba Lamentation",
-    "bpm": 156,
+    "bpm": 151,
     "instrument": "viola da gamba",
     "steps": 128,
     "key": "C",
@@ -365,5 +365,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

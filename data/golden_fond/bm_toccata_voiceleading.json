@@ -1,6 +1,6 @@
 {
     "name": "Bm_Toccata_VoiceLeading",
-    "bpm": 194,
+    "bpm": 166,
     "instrument": "harpsichord",
     "steps": 64,
     "key": "B",
@@ -148,5 +148,6 @@
             "chance": null
         }
     ],
-    "comment": "B minor toccata with voice leading through VI and iv chords, resolving into a dry F#7 dominant cadence"
+    "comment": "B minor toccata with voice leading through VI and iv chords, resolving into a dry F#7 dominant cadence",
+    "style": null
 }

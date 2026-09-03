@@ -1,6 +1,6 @@
 {
     "name": "C_Sharp_m_Ostinato_RisingSequence",
-    "bpm": 77,
+    "bpm": 137,
     "instrument": "piano",
     "steps": 64,
     "key": "C#",
@@ -260,5 +260,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

@@ -1,0 +1,279 @@
+{
+    "name": "Baroque Lament - Consonant Pitty Arch",
+    "bpm": 201,
+    "instrument": "harpsichord",
+    "steps": 128,
+    "key": "D",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "D3",
+            "duration": "2n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "F3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "A3",
+            "duration": "2n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "D4",
+            "duration": "4n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "F4",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "C3",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "E3",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "G3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "F4",
+            "duration": "4n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "G4",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "Bb2",
+            "duration": "2n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D3",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F4",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "D4",
+            "duration": "2n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "A2",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#3",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "E3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "E4",
+            "duration": "2n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C#4",
+            "duration": "2n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "D3",
+            "duration": "2n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F3",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "A3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "D4",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "F4",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "A2",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "E3",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "G3",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "E4",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "C#4",
+            "duration": "2n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D3",
+            "duration": "1n",
+            "velocity": 0.82,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "F3",
+            "duration": "1n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "A3",
+            "duration": "1n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D4",
+            "duration": "1n",
+            "velocity": 0.78,
+            "chance": null
+        }
+    ],
+    "comment": "",
+    "style": "Baroque Harpsichord Consonant Arch"
+}

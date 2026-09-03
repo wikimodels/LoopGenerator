@@ -1,6 +1,6 @@
 {
     "name": "Baroque Passacaglia Minor C 373665 (Smoothed)",
-    "bpm": 135,
+    "bpm": 128,
     "instrument": "piano",
     "steps": 128,
     "key": "C",
@@ -680,5 +680,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

@@ -1,6 +1,6 @@
 {
     "name": "Baroque Lament C Minor Track 2 Chromatic Descent",
-    "bpm": 212,
+    "bpm": 153,
     "instrument": "virginal",
     "steps": 128,
     "key": "C",
@@ -491,5 +491,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

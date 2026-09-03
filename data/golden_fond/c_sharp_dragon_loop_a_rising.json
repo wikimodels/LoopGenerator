@@ -1,6 +1,6 @@
 {
     "name": "C_Sharp_Dragon_Loop_A_Rising",
-    "bpm": 103,
+    "bpm": 131,
     "instrument": "piano",
     "steps": 64,
     "key": "C#",
@@ -204,5 +204,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

@@ -1,0 +1,272 @@
+{
+  "name": "Renaissance Pavane - Grand Processional",
+  "bpm": 224,
+  "instrument": "lute",
+  "steps": 128,
+  "key": null,
+  "scale": null,
+  "swing": 0.0,
+  "notes": [
+    {
+      "step": 0,
+      "note": "F2",
+      "duration": "2n",
+      "velocity": 0.78,
+      "chance": null
+    },
+    {
+      "step": 0,
+      "note": "A3",
+      "duration": "2n",
+      "velocity": 0.72,
+      "chance": null
+    },
+    {
+      "step": 0,
+      "note": "C4",
+      "duration": "2n",
+      "velocity": 0.79,
+      "chance": null
+    },
+    {
+      "step": 8,
+      "note": "C2",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 8,
+      "note": "F4",
+      "duration": "2n",
+      "velocity": 0.81,
+      "chance": null
+    },
+    {
+      "step": 16,
+      "note": "D2",
+      "duration": "2n",
+      "velocity": 0.75,
+      "chance": null
+    },
+    {
+      "step": 16,
+      "note": "F4",
+      "duration": "2n",
+      "velocity": 0.8,
+      "chance": null
+    },
+    {
+      "step": 24,
+      "note": "A2",
+      "duration": "2n",
+      "velocity": 0.73,
+      "chance": null
+    },
+    {
+      "step": 24,
+      "note": "E4",
+      "duration": "2n",
+      "velocity": 0.77,
+      "chance": null
+    },
+    {
+      "step": 32,
+      "note": "Bb2",
+      "duration": "2n",
+      "velocity": 0.76,
+      "chance": null
+    },
+    {
+      "step": 32,
+      "note": "D4",
+      "duration": "2n",
+      "velocity": 0.8,
+      "chance": null
+    },
+    {
+      "step": 40,
+      "note": "F2",
+      "duration": "2n",
+      "velocity": 0.73,
+      "chance": null
+    },
+    {
+      "step": 40,
+      "note": "C4",
+      "duration": "2n",
+      "velocity": 0.76,
+      "chance": null
+    },
+    {
+      "step": 48,
+      "note": "G2",
+      "duration": "2n",
+      "velocity": 0.75,
+      "chance": null
+    },
+    {
+      "step": 48,
+      "note": "D4",
+      "duration": "4n",
+      "velocity": 0.78,
+      "chance": null
+    },
+    {
+      "step": 52,
+      "note": "C4",
+      "duration": "4n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 56,
+      "note": "C2",
+      "duration": "2n",
+      "velocity": 0.77,
+      "chance": null
+    },
+    {
+      "step": 56,
+      "note": "E4",
+      "duration": "2n",
+      "velocity": 0.8,
+      "chance": null
+    },
+    {
+      "step": 64,
+      "note": "F2",
+      "duration": "2n",
+      "velocity": 0.78,
+      "chance": null
+    },
+    {
+      "step": 64,
+      "note": "F4",
+      "duration": "2n",
+      "velocity": 0.82,
+      "chance": null
+    },
+    {
+      "step": 72,
+      "note": "A2",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 72,
+      "note": "C5",
+      "duration": "2n",
+      "velocity": 0.83,
+      "chance": null
+    },
+    {
+      "step": 80,
+      "note": "Bb2",
+      "duration": "2n",
+      "velocity": 0.76,
+      "chance": null
+    },
+    {
+      "step": 80,
+      "note": "D5",
+      "duration": "4n",
+      "velocity": 0.84,
+      "chance": null
+    },
+    {
+      "step": 84,
+      "note": "C5",
+      "duration": "4n",
+      "velocity": 0.79,
+      "chance": null
+    },
+    {
+      "step": 88,
+      "note": "F2",
+      "duration": "2n",
+      "velocity": 0.75,
+      "chance": null
+    },
+    {
+      "step": 88,
+      "note": "A4",
+      "duration": "2n",
+      "velocity": 0.8,
+      "chance": null
+    },
+    {
+      "step": 96,
+      "note": "D2",
+      "duration": "2n",
+      "velocity": 0.76,
+      "chance": null
+    },
+    {
+      "step": 96,
+      "note": "F4",
+      "duration": "2n",
+      "velocity": 0.81,
+      "chance": null
+    },
+    {
+      "step": 104,
+      "note": "G2",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 104,
+      "note": "B4",
+      "duration": "2n",
+      "velocity": 0.79,
+      "chance": null
+    },
+    {
+      "step": 112,
+      "note": "C2",
+      "duration": "2n",
+      "velocity": 0.78,
+      "chance": null
+    },
+    {
+      "step": 112,
+      "note": "E4",
+      "duration": "2n",
+      "velocity": 0.82,
+      "chance": null
+    },
+    {
+      "step": 120,
+      "note": "F2",
+      "duration": "1n",
+      "velocity": 0.8,
+      "chance": null
+    },
+    {
+      "step": 120,
+      "note": "C3",
+      "duration": "1n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 120,
+      "note": "A3",
+      "duration": "1n",
+      "velocity": 0.72,
+      "chance": null
+    },
+    {
+      "step": 120,
+      "note": "F4",
+      "duration": "1n",
+      "velocity": 0.85,
+      "chance": null
+    }
+  ],
+  "comment": "",
+  "style": "Renaissance Pavane Lydian"
+}

@@ -1,0 +1,181 @@
+{
+    "name": "Organ_II_Accelerated_Descent",
+    "bpm": 260,
+    "instrument": "organ",
+    "steps": 128,
+    "key": "G",
+    "scale": "Harmonic Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "G1",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "D2",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "A#2",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "G3",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "A3",
+            "duration": "4n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "F#3",
+            "duration": "4n",
+            "velocity": 0.52,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "C1",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "C2",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D#3",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "G3",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "F3",
+            "duration": "4n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "G3",
+            "duration": "4n",
+            "velocity": 0.5,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "D1",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "A2",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "D3",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F#3",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "D#3",
+            "duration": "4n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "A3",
+            "duration": "4n",
+            "velocity": 0.49,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D#1",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "A#2",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D#3",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "G3",
+            "duration": "2n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "F3",
+            "duration": "4n",
+            "velocity": 0.28,
+            "chance": null
+        },
+        {
+            "step": 120,
+            "note": "D3",
+            "duration": "4n",
+            "velocity": 0.48,
+            "chance": null
+        }
+    ],
+    "comment": "\u041e\u0440\u0433\u0430\u043d\u043d\u0430\u044f \u043f\u0430\u0440\u0442\u0438\u044f \u0441 \u0443\u043c\u0435\u043d\u044c\u0448\u0435\u043d\u043d\u044b\u043c\u0438 \u0432 2 \u0440\u0430\u0437\u0430 \u0434\u043b\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044f\u043c\u0438 \u043d\u043e\u0442 (1m -> 2n, 2n -> 4n), \u0441\u043e\u0445\u0440\u0430\u043d\u044f\u044e\u0449\u0430\u044f \u0441\u0442\u0440\u043e\u0433\u0443\u044e \u0433\u0430\u0440\u043c\u043e\u043d\u0438\u0447\u0435\u0441\u043a\u0443\u044e \u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0443.",
+    "style": "gothic dark-wave"
+}

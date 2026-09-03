@@ -1,6 +1,6 @@
 {
     "name": "C_Sharp_m_Ostinato_Hemiola",
-    "bpm": 84,
+    "bpm": 176,
     "instrument": "piano",
     "steps": 64,
     "key": "C#",
@@ -176,5 +176,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

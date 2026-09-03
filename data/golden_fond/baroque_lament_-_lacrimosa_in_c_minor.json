@@ -1,0 +1,335 @@
+{
+    "name": "Baroque Lament - Lacrimosa in C Minor",
+    "bpm": 180,
+    "instrument": "viola",
+    "steps": 128,
+    "key": "C",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C2",
+            "duration": "2n",
+            "velocity": 0.77,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "Eb3",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "C4",
+            "duration": "8n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 14,
+            "note": "B4",
+            "duration": "16n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "B2",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.67,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "D3",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 30,
+            "note": "C4",
+            "duration": "16n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "Ab2",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "Eb3",
+            "duration": "8n",
+            "velocity": 0.67,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "Ab4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "C4",
+            "duration": "8n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 46,
+            "note": "Bb4",
+            "duration": "16n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G2",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "D3",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "B3",
+            "duration": "8n",
+            "velocity": 0.69,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 62,
+            "note": "F4",
+            "duration": "16n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F2",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.67,
+            "chance": null
+        },
+        {
+            "step": 68,
+            "note": "Ab3",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 76,
+            "note": "C4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "Eb2",
+            "duration": "2n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "Bb3",
+            "duration": "8n",
+            "velocity": 0.67,
+            "chance": null
+        },
+        {
+            "step": 84,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "Eb4",
+            "duration": "8n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 92,
+            "note": "Bb4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "G2",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "B3",
+            "duration": "16n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 98,
+            "note": "C4",
+            "duration": "16n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 100,
+            "note": "D4",
+            "duration": "16n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 102,
+            "note": "Eb4",
+            "duration": "16n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "F4",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 106,
+            "note": "G4",
+            "duration": "16n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 108,
+            "note": "Ab4",
+            "duration": "16n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 110,
+            "note": "G4",
+            "duration": "16n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "C2",
+            "duration": "1n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "G3",
+            "duration": "1n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "E4",
+            "duration": "1n",
+            "velocity": 0.76,
+            "chance": null
+        }
+    ],
+    "comment": "",
+    "style": "Baroque Lament Minor"
+}

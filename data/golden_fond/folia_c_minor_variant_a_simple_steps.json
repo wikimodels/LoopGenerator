@@ -1,6 +1,6 @@
 {
     "name": "Folia C Minor Variant A Simple Steps",
-    "bpm": 193,
+    "bpm": 154,
     "instrument": "virginal",
     "steps": 64,
     "key": "C",
@@ -274,5 +274,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

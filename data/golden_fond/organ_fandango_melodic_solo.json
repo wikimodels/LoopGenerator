@@ -1,0 +1,216 @@
+{
+    "name": "Organ_Fandango_Melodic_Solo",
+    "bpm": 240,
+    "instrument": "piano",
+    "steps": 128,
+    "key": "F#",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "F#2",
+            "duration": "2n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C#4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "E2",
+            "duration": "2n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "B3",
+            "duration": "2n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D2",
+            "duration": "2n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "A3",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "B3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#2",
+            "duration": "2n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G#3",
+            "duration": "2n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F#2",
+            "duration": "2n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F#4",
+            "duration": "4n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 76,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "E2",
+            "duration": "2n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 92,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D2",
+            "duration": "2n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 108,
+            "note": "B3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "C#2",
+            "duration": "2n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "C#4",
+            "duration": "2n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 124,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        }
+    ],
+    "comment": "\u041c\u0435\u043b\u043e\u0434\u0438\u044f \u043e\u043f\u0443\u0449\u0435\u043d\u0430 \u043d\u0430 \u043e\u043a\u0442\u0430\u0432\u0443 \u043d\u0438\u0436\u0435 (\u0431\u0430\u0441 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d)",
+    "style": null
+}

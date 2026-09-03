@@ -1,6 +1,6 @@
 {
     "name": "FFS_So_Many_Bridges_3",
-    "bpm": 84,
+    "bpm": 185,
     "instrument": "piano",
     "steps": 128,
     "key": "B",
@@ -372,5 +372,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

@@ -1,0 +1,237 @@
+{
+    "name": "Baroque Lament XXI - La Folia Syncopata",
+    "bpm": 164,
+    "instrument": "viola",
+    "steps": 128,
+    "key": "D",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "D3",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 2,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.66,
+            "chance": null
+        },
+        {
+            "step": 10,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "C#3",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 18,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 22,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.64,
+            "chance": null
+        },
+        {
+            "step": 26,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.66,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D3",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 34,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 38,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 42,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C3",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 50,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 54,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.64,
+            "chance": null
+        },
+        {
+            "step": 58,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.66,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F3",
+            "duration": "2n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 66,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 70,
+            "note": "C5",
+            "duration": "8n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 74,
+            "note": "D5",
+            "duration": "8n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "C3",
+            "duration": "2n",
+            "velocity": 0.74,
+            "chance": null
+        },
+        {
+            "step": 82,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 86,
+            "note": "Bb4",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 90,
+            "note": "C5",
+            "duration": "8n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D3",
+            "duration": "2n",
+            "velocity": 0.78,
+            "chance": null
+        },
+        {
+            "step": 98,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 102,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.72,
+            "chance": null
+        },
+        {
+            "step": 106,
+            "note": "D5",
+            "duration": "8n",
+            "velocity": 0.76,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "A3",
+            "duration": "2n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 114,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 118,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 122,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.72,
+            "chance": null
+        }
+    ],
+    "comment": "",
+    "style": "Baroque Folia Minor"
+}

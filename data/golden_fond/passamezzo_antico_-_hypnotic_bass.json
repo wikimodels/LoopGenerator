@@ -1,0 +1,251 @@
+{
+  "name": "Renaissance Passamezzo Antico - Hypnotic Bass",
+  "bpm": 225,
+  "instrument": "lute",
+  "steps": 128,
+  "key": null,
+  "scale": null,
+  "swing": 0.0,
+  "notes": [
+    {
+      "step": 0,
+      "note": "G2",
+      "duration": "2n",
+      "velocity": 0.75,
+      "chance": null
+    },
+    {
+      "step": 0,
+      "note": "Bb3",
+      "duration": "2n",
+      "velocity": 0.72,
+      "chance": null
+    },
+    {
+      "step": 8,
+      "note": "F2",
+      "duration": "2n",
+      "velocity": 0.71,
+      "chance": null
+    },
+    {
+      "step": 8,
+      "note": "A3",
+      "duration": "2n",
+      "velocity": 0.7,
+      "chance": null
+    },
+    {
+      "step": 16,
+      "note": "G2",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 16,
+      "note": "D4",
+      "duration": "2n",
+      "velocity": 0.75,
+      "chance": null
+    },
+    {
+      "step": 24,
+      "note": "D2",
+      "duration": "2n",
+      "velocity": 0.73,
+      "chance": null
+    },
+    {
+      "step": 24,
+      "note": "F#3",
+      "duration": "2n",
+      "velocity": 0.72,
+      "chance": null
+    },
+    {
+      "step": 32,
+      "note": "Bb2",
+      "duration": "2n",
+      "velocity": 0.73,
+      "chance": null
+    },
+    {
+      "step": 32,
+      "note": "D4",
+      "duration": "2n",
+      "velocity": 0.76,
+      "chance": null
+    },
+    {
+      "step": 40,
+      "note": "F2",
+      "duration": "2n",
+      "velocity": 0.71,
+      "chance": null
+    },
+    {
+      "step": 40,
+      "note": "C4",
+      "duration": "2n",
+      "velocity": 0.73,
+      "chance": null
+    },
+    {
+      "step": 48,
+      "note": "G2",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 48,
+      "note": "Bb3",
+      "duration": "4n",
+      "velocity": 0.72,
+      "chance": null
+    },
+    {
+      "step": 52,
+      "note": "A3",
+      "duration": "4n",
+      "velocity": 0.7,
+      "chance": null
+    },
+    {
+      "step": 56,
+      "note": "D2",
+      "duration": "2n",
+      "velocity": 0.75,
+      "chance": null
+    },
+    {
+      "step": 56,
+      "note": "F#3",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 64,
+      "note": "G2",
+      "duration": "2n",
+      "velocity": 0.75,
+      "chance": null
+    },
+    {
+      "step": 64,
+      "note": "G4",
+      "duration": "2n",
+      "velocity": 0.78,
+      "chance": null
+    },
+    {
+      "step": 72,
+      "note": "F2",
+      "duration": "2n",
+      "velocity": 0.72,
+      "chance": null
+    },
+    {
+      "step": 72,
+      "note": "F4",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 80,
+      "note": "G2",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 80,
+      "note": "D4",
+      "duration": "4n",
+      "velocity": 0.76,
+      "chance": null
+    },
+    {
+      "step": 84,
+      "note": "C4",
+      "duration": "4n",
+      "velocity": 0.71,
+      "chance": null
+    },
+    {
+      "step": 88,
+      "note": "D2",
+      "duration": "2n",
+      "velocity": 0.73,
+      "chance": null
+    },
+    {
+      "step": 88,
+      "note": "A3",
+      "duration": "2n",
+      "velocity": 0.73,
+      "chance": null
+    },
+    {
+      "step": 96,
+      "note": "Bb2",
+      "duration": "2n",
+      "velocity": 0.74,
+      "chance": null
+    },
+    {
+      "step": 96,
+      "note": "D4",
+      "duration": "2n",
+      "velocity": 0.77,
+      "chance": null
+    },
+    {
+      "step": 104,
+      "note": "C2",
+      "duration": "2n",
+      "velocity": 0.71,
+      "chance": null
+    },
+    {
+      "step": 104,
+      "note": "E4",
+      "duration": "2n",
+      "velocity": 0.73,
+      "chance": null
+    },
+    {
+      "step": 112,
+      "note": "D2",
+      "duration": "2n",
+      "velocity": 0.75,
+      "chance": null
+    },
+    {
+      "step": 112,
+      "note": "F#4",
+      "duration": "2n",
+      "velocity": 0.76,
+      "chance": null
+    },
+    {
+      "step": 120,
+      "note": "G2",
+      "duration": "1n",
+      "velocity": 0.77,
+      "chance": null
+    },
+    {
+      "step": 120,
+      "note": "G4",
+      "duration": "1n",
+      "velocity": 0.79,
+      "chance": null
+    }
+  ],
+  "comment": "",
+  "style": "Renaissance Passamezzo Antico Dorian"
+}

@@ -1,6 +1,6 @@
 {
     "name": "Baroque Lament C Minor Track 1 Passacaglia",
-    "bpm": 212,
+    "bpm": 119,
     "instrument": "viola da gamba",
     "steps": 128,
     "key": "C",
@@ -554,5 +554,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

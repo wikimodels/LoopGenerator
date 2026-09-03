@@ -1,6 +1,6 @@
 {
     "name": "Baroque Lament C Minor Track 4 Lute Counterpoint",
-    "bpm": 156,
+    "bpm": 138,
     "instrument": "lute",
     "steps": 128,
     "key": "C",
@@ -484,5 +484,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

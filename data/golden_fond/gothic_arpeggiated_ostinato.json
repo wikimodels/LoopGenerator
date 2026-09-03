@@ -1,0 +1,125 @@
+{
+    "name": "Renaissance Ricercar - Gothic Arpeggiated Ostinato",
+    "bpm": 76,
+    "instrument": "church organ",
+    "steps": 16,
+    "key": "F",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "F4",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 1,
+            "note": "Ab4",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 2,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 3,
+            "note": "F5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.88,
+            "chance": null
+        },
+        {
+            "step": 5,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "G4",
+            "duration": "16n",
+            "velocity": 0.82,
+            "chance": null
+        },
+        {
+            "step": 7,
+            "note": "Bb4",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "Db5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 9,
+            "note": "Bb4",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 10,
+            "note": "G4",
+            "duration": "16n",
+            "velocity": 0.82,
+            "chance": null
+        },
+        {
+            "step": 11,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "C4",
+            "duration": "16n",
+            "velocity": 0.88,
+            "chance": null
+        },
+        {
+            "step": 13,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 14,
+            "note": "G4",
+            "duration": "16n",
+            "velocity": 0.82,
+            "chance": null
+        },
+        {
+            "step": 15,
+            "note": "Bb4",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        }
+    ],
+    "comment": "Fast continuous baroque arpeggio driving the motion.",
+    "style": "Renaissance Ricercar Minor"
+}

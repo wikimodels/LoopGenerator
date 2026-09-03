@@ -1,6 +1,6 @@
 {
     "name": "C_Sharp_m_Ostinato_OffbeatBass",
-    "bpm": 86,
+    "bpm": 158,
     "instrument": "piano",
     "steps": 64,
     "key": "C#",
@@ -204,5 +204,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

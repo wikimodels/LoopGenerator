@@ -1,6 +1,6 @@
 {
     "name": "C_Sharp_m_Ostinato_CallResponse",
-    "bpm": 82,
+    "bpm": 143,
     "instrument": "piano",
     "steps": 64,
     "key": "C#",
@@ -197,5 +197,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

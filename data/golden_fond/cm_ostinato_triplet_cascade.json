@@ -1,6 +1,6 @@
 {
     "name": "C_Sharp_m_Ostinato_Triplet_Cascade",
-    "bpm": 165,
+    "bpm": 81,
     "instrument": "piano",
     "steps": 64,
     "key": "C#",
@@ -350,5 +350,7 @@
             "velocity": 0.22,
             "chance": null
         }
-    ]
+    ],
+    "comment": "",
+    "style": null
 }

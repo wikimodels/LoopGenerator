@@ -1,6 +1,6 @@
 {
     "name": "Folia C Minor Variant B Arpeggios",
-    "bpm": 164,
+    "bpm": 154,
     "instrument": "virginal",
     "steps": 64,
     "key": "C",
@@ -323,5 +323,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

@@ -1,0 +1,209 @@
+{
+    "name": "Baroque Lament C Minor Track 3 - Arpeggiated Cello Polyphony",
+    "bpm": 216,
+    "instrument": "violoncello",
+    "steps": 128,
+    "key": "C",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C2",
+            "duration": "4n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.59,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "D#3",
+            "duration": "8n",
+            "velocity": 0.61,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.63,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "C4",
+            "duration": "8n",
+            "velocity": 0.64,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "G2",
+            "duration": "4n",
+            "velocity": 0.63,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "B3",
+            "duration": "4n",
+            "velocity": 0.61,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "D4",
+            "duration": "4n",
+            "velocity": 0.62,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "G#2",
+            "duration": "4n",
+            "velocity": 0.64,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "C4",
+            "duration": "8n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "D#4",
+            "duration": "8n",
+            "velocity": 0.63,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "G#4",
+            "duration": "4n",
+            "velocity": 0.67,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G2",
+            "duration": "4n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G4",
+            "duration": "4n",
+            "velocity": 0.66,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "F4",
+            "duration": "4n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "A#2",
+            "duration": "4n",
+            "velocity": 0.62,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "D#4",
+            "duration": "8n",
+            "velocity": 0.61,
+            "chance": null
+        },
+        {
+            "step": 68,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "C4",
+            "duration": "4n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "G2",
+            "duration": "4n",
+            "velocity": 0.63,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "B3",
+            "duration": "2n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "C2",
+            "duration": "4n",
+            "velocity": 0.66,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "C4",
+            "duration": "8n",
+            "velocity": 0.62,
+            "chance": null
+        },
+        {
+            "step": 100,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.59,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "D#3",
+            "duration": "8n",
+            "velocity": 0.61,
+            "chance": null
+        },
+        {
+            "step": 108,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.58,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "G1",
+            "duration": "2n",
+            "velocity": 0.68,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "C2",
+            "duration": "2n",
+            "velocity": 0.67,
+            "chance": null
+        }
+    ],
+    "comment": "\u0410\u043a\u0442\u0438\u0432\u043d\u0430\u044f \u0432\u0438\u043e\u043b\u043e\u043d\u0447\u0435\u043b\u044c\u043d\u0430\u044f \u043f\u043e\u043b\u0438\u0444\u043e\u043d\u0438\u044f \u0441 \u0441\u043a\u0440\u044b\u0442\u044b\u043c \u0434\u0432\u0443\u0433\u043e\u043b\u043e\u0441\u0438\u0435\u043c, \u0440\u0430\u0441\u0441\u044b\u043f\u0430\u043d\u043d\u044b\u043c\u0438 \u0430\u0440\u043f\u0435\u0434\u0436\u0438\u043e \u0438 \u0447\u0435\u0442\u043a\u0438\u043c\u0438 \u043a\u0430\u0434\u0430\u043d\u0441\u043e\u0432\u044b\u043c\u0438 \u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430\u043c\u0438.",
+    "style": "Baroque Chamber"
+}

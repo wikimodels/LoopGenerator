@@ -1,6 +1,6 @@
 {
     "name": "Mizar_Harmosini_1",
-    "bpm": 96,
+    "bpm": 116,
     "instrument": "piano",
     "steps": 128,
     "key": "C",
@@ -582,5 +582,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

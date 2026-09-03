@@ -1,6 +1,6 @@
 {
     "name": "Gm_Dragon_Loop_Fracture",
-    "bpm": 224,
+    "bpm": 172,
     "instrument": "piano",
     "steps": 64,
     "key": "G",
@@ -218,5 +218,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }

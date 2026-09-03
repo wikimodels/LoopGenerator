@@ -1,6 +1,6 @@
 {
     "name": "Baroque Lament C Minor Track 3 Crumhorn Ground Bass",
-    "bpm": 216,
+    "bpm": 147,
     "instrument": "crumhorn",
     "steps": 128,
     "key": "C",
@@ -281,5 +281,6 @@
             "chance": null
         }
     ],
-    "comment": ""
+    "comment": "",
+    "style": null
 }
