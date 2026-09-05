@@ -24,6 +24,40 @@ os.makedirs(ARCHIVE_DIR, exist_ok=True)
 os.makedirs(INSTRUCTIONS_DIR, exist_ok=True)
 os.makedirs(EXPORTS_DIR, exist_ok=True)
 
+# Prompts storage
+PROMPTS_FILE = os.path.join(DATA_DIR, "prompts.json")
+
+def load_prompts() -> list:
+    if os.path.exists(PROMPTS_FILE):
+        try:
+            with open(PROMPTS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data if isinstance(data, list) else []
+        except Exception:
+            pass
+    return []
+
+def save_prompts(data: list):
+    with open(PROMPTS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+# Diary storage
+DIARY_FILE = os.path.join(DATA_DIR, "diary.json")
+
+def load_diary() -> list:
+    if os.path.exists(DIARY_FILE):
+        try:
+            with open(DIARY_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data if isinstance(data, list) else []
+        except Exception:
+            pass
+    return []
+
+def save_diary(data: list):
+    with open(DIARY_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
 # Metadata file (ratings, notes, etc.)
 META_FILE = os.path.join(DATA_DIR, "_loop_meta.json")
 
@@ -161,6 +195,106 @@ def save_artist_tracks(req: ArtistTracksRequest):
     data[artist] = tracks
     save_artists(data)
     return {"status": "success", "artist": artist, "count": len(tracks)}
+
+# ── Prompts ───────────────────────────────────────────────────────────────────
+class PromptItem(BaseModel):
+    songTitle: str = ""
+    styles: str = ""
+    negativePrompt: str = ""
+    lyrics: str = ""
+
+class PromptRecord(BaseModel):
+    id: str
+    name: str
+    prompt: List[PromptItem] = []
+    comment: str = ""
+    artists: List[str] = []
+
+@app.get("/api/prompts")
+def get_prompts():
+    return load_prompts()
+
+@app.post("/api/prompts")
+def create_prompt(rec: PromptRecord):
+    name = (rec.name or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Prompt name required")
+    data = load_prompts()
+    if any(p["name"] == name for p in data):
+        raise HTTPException(status_code=400, detail="Prompt name already exists")
+    rec.id = rec.id or str(uuid.uuid4())
+    data.append(rec.dict())
+    save_prompts(data)
+    return {"status": "success", "id": rec.id}
+
+@app.put("/api/prompts/{pid}")
+def update_prompt(pid: str, rec: PromptRecord):
+    data = load_prompts()
+    idx = next((i for i, p in enumerate(data) if p["id"] == pid), None)
+    if idx is None:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    if any(p["name"] == rec.name and p["id"] != pid for p in data):
+        raise HTTPException(status_code=400, detail="Prompt name already exists")
+    rec.id = pid
+    data[idx] = rec.dict()
+    save_prompts(data)
+    return {"status": "success", "id": pid}
+
+@app.delete("/api/prompts/{pid}")
+def delete_prompt(pid: str):
+    data = load_prompts()
+    nxt = [p for p in data if p["id"] != pid]
+    if len(nxt) == len(data):
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    save_prompts(nxt)
+    return {"status": "success", "deleted": pid}
+
+# ── Diary ─────────────────────────────────────────────────────────────────────
+class DiaryEntry(BaseModel):
+    id: str
+    date: str  # ISO YYYY-MM-DD
+    title: str
+    body: str = ""
+    tags: List[str] = []
+    artists: List[str] = []
+    prompts: List[str] = []  # prompt ids
+    status: str = "open"  # open | done
+
+@app.get("/api/diary")
+def get_diary():
+    return load_diary()
+
+@app.post("/api/diary")
+def create_diary(entry: DiaryEntry):
+    if not entry.title.strip():
+        raise HTTPException(status_code=400, detail="Title required")
+    data = load_diary()
+    entry.id = entry.id or str(uuid.uuid4())
+    if any(d["id"] == entry.id for d in data):
+        raise HTTPException(status_code=400, detail="Duplicate id")
+    data.append(entry.dict())
+    save_diary(data)
+    return {"status": "success", "id": entry.id}
+
+@app.put("/api/diary/{did}")
+def update_diary(did: str, entry: DiaryEntry):
+    data = load_diary()
+    idx = next((i for i, d in enumerate(data) if d["id"] == did), None)
+    if idx is None:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    entry.id = did
+    data[idx] = entry.dict()
+    save_diary(data)
+    return {"status": "success", "id": did}
+
+@app.delete("/api/diary/{did}")
+def delete_diary(did: str):
+    data = load_diary()
+    nxt = [d for d in data if d["id"] != did]
+    if len(nxt) == len(data):
+        raise HTTPException(status_code=404, detail="Entry not found")
+    save_diary(nxt)
+    return {"status": "success", "deleted": did}
     step: int
     note: str
     duration: str

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompts - LoopGenerator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_catalog.css">
+    <link rel="stylesheet" href="style_modal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="navbar.js" defer></script>
+</head>
+<body>
+    <div class="app-container">
+        <main class="main-content catalog-main">
+            <div class="catalog-header">
+                <div class="header-title-row">
+                    <h2>Prompts</h2>
+                    <div class="header-filters">
+                        <div class="search-wrapper">
+                            <input type="text" id="search-input" class="search-input" placeholder="Search prompts..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button id="search-clear" class="search-clear hidden" title="Clear search"><span class="material-icons">close</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-bar-content" style="justify-content:flex-end;">
+                    <div class="action-buttons" style="margin-left:auto;">
+                        <button id="btn-create-prompt" class="btn primary" title="Create new prompt">
+                            <span class="material-icons">add</span> Create New
+                        </button>
+                        <button id="btn-delete-selected-prompts" class="btn danger" disabled>
+                            <span class="material-icons">delete</span> Delete
+                        </button>
+                        <div class="selection-info">
+                            <label class="custom-checkbox-wrapper">
+                                <input type="checkbox" id="check-all-prompts">
+                                <span class="checkmark"></span>
+                                Select All
+                            </label>
+                            <span><span id="selected-prompt-count">0</span> selected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="prompts-list" class="catalog-list"></div>
+        </main>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="prompt-details-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2 id="details-prompt-name">Prompt Details</h2>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="btn-copy-prompt" class="btn neutral" title="Copy prompt JSON">
+                        <span class="material-icons">content_copy</span> Copy
+                    </button>
+                    <button id="btn-save-prompt" class="btn primary" title="Save prompt">
+                        <span class="material-icons">save</span> Save
+                    </button>
+                    <button id="btn-close-details-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Comment</label>
+                <textarea id="details-comment" class="input-text large-textarea" style="min-height:100px;width:100%;box-sizing:border-box;" placeholder=""></textarea>
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Prompt JSON</label>
+                <textarea id="details-prompt-json" class="input-text large-textarea" style="min-height:260px;white-space:pre;width:100%;box-sizing:border-box;" placeholder=""></textarea>
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Artists</label>
+                <div id="details-artists-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+                <div style="display:flex;gap:6px;">
+                    <select id="details-artist-select" class="input-text" style="flex:1;"></select>
+                    <button id="btn-add-artist-to-prompt" class="btn secondary"><span class="material-icons">person_add</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create New Modal -->
+    <div id="prompt-create-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2>Create Prompt</h2>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="btn-create-save" class="btn primary" title="Create prompt">
+                        <span class="material-icons">save</span> Create
+                    </button>
+                    <button id="btn-close-create-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Name (app only)</label>
+                <input type="text" id="create-prompt-name" class="input-text" style="width:100%;box-sizing:border-box;" placeholder="">
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Comment</label>
+                <textarea id="create-comment" class="input-text large-textarea" style="min-height:80px;width:100%;box-sizing:border-box;" placeholder=""></textarea>
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Prompt JSON</label>
+                <textarea id="create-prompt-json" class="input-text large-textarea" style="min-height:260px;white-space:pre;width:100%;box-sizing:border-box;" placeholder=""></textarea>
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Artists</label>
+                <div id="create-artists-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+                <div style="display:flex;gap:6px;">
+                    <select id="create-artist-select" class="input-text" style="flex:1;"></select>
+                    <button id="btn-create-add-artist" class="btn secondary"><span class="material-icons">person_add</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden">Message</div>
+    <script src="prompts.js?v=1"></script>
+</body>
+</html>

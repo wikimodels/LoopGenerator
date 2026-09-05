@@ -1,0 +1,293 @@
+{
+    "name": "Toy March - Windup Ballerina",
+    "bpm": 196,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "C",
+    "scale": "Major",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 2,
+            "note": "G4",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "G2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "E3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "C5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "E5",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "G2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "E3",
+            "duration": "8n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "C5",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "F5",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "C5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 34,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "D3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "F5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "G5",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "D3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "D5",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "E5",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "G2",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "D5",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C3",
+            "duration": "4n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C5",
+            "duration": "4n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "G2",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        }
+    ],
+    "comment": "",
+    "style": "Toy March"
+}

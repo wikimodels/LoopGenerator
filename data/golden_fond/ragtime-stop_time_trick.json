@@ -1,0 +1,272 @@
+{
+    "name": "Ragtime - Stop Time Trick",
+    "bpm": 218,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "E",
+    "scale": "Major",
+    "swing": 0.1,
+    "notes": [
+        {
+            "step": 0,
+            "note": "E2",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "G#5",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "G#3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "B3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "B5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "B1",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "G#5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "G#3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "B3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 14,
+            "note": "F#5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 18,
+            "note": "D#5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "C#5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 22,
+            "note": "B4",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 26,
+            "note": "G#4",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "F#4",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 30,
+            "note": "A4",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "E2",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "E5",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "G#3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "B3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 38,
+            "note": "G#5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "B1",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "B5",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "G#3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "B3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 46,
+            "note": "A5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#2",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#6",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "E3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "G#3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 54,
+            "note": "B5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "F#1",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "D#6",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "F#3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        }
+    ],
+    "comment": "",
+    "style": "Ragtime"
+}

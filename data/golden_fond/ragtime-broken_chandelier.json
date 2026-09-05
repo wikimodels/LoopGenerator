@@ -1,0 +1,342 @@
+{
+    "name": "Ragtime - Broken Chandelier",
+    "bpm": 197,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "C",
+    "scale": "Minor",
+    "swing": 0.1,
+    "notes": [
+        {
+            "step": 0,
+            "note": "C2",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 3,
+            "note": "Eb5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "Eb3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "G5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "G2",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "Eb5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 11,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "Eb3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 14,
+            "note": "G5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F2",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "Ab5",
+            "duration": "16n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 19,
+            "note": "F5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "Ab3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 22,
+            "note": "D5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "C2",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "G5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 27,
+            "note": "Eb5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "Eb3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 30,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "C2",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "Eb5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 35,
+            "note": "G5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "Eb3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 38,
+            "note": "C6",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "G2",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "B5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 43,
+            "note": "G5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "D3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 46,
+            "note": "D5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C2",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 51,
+            "note": "Eb5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "Eb3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 54,
+            "note": "G5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C1",
+            "duration": "4n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "Eb3",
+            "duration": "4n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "G3",
+            "duration": "4n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C6",
+            "duration": "4n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "Eb3",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        }
+    ],
+    "comment": "",
+    "style": "Ragtime"
+}

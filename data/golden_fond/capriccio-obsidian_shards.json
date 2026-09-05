@@ -1,0 +1,258 @@
+{
+    "name": "Capriccio - Obsidian Shards",
+    "bpm": 195,
+    "instrument": "piano",
+    "steps": 64,
+    "key": "F",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "F2",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "F4",
+            "duration": "16n",
+            "velocity": 0.6,
+            "chance": null
+        },
+        {
+            "step": 2,
+            "note": "Ab4",
+            "duration": "16n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 6,
+            "note": "F5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "Ab5",
+            "duration": "16n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 10,
+            "note": "F5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 14,
+            "note": "Ab4",
+            "duration": "16n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "Db2",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "F4",
+            "duration": "16n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 18,
+            "note": "Ab4",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "Db5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 22,
+            "note": "F5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "Ab5",
+            "duration": "16n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 26,
+            "note": "F5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "Db5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 30,
+            "note": "Ab4",
+            "duration": "16n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "C2",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "E4",
+            "duration": "16n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 34,
+            "note": "G4",
+            "duration": "16n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 38,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "G5",
+            "duration": "16n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 42,
+            "note": "E5",
+            "duration": "16n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "C5",
+            "duration": "16n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 46,
+            "note": "G4",
+            "duration": "16n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "F1",
+            "duration": "4n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "F4",
+            "duration": "4n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "Ab4",
+            "duration": "4n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C5",
+            "duration": "4n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "F2",
+            "duration": "8n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "F5",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "Ab5",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C6",
+            "duration": "8n",
+            "velocity": 0.95,
+            "chance": null
+        }
+    ],
+    "comment": "",
+    "style": "Capriccio"
+}

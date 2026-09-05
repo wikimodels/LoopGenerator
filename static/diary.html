@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary - LoopGenerator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_catalog.css">
+    <link rel="stylesheet" href="style_modal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="navbar.js" defer></script>
+</head>
+<body>
+    <div class="app-container">
+        <main class="main-content catalog-main">
+            <div class="catalog-header">
+                <div class="header-title-row">
+                    <h2>Diary</h2>
+                    <div class="header-filters">
+                        <div class="search-wrapper">
+                            <input type="text" id="search-input" class="search-input" placeholder="Search diary..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button id="search-clear" class="search-clear hidden" title="Clear search"><span class="material-icons">close</span></button>
+                        </div>
+                        <select id="filter-status" class="input-text" style="padding:4px 6px;">
+                            <option value="">All status</option>
+                            <option value="open">Open</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="action-bar-content" style="justify-content:flex-end;">
+                    <div class="action-buttons" style="margin-left:auto;">
+                        <button id="btn-create-entry" class="btn primary" title="Create entry">
+                            <span class="material-icons">add</span> Create Entry
+                        </button>
+                        <button id="btn-delete-selected-diary" class="btn danger" disabled>
+                            <span class="material-icons">delete</span> Delete
+                        </button>
+                        <div class="selection-info">
+                            <label class="custom-checkbox-wrapper">
+                                <input type="checkbox" id="check-all-diary">
+                                <span class="checkmark"></span>
+                                Select All
+                            </label>
+                            <span><span id="selected-diary-count">0</span> selected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="diary-list" class="catalog-list"></div>
+        </main>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="diary-details-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2 id="details-entry-title">Entry</h2>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="btn-save-entry" class="btn primary" title="Save entry"><span class="material-icons">save</span> Save</button>
+                    <button id="btn-close-details-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Date</label>
+                        <input type="date" id="details-date" class="input-text" style="width:100%;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Status</label>
+                        <select id="details-status" class="input-text" style="width:100%;"><option value="open">Open</option><option value="done">Done</option></select>
+                    </div>
+                </div>
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Title</label>
+                <input type="text" id="details-title" class="input-text" style="width:100%;box-sizing:border-box;">
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Body</label>
+                <textarea id="details-body" class="input-text large-textarea" style="min-height:180px;width:100%;box-sizing:border-box;white-space:pre-wrap;" placeholder="Technical notes..."></textarea>
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Tags (comma separated)</label>
+                <input type="text" id="details-tags" class="input-text" style="width:100%;box-sizing:border-box;" placeholder="mix, bug, idea">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                    <div>
+                        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Artists</label>
+                        <div id="details-artists-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+                        <div style="display:flex;gap:6px;"><select id="details-artist-select" class="input-text" style="flex:1;"></select><button id="btn-details-add-artist" class="btn secondary"><span class="material-icons">person_add</span></button></div>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Prompts</label>
+                        <div id="details-prompts-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+                        <div style="display:flex;gap:6px;"><select id="details-prompt-select" class="input-text" style="flex:1;"></select><button id="btn-details-add-prompt" class="btn secondary"><span class="material-icons">add</span></button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Modal -->
+    <div id="diary-create-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h2>Create Entry</h2>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="btn-create-save" class="btn primary"><span class="material-icons">save</span> Create</button>
+                    <button id="btn-close-create-modal" class="modal-close-btn"><span class="material-icons">close</span></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Date</label>
+                        <input type="date" id="create-date" class="input-text" style="width:100%;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Status</label>
+                        <select id="create-status" class="input-text" style="width:100%;"><option value="open">Open</option><option value="done">Done</option></select>
+                    </div>
+                </div>
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Title</label>
+                <input type="text" id="create-title" class="input-text" style="width:100%;box-sizing:border-box;" placeholder="Title">
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Body</label>
+                <textarea id="create-body" class="input-text large-textarea" style="min-height:180px;width:100%;box-sizing:border-box;" placeholder="Technical notes..."></textarea>
+                <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Tags (comma separated)</label>
+                <input type="text" id="create-tags" class="input-text" style="width:100%;box-sizing:border-box;" placeholder="mix, bug, idea">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                    <div>
+                        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Artists</label>
+                        <div id="create-artists-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+                        <div style="display:flex;gap:6px;"><select id="create-artist-select" class="input-text" style="flex:1;"></select><button id="btn-create-add-artist" class="btn secondary"><span class="material-icons">person_add</span></button></div>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Prompts</label>
+                        <div id="create-prompts-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+                        <div style="display:flex;gap:6px;"><select id="create-prompt-select" class="input-text" style="flex:1;"></select><button id="btn-create-add-prompt" class="btn secondary"><span class="material-icons">add</span></button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden">Message</div>
+    <script src="diary.js?v=1"></script>
+</body>
+</html>

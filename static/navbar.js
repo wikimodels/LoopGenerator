@@ -31,6 +31,8 @@
         ${navLink('golden.html', 'star', 'Golden', 'accent')}
         ${navLink('archive.html', 'inventory_2', 'Archive', 'neutral')}
         ${navLink('artists.html', 'group', 'Artists', 'secondary')}
+        ${navLink('prompts.html', 'chat_bubble', 'Prompts', 'secondary')}
+        ${navLink('diary.html', 'book', 'Diary', 'secondary')}
         ${navLink('exports.html', 'graphic_eq', 'Exports', 'neutral')}
         ${navLink('generate.html', 'auto_awesome', 'Generate', 'primary')}
     </nav>
