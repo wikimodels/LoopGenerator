@@ -235,6 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="waveform-container" id="waveform-${index}">
                         <div class="waveform-loading">Analyzing...</div>
                     </div>
+                    <div class="trimmer-container" style="display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: rgba(0,0,0,0.15); border-radius: 6px; margin-top: 6px;">
+                        <span class="material-icons" style="font-size: 14px; color: #64748b;" title="Trim">content_cut</span>
+                        <input type="range" class="trim-start" min="0" max="100" value="0" title="Start trim" style="flex: 1; height: 4px; accent-color: #3b82f6;">
+                        <input type="range" class="trim-end" min="0" max="100" value="100" title="End trim" style="flex: 1; height: 4px; accent-color: #3b82f6;">
+                        <button class="btn small save-trim-btn" style="padding: 3px 8px; font-size: 11px; white-space: nowrap;"><span class="material-icons" style="font-size: 14px;">save</span></button>
+                    </div>
                 `;
 
                 exportsList.appendChild(card);
@@ -328,6 +334,99 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     updateBulkActionUI();
                 });
+
+                // Trimmer Logic (compact)
+                const trimStart = card.querySelector('.trim-start');
+                const trimEnd = card.querySelector('.trim-end');
+                const btnSaveTrim = card.querySelector('.save-trim-btn');
+                const waveformContainer = card.querySelector('.waveform-container');
+                // Add trim overlay lines
+                let trimOverlay = null;
+                if (waveformContainer) {
+                    trimOverlay = document.createElement('div');
+                    trimOverlay.style.cssText = 'position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;';
+                    trimOverlay.innerHTML = '<div class="trim-line trim-start-line" style="position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(59,130,246,0.8); left: 0%;"></div><div class="trim-line trim-end-line" style="position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(59,130,246,0.8); left: 100%;"></div>';
+                    waveformContainer.style.position = 'relative';
+                    waveformContainer.appendChild(trimOverlay);
+                }
+                if (trimStart && trimEnd && btnSaveTrim) {
+                    const updateTrimVisual = () => {
+                        const start = parseInt(trimStart.value);
+                        const end = parseInt(trimEnd.value);
+                        // Ensure start < end
+                        if (start >= end) {
+                            if (document.activeElement === trimStart) trimEnd.value = Math.min(100, start + 1);
+                            else trimStart.value = Math.max(0, end - 1);
+                        }
+                        if (trimOverlay) {
+                            trimOverlay.querySelector('.trim-start-line').style.left = trimStart.value + '%';
+                            trimOverlay.querySelector('.trim-end-line').style.left = trimEnd.value + '%';
+                        }
+                    };
+                    trimStart.addEventListener('input', updateTrimVisual);
+                    trimEnd.addEventListener('input', updateTrimVisual);
+                    btnSaveTrim.addEventListener('click', async () => {
+                        const duration = ws.getDuration();
+                        if (!duration) return;
+                        const startPct = parseInt(trimStart.value) / 100;
+                        const endPct = parseInt(trimEnd.value) / 100;
+                        if (startPct >= endPct) return;
+                        btnSaveTrim.disabled = true;
+                        btnSaveTrim.innerHTML = '<span class="material-icons" style="font-size: 14px; animation: spin 1s linear infinite;">sync</span>';
+                        try {
+                            const buffer = ws.getDecodedData();
+                            if (!buffer) throw new Error('No audio data');
+                            const sr = buffer.sampleRate;
+                            const startSample = Math.floor(buffer.length * startPct);
+                            const endSample = Math.floor(buffer.length * endPct);
+                            const newLength = endSample - startSample;
+                            const trimmedBuffer = new AudioContext().createBuffer(buffer.numberOfChannels, newLength, sr);
+                            for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+                                trimmedBuffer.getChannelData(ch).set(buffer.getChannelData(ch).subarray(startSample, endSample));
+                            }
+                            // Encode as WAV
+                            const wavBlob = await new Promise(resolve => {
+                                const worker = new Worker(URL.createObjectURL(new Blob([`
+                                    self.onmessage = e => {
+                                        const {buf, sr} = e.data;
+                                        const numCh = buf.length;
+                                        const len = buf[0].length;
+                                        const ab = new ArrayBuffer(44 + len * numCh * 2);
+                                        const view = new DataView(ab);
+                                        const writeStr = (off, s) => { for(let i=0;i<s.length;i++) view.setUint8(off+i, s.charCodeAt(i)); };
+                                        writeStr(0, 'RIFF'); view.setUint32(4, 36 + len * numCh * 2, true); writeStr(8, 'WAVE');
+                                        writeStr(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+                                        view.setUint16(22, numCh, true); view.setUint32(24, sr, true);
+                                        view.setUint32(28, sr * numCh * 2, true); view.setUint16(32, numCh * 2, true); view.setUint16(34, 16, true);
+                                        writeStr(36, 'data'); view.setUint32(40, len * numCh * 2, true);
+                                        let off2 = 44;
+                                        for(let i=0;i<len;i++) for(let ch=0; ch<numCh; ch++) {
+                                            let s = Math.max(-1, Math.min(1, buf[ch][i]));
+                                            view.setInt16(off2, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off2+=2;
+                                        }
+                                        self.postMessage(ab, [ab]);
+                                    }
+                                `], {type: 'application/javascript'})));
+                                const chData = [];
+                                for(let c=0;c<trimmedBuffer.numberOfChannels;c++) chData.push(trimmedBuffer.getChannelData(c).slice());
+                                worker.postMessage({buf: chData, sr}, []);
+                                worker.onmessage = e => resolve(new Blob([e.data], {type: 'audio/wav'}));
+                            });
+                            const res = await fetch(`/api/exports/trim/${encodeURIComponent(file.filename)}`, { method: 'POST', body: wavBlob, headers: { 'Content-Type': 'audio/wav' } });
+                            if (!res.ok) throw new Error('Trim save failed');
+                            // Reload card or show success
+                            const data = await res.json();
+                            ws.load(`/exports/${encodeURIComponent(data.filename)}?t=${Date.now()}`);
+                            trimStart.value = 0; trimEnd.value = 100;
+                        } catch (err) {
+                            console.error('Trim failed', err);
+                            alert('Trim failed: ' + err.message);
+                        } finally {
+                            btnSaveTrim.disabled = false;
+                            btnSaveTrim.innerHTML = '<span class="material-icons" style="font-size: 14px;">save</span>';
+                        }
+                    });
+                }
 
                 // Inline Rename Logic
                 const filenameEl = card.querySelector('.export-filename');

@@ -276,14 +276,55 @@ Anti-Buzz Gap: если два соседних по времени звука �
         const btnOpen = document.getElementById('btn-insert-json');
         const modal = document.getElementById('insert-modal');
         const btnClose = document.getElementById('btn-close-insert');
+        const btnImport = document.getElementById('btn-import-pasted');
 
         if (!btnOpen || !modal) return;
 
-        // Only open the modal — actual import logic lives in page JS
-        // (catalog.js / golden.js / app.js each handle #btn-import-pasted themselves)
         btnOpen.addEventListener('click', () => modal.classList.remove('hidden'));
         if (btnClose) btnClose.addEventListener('click', () => modal.classList.add('hidden'));
         modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
+
+        // Fallback handler for pages without page-specific import logic (e.g., prompts.html, diary.html, artists.html, archive.html, exports.html)
+        // Catalog/golden/index have their own handlers — skip there to avoid double import
+        const path = location.pathname.split('/').pop() || 'index.html';
+        const needsFallback = ['prompts.html', 'diary.html', 'artists.html', 'archive.html', 'exports.html', 'generate.html'].includes(path);
+        if (needsFallback && btnImport) {
+            btnImport.addEventListener('click', async () => {
+                const ta = document.getElementById('json-paste-area');
+                const text = ta ? ta.value.trim() : '';
+                if (!text) return;
+                let data;
+                try { data = JSON.parse(text); } catch (e) { alert('Invalid JSON: ' + e.message); return; }
+                const problems = window.validateLoopsImport ? await window.validateLoopsImport(data) : [];
+                if (problems.length) {
+                    alert('Insert JSON: документ не прошёл валидацию:\n\n' + problems.join('\n') + '\n\nИмпорт отменён — исправьте документ и повторите.');
+                    return;
+                }
+                const orig = btnImport.innerHTML;
+                btnImport.disabled = true;
+                btnImport.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span> Importing...';
+                let successCount = 0;
+                const failed = [];
+                for (const loop of data) {
+                    try {
+                        const res = await fetch('/api/loops', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(loop) });
+                        if (res.ok) successCount++; else {
+                            let detail = `HTTP ${res.status}`;
+                            try { const j = await res.json(); if (j.detail) detail = j.detail; } catch (_) {}
+                            failed.push(`${loop.name || 'unnamed'}: ${detail}`);
+                        }
+                    } catch (e) { failed.push(`${loop.name || 'unnamed'}: ${e.message}`); }
+                }
+                btnImport.disabled = false;
+                btnImport.innerHTML = orig;
+                if (failed.length) alert('Some tracks were NOT imported (' + failed.length + '):\n\n' + failed.join('\n'));
+                if (successCount) {
+                    const toast = document.getElementById('toast');
+                    if (toast) { toast.textContent = `Imported ${successCount} loops!`; toast.classList.remove('hidden'); setTimeout(()=>toast.classList.add('hidden'), 3000); }
+                }
+                if (!failed.length) { modal.classList.add('hidden'); if (ta) ta.value = ''; }
+            });
+        }
     }
 
     // ── Wire up clear-all buttons ────────────────────────────────────────────

@@ -305,6 +305,9 @@ function closeCommentModal() {
 
 async function saveComment() {
     if (!commentLoop) return;
+    const btn = document.getElementById('btn-save-comment');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span> Saving...'; }
     commentLoop.comment = commentTextarea.value.trim();
     if (styleInput) commentLoop.style = styleInput.value.trim();
     try {
@@ -319,7 +322,7 @@ async function saveComment() {
     } catch (e) {
         console.error('Failed to save comment', e);
         showToast('Failed to save comment');
-    }
+    } finally { if (btn) { btn.disabled = false; btn.innerHTML = orig; } }
 }
 
 // --- Data Fetching & Rendering ---
@@ -949,6 +952,9 @@ function setupEventListeners() {
         btnImportPasted.addEventListener('click', async () => {
             const text = jsonPasteArea.value.trim();
             if (!text) return;
+            const orig = btnImportPasted.innerHTML;
+            btnImportPasted.disabled = true;
+            btnImportPasted.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span> Importing...';
             try {
                 const data = JSON.parse(text);
                 const problems = window.validateLoopsImport ? await window.validateLoopsImport(data) : [];
@@ -985,7 +991,7 @@ function setupEventListeners() {
             } catch (err) {
                 showToast("Invalid JSON text");
                 console.error(err);
-            }
+            } finally { btnImportPasted.disabled = false; btnImportPasted.innerHTML = orig; }
         });
     }
 

@@ -829,6 +829,19 @@ async def upload_audio(filename: str, request: Request):
         f.write(data)
     return {"status": "ok", "filename": filename}
 
+@app.post("/api/exports/trim/{filename}")
+async def trim_export_audio(filename: str, request: Request):
+    """Saves trimmed audio, overwriting the original file."""
+    safe_filename = os.path.basename(filename)
+    filepath = os.path.join(EXPORTS_DIR, safe_filename)
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found")
+    data = await request.body()
+    # Save trimmed version (overwrite original for simplicity)
+    with open(filepath, "wb") as f:
+        f.write(data)
+    return {"status": "ok", "filename": safe_filename}
+
 @app.get("/api/exports")
 def list_exports():
     """Lists all exported audio files."""

@@ -6,11 +6,12 @@
     let detailsPrompt = null;
     let createArtists = [];
 
-    function showToast(msg) {
+    function showToast(msg, type='success') {
         const t = document.getElementById('toast');
         if (!t) return;
         t.textContent = msg;
-        t.classList.remove('hidden');
+        t.classList.remove('hidden', 'toast-success', 'toast-error');
+        t.classList.add(type === 'error' ? 'toast-error' : 'toast-success');
         setTimeout(() => t.classList.add('hidden'), 3000);
     }
     function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -55,7 +56,7 @@
             div.className = 'catalog-item artist-item';
             div.innerHTML = `
                 <div class="item-info artist-info" style="flex:1;">
-                    <div class="artist-name">${esc(p.name)}</div>
+                    <div class="artist-name" title="Click to edit">${esc(p.name)}</div>
                 </div>
                 <button class="btn icon-btn copy-btn" title="Copy prompt"><span class="material-icons">content_copy</span></button>
                 <button class="btn icon-btn details-btn" title="Details"><span class="material-icons">info</span></button>
@@ -75,6 +76,41 @@
             div.querySelector('.details-btn').addEventListener('click', e=>{
                 e.stopPropagation();
                 openDetails(p.id);
+            });
+            // Inline rename — click name to edit, Enter to save
+            const nameEl = div.querySelector('.artist-name');
+            nameEl.addEventListener('click', () => {
+                if (nameEl.isContentEditable) return;
+                nameEl.contentEditable = 'true';
+                nameEl.focus();
+                const range = document.createRange();
+                range.selectNodeContents(nameEl);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            });
+            nameEl.addEventListener('blur', async () => {
+                nameEl.contentEditable = 'false';
+                const newName = nameEl.textContent.trim();
+                if (!newName || newName === p.name) { nameEl.textContent = p.name; return; }
+                const oldName = p.name;
+                p.name = newName;
+                try {
+                    const r = await fetch('/api/prompts/'+encodeURIComponent(p.id), {
+                        method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(p)
+                    });
+                    if(!r.ok){ const j=await r.json(); throw new Error(j.detail||'rename failed'); }
+                    showToast('Renamed');
+                    renderPrompts();
+                } catch(e){
+                    p.name = oldName;
+                    nameEl.textContent = oldName;
+                    showToast(e.message, 'error');
+                }
+            });
+            nameEl.addEventListener('keydown', e=>{
+                if(e.key==='Enter'){ e.preventDefault(); nameEl.blur(); }
+                if(e.key==='Escape'){ nameEl.textContent = p.name; nameEl.blur(); }
             });
             list.appendChild(div);
         });
@@ -103,6 +139,9 @@
     function closeDetails(){ document.getElementById('prompt-details-modal').classList.add('hidden'); detailsPrompt=null; }
     async function saveDetails(){
         if(!detailsPrompt) return;
+        const btn = document.getElementById('btn-save-prompt');
+        const orig = btn ? btn.innerHTML : '';
+        if(btn){ btn.disabled = true; btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span> Saving...'; }
         try {
             const raw = document.getElementById('details-prompt-json').value.trim();
             detailsPrompt.prompt = raw ? JSON.parse(raw) : [];
@@ -114,7 +153,8 @@
             showToast('Saved');
             closeDetails();
             await loadPrompts(); renderPrompts();
-        } catch(e){ showToast(e.message); }
+        } catch(e){ showToast(e.message, 'error'); }
+        finally { if(btn){ btn.disabled = false; btn.innerHTML = orig; } }
     }
     function copyDetails(){
         try{ const v = document.getElementById('details-prompt-json').value; navigator.clipboard.writeText(v).then(()=>showToast('Copied')); }catch(e){}
@@ -131,14 +171,14 @@
     function closeCreate(){ document.getElementById('prompt-create-modal').classList.add('hidden'); }
     async function createPrompt(){
         const name = document.getElementById('create-prompt-name').value.trim();
-        if(!name){ showToast('Name required'); return; }
-        let prompt; try{ const raw = document.getElementById('create-prompt-json').value.trim(); prompt = raw ? JSON.parse(raw) : []; }catch(e){ showToast('Invalid JSON'); return; }
+        if(!name){ showToast('Name required', 'error'); return; }
+        let prompt; try{ const raw = document.getElementById('create-prompt-json').value.trim(); prompt = raw ? JSON.parse(raw) : []; }catch(e){ showToast('Invalid JSON', 'error'); return; }
         const rec = { id: crypto.randomUUID(), name, prompt, comment: document.getElementById('create-comment').value, artists: createArtists.slice() };
         try{
             const r = await fetch('/api/prompts', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rec)});
             if(!r.ok){ const j=await r.json(); throw new Error(j.detail||'create failed'); }
             showToast('Created'); closeCreate(); await loadPrompts(); renderPrompts();
-        }catch(e){ showToast(e.message); }
+        }catch(e){ showToast(e.message, 'error'); }
     }
 
     async function bulkDelete(){
