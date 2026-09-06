@@ -365,6 +365,7 @@ function renderCatalog() {
             (artists[currentArtist] || []).includes(loop.name)) return false;
         return true;
     });
+    filteredLoops.sort((a,b)=> String(a.name||'').localeCompare(String(b.name||''), undefined, {sensitivity:'base'}));
 
     filteredLoops.forEach(loop => {
         const div = document.createElement('div');

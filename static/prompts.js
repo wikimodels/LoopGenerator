@@ -51,7 +51,7 @@
         if (!list) return;
         const q = (document.getElementById('search-input')?.value || '').toLowerCase();
         list.innerHTML = '';
-        prompts.filter(p=> !q || p.name.toLowerCase().includes(q)).forEach(p=>{
+        prompts.filter(p=> !q || p.name.toLowerCase().includes(q)).sort((a,b)=> String(a.name||'').localeCompare(String(b.name||''), undefined, {sensitivity:'base'})).forEach(p=>{
             const div = document.createElement('div');
             div.className = 'catalog-item artist-item';
             div.innerHTML = `

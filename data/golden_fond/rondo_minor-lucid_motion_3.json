@@ -1,0 +1,293 @@
+{
+    "name": "rondo_minor-lucid_motion_3",
+    "bpm": 179,
+    "instrument": "piano",
+    "steps": 128,
+    "key": "D",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "D3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "F3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "Bb3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "G3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "E3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "Bb3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "A2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "E3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "G3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "Bb3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "D3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 68,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "Bb3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 76,
+            "note": "C4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "D4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "F3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 84,
+            "note": "C4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "Bb3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 92,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "G3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "Bb2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 100,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "E3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 108,
+            "note": "C#3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "D3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "A3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 116,
+            "note": "F3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 120,
+            "note": "A3",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 124,
+            "note": "D3",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        }
+    ],
+    "comment": "Full 128-step Rondo loop in D minor, expressive refrain structure, max 4n duration.",
+    "style": "rondo"
+}

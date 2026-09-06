@@ -60,4 +60,5 @@ test_loop_*.json
 data/*
 !data/golden_fond/
 !data/golden_fond/*.json
+!data/prompts.json
 test_tone.js

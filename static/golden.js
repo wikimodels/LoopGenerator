@@ -361,6 +361,7 @@ function renderCatalog() {
             (artists[currentArtist] || []).includes(loop.name)) return false;
         return true;
     });
+    filteredLoops.sort((a,b)=> String(a.name||'').localeCompare(String(b.name||''), undefined, {sensitivity:'base'}));
 
     if (filteredLoops.length === 0) {
         catalogList.innerHTML = `

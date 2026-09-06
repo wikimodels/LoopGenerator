@@ -1,0 +1,298 @@
+[
+  {
+    "id": "ab821578-f10c-48ed-97b4-3d99ac9da05a",
+    "name": "AUTONM BALLADS Flute & Piano",
+    "prompt": [
+      {
+        "songTitle": "Minimalist_Ivory_Air",
+        "styles": "instrumental, post-classical minimalism, close-mic felt piano, expressive wooden flute, hypnotic piano arpeggios, dry studio recording, intimate modern mix, minimalist repetition, clear transient response, piano and flute duet",
+        "negativePrompt": "guitar, lute, plucked strings, fingerpicking, traditional folk structure, vocals, reverb wash, epic, orchestral, percussion, pop chord progressions, tavern music",
+        "lyrics": "[Instrumental][Hypnotic Piano Ostinato][Breath Flute Enters][Minimalist Development][Tension Building][Harmonic Shift][Sudden Stop]"
+      }
+    ],
+    "comment": "Красивый промпт. Тестировался на сред. балладах. ",
+    "artists": []
+  },
+  {
+    "id": "d0e019bf-45b5-40a0-b48b-e0de6a132606",
+    "name": "AUTUNM BALLADS Flute & Cello",
+    "prompt": [
+      {
+        "songTitle": "Minimalist_Ivory_Cello",
+        "styles": "instrumental, post-classical minimalism, calm, steady, flute, solo cello, hypnotic cello arpeggios, dry studio recording, intimate modern mix, minimalist repetition, clear transient response, flute and cello duet",
+        "negativePrompt": "woodwinds, guitar, lute, plucked strings, fingerpicking, traditional folk structure, vocals, reverb wash, epic, orchestral, percussion, pop chord progressions, tavern music",
+        "lyrics": "[Instrumental][Hypnotic flute Ostinato][Bowed Cello Enters][Minimalist Development][Tension Building][Harmonic Shift][Sudden Stop]"
+      }
+    ],
+    "comment": "Красивый чёткий промпт. Луп - средневек. баллады.",
+    "artists": []
+  },
+  {
+    "id": "3a28f071-5ee3-4d4a-9236-8ba960f4094c",
+    "name": "AUTUNM BALLADS Guitar & Cello",
+    "prompt": [
+      {
+        "songTitle": "Minimalist_Ivory_Air",
+        "styles": "instrumental | post-classical minimalism | calm | steady | Nylon-string classical guitar | cello | hypnotic cello arpeggios | graceful ending | dry studio recording | intimate modern mix | minimalist repetition | clear transient response | cello and guitar duet",
+        "negativePrompt": "lute, plucked strings, fingerpicking, traditional folk structure, vocals, reverb wash, epic, orchestral, percussion, pop chord progressions, tavern music",
+        "lyrics": "[Instrumental][Hypnotic Cello Ostinato][Breath Guitar Enters][Minimalist Development][Tension Building][Harmonic Shift][Graceful Ending]"
+      }
+    ],
+    "comment": "Гитара не всегда ведёт себя хорошо - иногда жёстковато звучит. Но в целом получаются хорошие треки. \nСтепень проникновенности может разниться от лупа к лупу.\nТестировался на лупе средвек. баллады.",
+    "artists": []
+  },
+  {
+    "id": "fde13e0e-31c6-47b0-9d91-da110e7c3780",
+    "name": "AUTUNM BALLADS Theobro",
+    "prompt": [
+      {
+        "songTitle": "Minimalist_Theorbo",
+        "styles": "instrumental, post-classical minimalism, theorbo, hypnotic arpeggios, contemporary acoustic, dry studio recording, intimate modern mix, minimalist repetition, intricate fingerpicking, clear transient response",
+        "negativePrompt": "traditional folk structure, vocals, reverb wash, epic, orchestral, percussion, pop chord progressions, tavern music",
+        "lyrics": "[Instrumental][Hypnotic Theorbo Pattern][Minimalist Development][Tension Building][Harmonic Shift][Sudden Stop]"
+      }
+    ],
+    "comment": "Жёстовато, но если привыкнуть, то хорошо заходит. Тестировался на балладах. ",
+    "artists": []
+  },
+  {
+    "id": "75aae330-4d4b-4d69-ac35-c42b0723704b",
+    "name": "BOURREE LUTE I",
+    "prompt": [
+      {
+        "songTitle": "Bourree_Geometric_-_Steel_Precision",
+        "styles": "solo lute and virginal | neoclassical bourree | rigid rhythmic pulse | bone-dry studio master | transparent sound | sharp timing | detached notes | instrumental",
+        "negativePrompt": "vocals, singing, harsh frequencies, buzz, artifact, muffled, romantic expression, delay, modern pop, synth, brass, epic choir",
+        "lyrics": "[Instrumental][Intro][Transparent Lute Stabs][Section: Polyphonic Ostinato][Metronomic Pacing][Section: Clean Polyphony][Steady Mechanical Drive][Outro][Dry Crisp Ending][End]"
+      }
+    ],
+    "comment": "Восхитетельное звучание в сочетании со специализированным промптом. \n",
+    "artists": []
+  },
+  {
+    "id": "f28921cd-0fdd-46e2-94c2-111042091a99",
+    "name": "BOURREE PIANO I (ROYAL)",
+    "prompt": [
+      {
+        "songTitle": "Bourree_Solo_Piano_Bone_Dry",
+        "styles": "solo acoustic grand piano | bourgeois dance | clean note separation | ultra-dry studio space | high-pass filtered low-end | zero room resonance | strict tempo pacing | flat dynamics | instrumental",
+        "negativePrompt": "",
+        "lyrics": "[Instrumental][Intro][Transparent Piano Theme][Section: Elegant Bourree Step][Strict Pacing][Section: Clean Counterpoint][Steady Rhythm][Outro][Clean Dry Ending][End]"
+      }
+    ],
+    "comment": "Даёт красивый солидный стильный звук именно в этом комбмо - бурре луп + промт.\nПробовал сочетать с ронд (минор) и регтаймом - фигня полная. \n",
+    "artists": []
+  },
+  {
+    "id": "8eaf4290-7351-42ed-9571-c199793503dd",
+    "name": "BOURREE PIANO II (CLASSICAL)",
+    "prompt": [
+      {
+        "songTitle": "Bourree_Stately_-_Transparent_Keys",
+        "styles": "solo classical piano | stately bourgeois dance | crisp staccato | pristine acoustic clarity | direct input grand piano | flat velocity | non-expressive precision | instrumental",
+        "negativePrompt": "vocals, singing, saturated, rough texture, vinyl crackle, dynamic compression, dramatic crescendos, cinematic choir, strings, brass, epic",
+        "lyrics": "[Instrumental][Intro][Transparent Staccato Theme][Section: Elegant Bourree Step][Strict Tempo Pacing][Section: Clean Counterpoint][Steady Rhythm][Outro][Clean Dry Ending][End]"
+      }
+    ],
+    "comment": "Даёт хороший чистый звук и хорошо держит атаки - не впадает в клиппинг. \nС этим промтом тестил бурре-лупы. Другие лупы не тестил.",
+    "artists": []
+  },
+  {
+    "id": "60c92867-193b-437e-83cf-20d0cc1922f7",
+    "name": "BOURREE PIANO III (CLASSICAL)",
+    "prompt": [
+      {
+        "songTitle": "Bourree_Perpetual_-_Clean_Clockwork",
+        "styles": "solo classical piano | fast neoclassical bourree | percussive hammer attack | close-mic piano studio | immaculate high fidelity | rigid rhythmic drive | detached notes | instrumental",
+        "negativePrompt": "vocals, singing, harsh frequencies, noise, compression artifacts, muffled sound, emotional expression, delay, heavy bass, synth, cinematic",
+        "lyrics": "[Instrumental][Intro][Percussive Piano Stabs][Section: Rapid Polyphonic Run][Metronomic Flow][Section: Flat Velocity Pattern][Steady Drive][Outro][Dry Crisp Resolution][End]"
+      }
+    ],
+    "comment": "Немного визгливый, немного резкий, но качественный звук, к-й хорошо держит нагрузки и даёт хорошие низы.",
+    "artists": []
+  },
+  {
+    "id": "a6567a6c-8805-496f-a9ed-ad39c076c4f5",
+    "name": "CAPRICCIO VIRTUOSO PIANO",
+    "prompt": [
+      {
+        "songTitle": "Echoes_Of_The_Past",
+        "styles": "virtuoso solo piano | classical capriccio | fast erratic tempo | highly unpredictable | dramatic volume changes | rapid arpeggios | flying fingers | rich concert hall acoustics | instrumental",
+        "negativePrompt": "",
+        "lyrics": "[Instrumental][Intro][Sudden Explosive Chord][Section: Unpredictable Run][Rapid Arpeggios][Dramatic Crescendo][Section: Mischievous Pause][Silent Breath][Soft Staccato Tiptoe][Section: Virtuoso Climax][Furious 16th Notes][Heavy Bass Accents][Outro][Grand Triumphant Finish][End]"
+      }
+    ],
+    "comment": "Стремительный, мощный, качественный. Отлично ложится на соовествущий луп.",
+    "artists": []
+  },
+  {
+    "id": "c47a85ad-309a-4f8a-b042-821c3a25f91a",
+    "name": "MINUET Acoustic Piano I",
+    "prompt": [
+      {
+        "songTitle": "Minuet_06_-_Baroque_Clarity_Matrix",
+        "styles": "solo acoustic piano | classical minuet | purely instrumental | absolute zero pedal | crisp staccato articulation | bone-dry studio master | flat dynamic range | transparent master output | zero clipping",
+        "negativePrompt": "vocals, singing, clipping, compression artifacts, room reverb, muddy bass, romantic expression, crescendos, rubato, delay, modern pop, synth, epic choir, dynamic swells",
+        "lyrics": "[Instrumental][Intro][Clean Staccato Piano][Section: Strict Baroque Grid][Crisp Articulation][Section: Flat Dynamics][Steady Mechanical Pace][Outro][Dry Precision Stop][End]"
+      }
+    ],
+    "comment": "Очень мощный чёткий звук. С минуэтным лупом расправился замечателно в 2/2.",
+    "artists": []
+  },
+  {
+    "id": "859a0adf-a989-4ab0-89b2-c79e178d5ecf",
+    "name": "MINUET Acoustic Piano II",
+    "prompt": [
+      {
+        "songTitle": "Minuet_04_-_Metronomic_Harpsichord_Tone",
+        "styles": "solo acoustic piano | classical minuet | purely instrumental | absolute zero pedal | hard hammer attack | crystal clear high register | bone-dry direct mic | unmastered pristine headroom | zero clipping",
+        "negativePrompt": "vocals, singing, clipping, compression artifacts, room reverb, muddy bass, romantic expression, crescendos, rubato, delay, modern pop, synth, epic choir, dynamic swells",
+        "lyrics": "[Instrumental][Intro][Direct Mic Piano][Section: Strict Metronomic Grid][Hard Staccato Notes][Section: Flat Dynamic Range][Zero Pedaling Drive][Outro][Instant Dead Stop Ending][End]"
+      }
+    ],
+    "comment": "Хорошее объёмное звучание. Интересная арранжировка. Выдержал 2/2.",
+    "artists": []
+  },
+  {
+    "id": "3f0d31be-0c35-4cc6-8587-8827c6d155f1",
+    "name": "MINUET Acoustic Piano III",
+    "prompt": [
+      {
+        "songTitle": "Minuet_01_-_Dry_Staccato_Mechanics",
+        "styles": "solo acoustic piano | classical minuet | pure instrumental | strict steady pace | flat dynamics | bone-dry studio master | zero pedal staccato | uncompressed raw audio | zero clipping",
+        "negativePrompt": "vocals, singing, clipping, compression artifacts, loud mastering, romantic expression, crescendos, rubato, delay, modern pop, synth, epic choir, dynamic swells",
+        "lyrics": "[Instrumental][Intro][Dry Staccato Piano][Section: Strict Meter Minuet][Metronomic Pacing][Section: Flat Dynamics][Steady Mechanical Drive][Outro][Crisp Unpedaled Ending][End]"
+      }
+    ],
+    "comment": "Сильное звучание без клиппинга. Тестировался с одноимённым лупом. Продержался 2/2.",
+    "artists": []
+  },
+  {
+    "id": "5f81a080-1449-4f77-b7f8-1e774bd64771",
+    "name": "MINUET Grand Piano",
+    "prompt": [
+      {
+        "songTitle": "Minuet_12_-_Grand_Fixed_Ending",
+        "styles": "solo acoustic grand piano | graceful ending | purely instrumental | strict zero pedal |  bone-dry studio master | flat velocity | hard fixed resolution | uncompressed raw audio | zero clipping",
+        "negativePrompt": "vocals, singing, percussion, tapping, wood knock, orchestra, strings, brass, synth, room acoustics, clipping, digital distortion, compression artifacts, harsh frequencies, low-end mud, romantic expression, crescendos, dynamic swells, limiter pump, tail distortion, repeating notes, woodpecker effect",
+        "lyrics": "[Instrumental][Intro][Solo Acoustic Grand Piano][Section: Strict Minuet Grid][Mechanical Hammer Action][Section: Flat Dynamic Range][Steady Metronomic Pace][Outro][Final Cadence Chord][Graceful Ending][End]"
+      }
+    ],
+    "comment": "Очень раскатиско. Драмматично. Держит звук. Не обосралось на миинуэте и на регтайме.\nИнтересно, что регтайм получился качественно по звуку, но полное дерьмо по ритму. Нужен более жёсткий ритм для него.",
+    "artists": []
+  },
+  {
+    "id": "4f0f3bd8-aec0-4b87-94fd-6d6788949979",
+    "name": "RIGAUDON ACOUSTIC PIANO",
+    "prompt": [
+      {
+        "songTitle": "Rigaudon_Transparent_Clockwork",
+        "styles": "solo acoustic piano, transparent audio, direct mic feed, short decay, strict 156 BPM, baroque rigaudon, clean fundamental frequencies, even velocity, pure instrumental, graceful ending",
+        "negativePrompt": "hall, church, wet mix, thick texture, aggressive transients, soft mud, lo-fi hiss, vinyl crackle, compression artifacts, singing, romantic expression",
+        "lyrics": "[Instrumental][Intro][Direct Mic Piano][Section: Unwavering Tempo][Short Clean Notes][Section: Clockwork Groove][Restrained Dynamics][Outro][Graceful Ending][End]"
+      }
+    ],
+    "comment": "Стремительный, красивый, чистый. Но генерит короткие треки. ",
+    "artists": []
+  },
+  {
+    "id": "d9038c6f-b318-4a0f-a5ff-06cb0cf625ef",
+    "name": "RIGAUDON CLASSICAL PIANO",
+    "prompt": [
+      {
+        "songTitle": "Bourree_Stately_-_Transparent_Keys",
+        "styles": "solo classical piano | stately bourgeois dance | crisp staccato | graceful ending | pristine acoustic clarity | direct input grand piano | flat velocity | non-expressive precision | instrumental",
+        "negativePrompt": "vocals, singing, saturated, rough texture, vinyl crackle, dynamic compression, dramatic crescendos, cinematic choir, strings, brass, epic",
+        "lyrics": "[Instrumental][Intro][Transparent Staccato Theme][Section: Elegant Bourree Step][Strict Tempo Pacing][Section: Clean Counterpoint][Steady Rhythm][Outro][Graceful Ending][End]"
+      }
+    ],
+    "comment": "Крепкий середнячок. ",
+    "artists": []
+  },
+  {
+    "id": "1aefae59-8505-412f-87f7-9e97b8f57366",
+    "name": "RIGAUDON MOTORIC GRAND PIANO",
+    "prompt": [
+      {
+        "songTitle": "Rigaudon_02_Motoric_Drive",
+        "styles": "classical chamber music | solo grand piano | 156 BPM | graceful ending | motoric ostinato | staccato grand piano | crisp mid-high register | deep bass accents | intimate acoustic space | instrumental",
+        "negativePrompt": "vocals, singing, delay, muddy bass, romantic expression, soft ambient, long sustain, artificial compression, electronic, orchestra, strings",
+        "lyrics": "[Instrumental][Intro][Direct Mic Piano][Section: Fast Motoric Rhythm][Crisp Chord Separation][Section: Steady Bass Pulse][Flat Dynamic Range][Outro][Graceful Ending]"
+      }
+    ],
+    "comment": "Крепкое, красивое и напористое звучание.",
+    "artists": []
+  },
+  {
+    "id": "961bcc80-263e-4e83-9de2-a4e99079e67e",
+    "name": "Scherzo Funny Piano",
+    "prompt": [
+      {
+        "songTitle": "Scherzo",
+        "styles": "solo upright piano | playful neoclassical | bright staccato | fast tempo | cheerful | wooden room decay | instrumental",
+        "negativePrompt": "",
+        "lyrics": "[Instrumental]\n\n[Intro]\n\n[Solo Upright Piano]\n\n[Section: Playful Theme]\n\n[Bright Staccato Notes]\n\n[Wooden Room Decay]\n\n[Section: Dancing Keys]\n\n[Syncopated Key Repetition]\n\n[Mid Register Melodic Line]\n\n[Section: Joyful Leap]\n\n[High Register Ripples]\n\n[Piano Resonance Decay]\n\n[Outro]\n\n[Graceful Ending]\n\n[End]"
+      }
+    ],
+    "comment": "Основной промт, оригинальный, к-й дал звучание трекам в workspace \"Upbeat Piano Scherzo\"",
+    "artists": []
+  },
+  {
+    "id": "c1996240-0dd7-4873-a21e-9bb0abf31e18",
+    "name": "Schrezzo Classic Piano I",
+    "prompt": [
+      {
+        "songTitle": "Scherzo_Syncopation_-_Rigid_Drive",
+        "styles": "solo classical piano | percussive scherzo | mechanical pacing | rigid syncopation | flat velocity | dry close-mic studio | detached notes | instrumental",
+        "negativePrompt": "vocals, singing, romantic era, legato, dynamic swells, crescendos, cinematic, strings, delay, humanization, pop",
+        "lyrics": "[Instrumental][Intro][Percussive Bass Stabs][Section: Interlocking Theme][Rigid Rhythmic Motif][Section: Flat Dynamics][Steady Mechanical Drive][Outro][Dry Staccato End][End]"
+      }
+    ],
+    "comment": "Один из трёх классических промптов для Шреццо. Дал отличный звук для специализированног Шреццо-Лупа. \n",
+    "artists": []
+  },
+  {
+    "id": "33d125db-af25-413e-931f-c25d6dc0ebcf",
+    "name": "Schrezzo Classic Piano II",
+    "prompt": [
+      {
+        "songTitle": "Scherzo_Geometric_-_Flat_Acoustics",
+        "styles": "solo classical piano | baroque scherzo | objective performance | non-expressive | strict metronomic tempo | dry room acoustics | crisp counterpoint | instrumental",
+        "negativePrompt": "vocals, singing, emotional expression, rubato, heavy pedal, crescendos, atmospheric, modern, cinematic, choir, synthetic",
+        "lyrics": "[Instrumental][Intro][Detached Ostinato][Section: Geometric Scherzo][Precise Interlocking Lines][Section: Metronomic Counterpoint][Flat Articulation][Outro][Neat Resolution][End]"
+      }
+    ],
+    "comment": "\nОдин из трёх классических промптов для Шреццо. Дал отличный звук для специализированног Шреццо-Лупа. \n",
+    "artists": []
+  },
+  {
+    "id": "cd6a40ba-1497-45c0-bc72-518f1cc60063",
+    "name": "Schrezzo Classic Piano III",
+    "prompt": [
+      {
+        "songTitle": "Scherzo_Motion_-_Polished_Pace",
+        "styles": "solo classical piano | fast scherzo | precise mechanical rhythm | dry studio master | pristine sound | flat dynamics | detached notes | instrumental",
+        "negativePrompt": "vocals, singing, clipped, saturated, rough texture, rubato, heavy pedal, dynamic swells, crescendos, cinematic, strings, delay",
+        "lyrics": "[Instrumental][Intro][Precise Piano Stabs][Section: Rapid Motive][Rigid Metronomic Flow][Section: Flat Dynamics][Clean Steady Drive][Outro][Dry Crisp Resolution][End]"
+      }
+    ],
+    "comment": "Один из трёх классических промптов для Шреццо. Дал отличный звук для специального Шреццо-Лупа.",
+    "artists": []
+  },
+  {
+    "id": "4450341b-c4c3-4160-8e76-987760cd064b",
+    "name": "Toy March Piano Version 2",
+    "prompt": [
+      {
+        "songTitle": "Staccato_Etude_-_Objective_Pace",
+        "styles": "solo classical piano | staccato etude | minimalist march | objective playing | rigid tempo | dry studio | non-expressive | crisp articulation | instrumental",
+        "negativePrompt": "vocals, emotional, rubato, crescendos, dramatic, orchestral backing, delay, childish, cinematic, epic",
+        "lyrics": "[Instrumental][Intro][Crisp Bass Ostinato][Section: Technical March][Dry Staccato Runs][Section: Objective Pacing][Steady Rhythm][Outro][Neat Resolution][End]"
+      }
+    ],
+    "comment": "Сочетание Пропт + Toy March Loop\nдаёт более гладкое и мелодичное звучание по сравению с первой \nверсией (Диснеевской). Читстое фоно  с минимальными вкраплениями.\nДиснеевская версия даёт больше брака и больше визга и прочего.",
+    "artists": [
+      "UPBEAT PIANO TOY MARCH"
+    ]
+  }
+]
