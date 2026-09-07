@@ -1,0 +1,216 @@
+{
+    "name": "darkjazz_noir-whisper_melodic",
+    "bpm": 115,
+    "instrument": "piano",
+    "steps": 128,
+    "key": "D",
+    "scale": "Minor",
+    "swing": 5.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "D1",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "A1",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "Bb4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "G4",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "A0",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "E1",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "D4",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C#4",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "G0",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "D1",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 68,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "Bb4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 84,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "A0",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "E1",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 100,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "D4",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "C#4",
+            "duration": "8n",
+            "velocity": 0.65,
+            "chance": null
+        },
+        {
+            "step": 116,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 120,
+            "note": "D4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        }
+    ],
+    "comment": "\u0411\u043e\u043b\u0435\u0435 \u043f\u043e\u0434\u0432\u0438\u0436\u043d\u0430\u044f \u0434\u0435\u0442\u0435\u043a\u0442\u0438\u0432\u043d\u0430\u044f \u043c\u0435\u043b\u043e\u0434\u0438\u044f. \u041f\u043e\u0434\u044a\u0435\u043c \u043f\u043e \u0430\u0440\u043f\u0435\u0434\u0436\u0438\u043e \u0438 \u043a\u0440\u0430\u0441\u0438\u0432\u044b\u0439 \u0441\u043f\u0430\u0434 \u043a \u0434\u0438\u0441\u0441\u043e\u043d\u0438\u0440\u0443\u044e\u0449\u0435\u043c\u0443 C#.",
+    "style": "dark_jazz"
+}

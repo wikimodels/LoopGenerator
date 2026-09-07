@@ -10,7 +10,7 @@
         "lyrics": "[Instrumental][Hypnotic Piano Ostinato][Breath Flute Enters][Minimalist Development][Tension Building][Harmonic Shift][Sudden Stop]"
       }
     ],
-    "comment": "Красивый промпт. Тестировался на сред. балладах. ",
+    "comment": "Красивый промпт. Тестировался на средневековых балладах. ",
     "artists": []
   },
   {
@@ -24,7 +24,7 @@
         "lyrics": "[Instrumental][Hypnotic flute Ostinato][Bowed Cello Enters][Minimalist Development][Tension Building][Harmonic Shift][Sudden Stop]"
       }
     ],
-    "comment": "Красивый чёткий промпт. Луп - средневек. баллады.",
+    "comment": "Красивый чёткий промпт. Тестировался на средневековых балладах. ",
     "artists": []
   },
   {
@@ -38,7 +38,7 @@
         "lyrics": "[Instrumental][Hypnotic Cello Ostinato][Breath Guitar Enters][Minimalist Development][Tension Building][Harmonic Shift][Graceful Ending]"
       }
     ],
-    "comment": "Гитара не всегда ведёт себя хорошо - иногда жёстковато звучит. Но в целом получаются хорошие треки. \nСтепень проникновенности может разниться от лупа к лупу.\nТестировался на лупе средвек. баллады.",
+    "comment": "Гитара не всегда ведёт себя хорошо - иногда жёстковато звучит. Но в целом получаются хорошие треки. \nСтепень проникновенности может разниться от лупа к лупу.\nТестировался на средневековых балладах. ",
     "artists": []
   },
   {
@@ -52,7 +52,7 @@
         "lyrics": "[Instrumental][Hypnotic Theorbo Pattern][Minimalist Development][Tension Building][Harmonic Shift][Sudden Stop]"
       }
     ],
-    "comment": "Жёстовато, но если привыкнуть, то хорошо заходит. Тестировался на балладах. ",
+    "comment": "Жёстовато, но если привыкнуть, то хорошо заходит. Тестировался на средневековых балладах. ",
     "artists": []
   },
   {
@@ -294,5 +294,159 @@
     "artists": [
       "UPBEAT PIANO TOY MARCH"
     ]
+  },
+  {
+    "id": "2cf16480-852d-4e02-9864-43af860c607c",
+    "name": "RENAISSANCE BALLADS Viola Da Gamba",
+    "prompt": [
+      {
+        "songTitle": "Forgotten Oath",
+        "styles": "early music | chamber classical | viola da gamba ensemble | slow expressive bowing | deep acoustic realism | melancholic modal harmony | crescendo-decrescendo | clean analog mix",
+        "negativePrompt": "piano, modern strings, percussion, ambient drone, excessive delay, vocal, background noise, digital compression",
+        "lyrics": "[Instrumental Intro][Low Viola Drone][First Movement][Interweaving String Melodies][Slow Tempo][Second Movement][Dynamic Swell][Rich Harmonic Overtones][Resolution][Gentle Decrescendo][Return to Drone][Outro][Natural String Fade][End]"
+      }
+    ],
+    "comment": "Красивая виола да гамба даёт приличный звук. Тестировался с кабацкими лупами. ",
+    "artists": []
+  },
+  {
+    "id": "cbd461b9-025c-4d53-8788-33fb28b79904",
+    "name": "RENAISSANCE BALLADS Consort",
+    "prompt": [
+      {
+        "songTitle": "Authentic_Consort",
+        "styles": "instrumental | renaissance viol consort | pavane | early music | polyphony | modal harmony | 1500s | historical archive | flat dynamics | raw string resonance | unpolished acoustic",
+        "negativePrompt": "modern progression, contemporary, folk ballad, dramatic, climax, ambient, modern classical, hollywood, piano",
+        "lyrics": "[Instrumental][Viol Consort][Polyphonic Texture][Slow Pavane][Modal Resolution][End]"
+      }
+    ],
+    "comment": "Чуть-чуть заунывный, но качественный промт ансамбля Ренессанса. Тестировался с кабацкими лупами. ",
+    "artists": []
+  },
+  {
+    "id": "dbc3e22d-a8cf-4e32-b030-53ba9ac707ad",
+    "name": "RENAISSANCE BALLADS Viola Consort",
+    "prompt": [
+      {
+        "songTitle": "Theorbo_Gamba_Archive",
+        "styles": "instrumental | historically informed performance | early music ensemble | 16th century | theorbo | viola da gamba | period instruments | gut strings | modal tuning | raw historical recording | dry acoustic | non-pop",
+        "negativePrompt": "pop, folk, cinematic, modern acoustic, steel strings, edm, percussion, romanticism, heavy reverb, synthetic pads, dramatic swell",
+        "lyrics": "[Instrumental][Theorbo Intro][Gamba Enters][Counterpoint][Recercar][End]"
+      }
+    ],
+    "comment": "Сильный промпт со струнными. Тестировался с кабацкими лупами. ",
+    "artists": []
+  },
+  {
+    "id": "5a322f0a-8e82-44f7-b593-93d50db5fb4a",
+    "name": "RENAISSANCE BALLADS Da Gamba & Choir",
+    "prompt": [
+      {
+        "songTitle": "Gamba_Lamentation",
+        "styles": "early music lament | viola da gamba | deep choral undertones | baritone and alto choir | dark Renaissance harmony | dry chamber acoustic | low frequencies only | velvety texture",
+        "negativePrompt": "soprano | high choir | piercing frequencies | clipping | distortion | cinematic | pop | modern | treble instruments | upbeat",
+        "lyrics": "[Deep Gamba Drone][Baritone Chant][Alto Weaving Harmony][Somber Renaissance Progression][Dark Vocal Cadence]"
+      }
+    ],
+    "comment": "Вокал даёт перегруз. В одном треке его немного, но он есть.\nПохоже, придётся делать большой отсев, если захочется всё-таки его использовать.",
+    "artists": []
+  },
+  {
+    "id": "50449115-c647-415e-80a7-341bb4c76750",
+    "name": "RENAISSANCE BALLADS Lute & Viola Da Gamba",
+    "prompt": [
+      {
+        "songTitle": "heavy-hearth-stomp",
+        "styles": "instrumental | authentic historical renaissance style | early music performance | lute and viola da gamba duet | sharp clean plucking | complex linear counterpoint | 90 BPM | steady pace | flat dynamics | dry studio mix | close-mic | zero reverb",
+        "negativePrompt": "vocals, singing, voice, choir, tenor, soprano, spoken word, modern, pop, cinematic, epic, drums, percussion, heavy reverb",
+        "lyrics": "[Instrumental Intro][Viola da gamba Enters][Lute polyphony grid ][Complex Linear Counterpoint][Lute Interlude][Viola da gamba Solo][Outro]"
+      }
+    ],
+    "comment": "Промт даёт звучания дла обоих - и для лютни, и для виолы да гамба. Иногда бывают нюансики в отдельный генерациях - плавает звук. Тестировался с кабацкими лупами. ",
+    "artists": []
+  },
+  {
+    "id": "2a4d459d-adac-4f08-bbc1-113e219d2a48",
+    "name": "RENAISSANCE BALLADS Chamber of Lute, Flute and da Gamba",
+    "prompt": [
+      {
+        "songTitle": "#1CAE10 Renaissance Trio - Il Cielo Stellato",
+        "styles": "16th century renaissance chamber | early music trio | graceful ending | tenor recorder | lute | viola da gamba | austere modal counterpoint | perfectly balanced mix | warm wooden tone | no vibrato | sharp geometric patterns | 90 BPM | steady pace | flat dynamics | dry studio acoustics | close-mic",
+        "negativePrompt": "soprano recorder, high pitch, shrill, piercing frequencies, squeaky, harsh treble, vocals, singing, voice, modern, pop, uneven mix, dominant solo, vihuela",
+        "lyrics": "[Instrumental Intro][Lute and Viola da gamba set the geometric grid][Tenor Recorder enters gently][Three-part Polyphonic Interlocking][Lute and Recorder Staccato Exchange][Deep Gamba Resonance with Wind Motif][Complex Mathematical Trio Counterpoint][Strict Interlocking Metric Grid][Final Polyphonic Resolution][Graceful Ending][Graceful Acoustic Outro]"
+      }
+    ],
+    "comment": "Хорошие лютня, да Гамба и флейта. Но может быть брачок с генерациями. Где-то может пойти перегрузка.\nТестировался с кабацкими лупами. ",
+    "artists": []
+  },
+  {
+    "id": "152dd60e-3d66-496f-9af6-a6086ea8dd72",
+    "name": "!!!TEST Ultar Slow Dark Jazz Guitar",
+    "prompt": [
+      {
+        "songTitle": "VNR-CEL-11] Mournful Acoustic Cello",
+        "styles": "40 BPM | slow dark jazz | vintage jazz guitar | deep acoustic contrabass | soft grand piano | thick low frequency | calm graceful ending | zero percussion | no drums | ultra slow tempo | heavy smooth sound | dark bar atmosphere | long sustained notes",
+        "negativePrompt": "",
+        "lyrics": "[Instrumental][Intro][bowed cello swell, deep acoustic contrabass note, warm muted guitar chord][Dark Melt][dark jazz guitar melody with zero treble, heavy contrabass sub, slow warm chords][Deep Solo][solo jazz guitar improvisation over thick bass resonance][Calm Graceful Ending][Outro]"
+      }
+    ],
+    "comment": "Проблемный промпт. По генерациям с дарк-джаз лупов даёт нестабильный результат. Клиппинг и т.д.\nС Нуар Джазом в качестве подложки получается неплохой результать. Но надо ещё рассмотреть его.",
+    "artists": []
+  },
+  {
+    "id": "ddc57e13-27c4-4afe-8b17-5e34e3bf642b",
+    "name": "(ZAPIL) MAGNIFICENT GRID Clarniet & Brass & Viola",
+    "prompt": [
+      {
+        "songTitle": "folia_syncopated_drive",
+        "styles": "minimalist chamber duo | small baroque portative organ and viola da gamba | repetitive melodic cells | slow harmonic shift | dry stone room acoustic | contemplative | steady 66 BPM | graceful ending",
+        "negativePrompt": "polished mastering, glossy production, autotune, cathedral echo, church reverb, drums, percussion, distortion, climax, buildup, drop, piano, electric, synth, vocal, choir",
+        "lyrics": "[Intro][Small Organ and Viola da Gamba Establish, Steady 66 BPM][Section 1][Repetitive Melodic Cell Introduced, Contemplative Sacred Mood][Section 2][Harmony Shifts Slowly, Organ and Gamba Continue][Outro][Duo Slows, Fades Into Silence][Graceful Ending][Instant Silence][End][Intro][Low Woodwind Trio Establish, Steady 66 BPM][Section 1][Repetitive Melodic Cell Introduced, Contemplative Wooden Atmosphere][Section 2][Harmony Shifts Slowly, Bass Clarinet and Bassoon Continue][Outro][Woodwinds Slow, Fade Into Silence][Graceful Ending][Instant Silence][End][Intro][Muted Brass Trio Establish, Steady 66 BPM][Section 1][Repetitive Melodic Cell Introduced, Contemplative Warm Mood][Section 2][Harmony Shifts Slowly, Muted Brass Trio Continues][Outro][Trio Slows, Fades Into Silence][Graceful Ending][Instant Silence][End][Intro][String Quartet Establish, Steady 66 BPM][Section 1][Repetitive Melodic Cell Introduced, Contemplative Mood][Section 2][Harmony Shifts Slowly, Quartet Continues][Outro][Quartet Slows, Fades Into Silence][Graceful Ending][Instant Silence][End]"
+      }
+    ],
+    "comment": "Удивительный промт. Намешало грязи в лирике и в стиле. В стилях стоит орган. В лирике - хвосты от других промптов (эксперимент с расширением были, переписывал под новое поле для лирики). Но он даёт афигенные по красоте композиции! Стабильно 1/2 брак и 1/2 АХУЕННО. Один раз закапризничал и дал брак на фолио-луп 2/2.\n\nТестировлся с филио. Практически всё АХУЕННО.\nПопытки почистить луп привели к потере звука: кирзовое щипковое, рёв кларнета.",
+    "artists": []
+  },
+  {
+    "id": "b0795800-af22-468c-b8e2-018076942427",
+    "name": "(ZAPIL) MAGNIFICENT GRID Guitar & Chamber",
+    "prompt": [
+      {
+        "songTitle": "folia_polyphonic_chase",
+        "styles": "early baroque style, 17th century historical performance, baroque guitar lead, punteado style, delicate gut strings, tiny baroque chamber orchestra, baroque violin zero vibrato, viola da gamba, ultra dry acoustics, close-mic, 90 BPM, flat dynamics, static loop, dark warm timbre, mellow frequency profile, smooth low-pass filter, softened high frequencies, tape warmth, historical accuracy, graceful ending",
+        "negativePrompt": "",
+        "lyrics": "[BPM: 90][Time Signature: 4/4][Style: Quiet Baroque Guitar and Dry String Chamber][Continuous Flat Soft Dynamics][Baroque Guitar Slow Soft Punteado Theme][Tiny Historical String Ensemble Zero Vibrato Backing][Strict Mechanical Repetition Grid][Unchanging Static Texture Throughout][Zero Volume Change][Static Level Soft Sustained Accompaniment][Uniform Smooth Velocity][Constant Quiet Warm Volume][Gentle Unison Cadence Ringing Out][Graceful Fade Out][End]"
+      }
+    ],
+    "comment": "Крепкий промт дал стабильно три по 1/2 хороших трека. ",
+    "artists": []
+  },
+  {
+    "id": "9f2c5407-4cec-4c2e-849c-e9115a1aa607",
+    "name": "(ZAPIL) MAGNIFICENT GRID Clarniet & Bassoon",
+    "prompt": [
+      {
+        "songTitle": "тfolia_falling_leaves",
+        "styles": "minimalist low woodwind trio | bass clarinet and bassoon | repetitive melodic cells | slow harmonic shift | dry timber acoustic studio | contemplative | steady 66 BPM | graceful ending",
+        "negativePrompt": "",
+        "lyrics": "[Intro][Low Woodwind Trio Establish, Steady 66 BPM][Section 1][Repetitive Melodic Cell Introduced, Contemplative Wooden Atmosphere][Section 2][Harmony Shifts Slowly, Bass Clarinet and Bassoon Continue][Outro][Woodwinds Slow, Fade Into Silence][Graceful Ending][Instant Silence][End][Intro][Muted Brass Trio Establish, Steady 66 BPM][Section 1][Repetitive Melodic Cell Introduced, Contemplative Warm Mood][Section 2][Harmony Shifts Slowly, Muted Brass Trio Continues][Outro][Trio Slows, Fades Into Silence][Graceful Ending][Instant Silence][End][Intro][String Quartet Establish, Steady 66 BPM][Section 1][Repetitive Melodic Cell Introduced, Contemplative Mood][Section 2][Harmony Shifts Slowly, Quartet Continues][Outro][Quartet Slows, Fades Into Silence][Graceful Ending][Instant Silence][End]"
+      }
+    ],
+    "comment": "Промпт даёт хороший запил, но только с фолия-лупами. Как ни странно, с другими дал стабильный сбой. \nПромпт духовой. \n\nНапример, суно обосралось с этими тремя лупами по-полной.\n\n1. Passamezzo Antico (Пассамеццо антико)\nОдин из самых старых танцев. Гармония строится на качелях между тоникой и субтоном. Если Фолия — это трагизм, то Пассамеццо — это суровый, маршеобразный драйв. (Тональность: G Minor).\n\n2. Passacaglia (Пассакалия / Нисходящий тетрахорд)\nЭто когда бас упрямо шагает вниз по ступенькам (Тоника -> 7 -> 6 -> 5). Бесконечный, гипнотический спуск в бездну. Очень драматичная и кинематографичная штука. (Тональность: D Minor).\n\n3. Spagnoletta (Спаньолетта)\nЕще один популярный придворный танец. Чуть более изящный, с красивым переходом в параллельный мажор в середине лупа и возвращением в темный минор в конце. (Тональность: A Minor).",
+    "artists": []
+  },
+  {
+    "id": "06086a51-66fa-4555-afbb-dfe98d740b9c",
+    "name": "(ZAPIL) BAR_LOOP Crumhorn & Dulcian Bassoon",
+    "prompt": [
+      {
+        "songTitle": "folia_alberti_mechanism",
+        "styles": "94 BPM | early baroque wind ensemble | solo renaissance crumhorn and supporting dulcian bassoon | buzzing reed textures | historical woodwind counterpoint | strict metric ostinato loop | warm dry historic hall | flat unaccented breathing | zero emotional peaks | no drums | no vocals",
+        "negativePrompt": "modern flute, oboe, clarinet, saxophone, synthesizer, electronic, digital piano, strings section, drums, percussion, snare, marimba, epic climax, dramatic swell, vocals, church organ",
+        "lyrics": "[Instrumental]\n[Main Theme]\n[square wave lead melody, pulse wave harmony]\n[triangle wave bassline, noise-based percussion]\n[staccato synth arpeggios]\n[Variation]\n[lead melody shifts to higher octave]\n[syncopated noise-channel snare hits]"
+      }
+    ],
+    "comment": "Отличный промт! Красивейший запил! crumhorn and supporting dulcian bassoon.",
+    "artists": []
   }
 ]

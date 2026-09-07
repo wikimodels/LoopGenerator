@@ -1,0 +1,174 @@
+{
+    "name": "darkjazz_midnight-rain_melodic",
+    "bpm": 110,
+    "instrument": "piano",
+    "steps": 128,
+    "key": "F",
+    "scale": "Minor",
+    "swing": 10.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "F1",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "C2",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "Ab4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "C5",
+            "duration": "4n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "Eb1",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "Bb1",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "Bb4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "Ab4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "G4",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "Db1",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "Ab1",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "Eb4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "Db4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "C4",
+            "duration": "4n",
+            "velocity": 0.7,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "C1",
+            "duration": "4n",
+            "velocity": 0.9,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "G1",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "Ab4",
+            "duration": "8n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "E4",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 120,
+            "note": "F4",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        }
+    ],
+    "comment": "\u041c\u0435\u043b\u043e\u0434\u0438\u044f-\u043a\u0430\u043f\u043b\u044f. \u041c\u043d\u043e\u0433\u043e \u0432\u043e\u0437\u0434\u0443\u0445\u0430 \u043c\u0435\u0436\u0434\u0443 \u043d\u043e\u0442\u0430\u043c\u0438, \u043a\u0440\u0430\u0441\u0438\u0432\u043e\u0435 \u0432\u043e\u0441\u0445\u043e\u0436\u0434\u0435\u043d\u0438\u0435 \u043a C5 \u0438 \u043c\u0435\u043b\u0430\u043d\u0445\u043e\u043b\u0438\u0447\u043d\u044b\u0439 \u0441\u043f\u0443\u0441\u043a.",
+    "style": "dark_jazz"
+}

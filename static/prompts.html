@@ -98,6 +98,10 @@
                 <textarea id="create-comment" class="input-text large-textarea" style="min-height:80px;width:100%;box-sizing:border-box;" placeholder=""></textarea>
                 <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Prompt JSON</label>
                 <textarea id="create-prompt-json" class="input-text large-textarea" style="min-height:260px;white-space:pre;width:100%;box-sizing:border-box;" placeholder=""></textarea>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                    <div id="create-json-hint" style="font-size:0.75rem;color:var(--text-muted);flex:1;"></div>
+                    <button id="btn-format-create-json" class="btn neutral" style="padding:2px 10px;font-size:0.75rem;" title="Pretty-print JSON">Format</button>
+                </div>
                 <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin:12px 0 0.25rem;">Artists</label>
                 <div id="create-artists-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
                 <div style="display:flex;gap:6px;">
@@ -109,6 +113,6 @@
     </div>
 
     <div id="toast" class="toast hidden">Message</div>
-    <script src="prompts.js?v=2"></script>
+    <script src="prompts.js?v=6"></script>
 </body>
 </html>

@@ -1,26 +1,134 @@
-// prompts.js — Prompts page table + modals
+// prompts.js — Prompts page table + modals (v6)
 (function () {
+    console.log('[prompts.js v6] script loaded');
     let prompts = [];
     let artists = [];
     let selected = new Set();
     let detailsPrompt = null;
     let createArtists = [];
+    let createBusy = false;
 
+    // Surface silent JS errors as toasts — "no errors" must be impossible to miss
+    window.addEventListener('error', (e) => {
+        try {
+            const msg = (e && e.message) || (e && e.error && e.error.message) || 'unknown JS error';
+            console.error('[prompts.js v6] window.onerror:', e);
+            const t = document.getElementById('toast');
+            if (t) { t.textContent = 'JS error: ' + msg; t.classList.remove('hidden'); }
+        } catch (_) {}
+    });
+
+    // Delegated fallback: if direct button wiring ever missed, clicks still work.
+    // Busy-guard in createPrompt + idempotent openCreate make double-firing safe.
+    document.addEventListener('click', (e) => {
+        if (!e.target || !e.target.closest) return;
+        if (e.target.closest('#btn-create-save')) {
+            if (e.__promptsHandled) return;
+            e.__promptsHandled = true;
+            console.log('[prompts.js v6] delegated #btn-create-save click');
+            createPrompt();
+        } else if (e.target.closest('#btn-create-prompt')) {
+            if (e.__promptsHandled) return;
+            e.__promptsHandled = true;
+            console.log('[prompts.js v6] delegated #btn-create-prompt click');
+            openCreate();
+        } else if (e.target.closest('#btn-format-create-json')) {
+            if (e.__promptsHandled) return;
+            e.__promptsHandled = true;
+            formatCreateJson();
+        }
+    });
     function showToast(msg, type='success') {
         const t = document.getElementById('toast');
         if (!t) return;
         t.textContent = msg;
         t.classList.remove('hidden', 'toast-success', 'toast-error');
         t.classList.add(type === 'error' ? 'toast-error' : 'toast-success');
-        setTimeout(() => t.classList.add('hidden'), 3000);
+        clearTimeout(t.__timer);
+        // Errors stay visible longer so they can't be missed
+        t.__timer = setTimeout(() => t.classList.add('hidden'), type === 'error' ? 8000 : 3000);
     }
     function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function stripFences(s) {
+        // Tolerate ```json ... ``` pasted from AI chats
+        if (/^\s*```/.test(s)) s = s.replace(/^\s*```[a-zA-Z]*\s*/, '').replace(/\s*```\s*$/, '');
+        return s.trim();
+    }
+    function repairJson(s) {
+        // Auto-format pasted docs: escape raw newlines/tabs inside "..." strings
+        // and drop trailing commas — strict JSON.parse rejects both, humans paste both.
+        let out = '';
+        let inStr = false;
+        let escd = false;
+        for (let i = 0; i < s.length; i++) {
+            const c = s[i];
+            if (inStr) {
+                if (escd) { out += c; escd = false; }
+                else if (c === '\\') { out += c; escd = true; }
+                else if (c === '"') { out += c; inStr = false; }
+                else if (c === '\n') { out += '\\n'; }
+                else if (c === '\r') { if (s[i + 1] !== '\n') out += '\\n'; }
+                else if (c === '\t') { out += '\\t'; }
+                else if (c < ' ') { out += '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'); }
+                else { out += c; }
+            } else {
+                out += c;
+                if (c === '"') inStr = true;
+            }
+        }
+        return out.replace(/,\s*([}\]])/g, '$1');
+    }
+    function parsePromptJson(raw) {
+        // Strict first (exact errors), repaired fallback (multiline lyrics etc.)
+        const text = stripFences((raw || '').trim());
+        if (!text) return [];
+        try { return JSON.parse(text); }
+        catch (e1) {
+            try { return JSON.parse(repairJson(text)); }
+            catch (e2) { throw e1; }
+        }
+    }
+    function updateCreateJsonHint() {
+        const ta = document.getElementById('create-prompt-json');
+        const hint = document.getElementById('create-json-hint');
+        if (!ta || !hint) return;
+        const raw = stripFences(ta.value.trim());
+        if (!raw) { hint.textContent = 'Empty — will be saved as []'; hint.style.color = 'var(--text-muted)'; return; }
+        try {
+            const v = JSON.parse(raw);
+            const n = Array.isArray(v) ? v.length : 1;
+            hint.textContent = '✓ Valid JSON — ' + n + ' item' + (n === 1 ? '' : 's');
+            hint.style.color = '#4ade80';
+        } catch (e) {
+            try {
+                const v = JSON.parse(repairJson(raw));
+                const n = Array.isArray(v) ? v.length : 1;
+                hint.textContent = '✓ Valid — line breaks will be auto-fixed on save (' + n + ' item' + (n === 1 ? '' : 's') + ')';
+                hint.style.color = '#fbbf24';
+            } catch (e2) {
+                hint.textContent = '✗ Invalid JSON: ' + e.message;
+                hint.style.color = '#f87171';
+            }
+        }
+    }
+    function formatCreateJson() {
+        const ta = document.getElementById('create-prompt-json');
+        if (!ta) return;
+        try {
+            const v = parsePromptJson(ta.value);
+            ta.value = JSON.stringify(Array.isArray(v) ? v : [v], null, 2);
+            updateCreateJsonHint();
+            showToast('Formatted');
+        } catch (e) { showToast('Cannot format: ' + e.message, 'error'); }
+    }
 
     async function loadArtists() {
         try { const r = await fetch('/api/artists'); const d = await r.json(); artists = Object.keys(d).sort((a,b)=>a.localeCompare(b)); } catch(e){ artists=[]; }
     }
     async function loadPrompts() {
-        const r = await fetch('/api/prompts'); prompts = await r.json();
+        const r = await fetch('/api/prompts');
+        if(!r.ok) throw new Error('load prompts failed: HTTP ' + r.status);
+        prompts = await r.json();
     }
     function fillArtistSelect(sel) {
         if (!sel) return;
@@ -144,7 +252,7 @@
         if(btn){ btn.disabled = true; btn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span> Saving...'; }
         try {
             const raw = document.getElementById('details-prompt-json').value.trim();
-            detailsPrompt.prompt = raw ? JSON.parse(raw) : [];
+            detailsPrompt.prompt = raw ? parsePromptJson(raw) : [];
             detailsPrompt.comment = document.getElementById('details-comment').value;
             const r = await fetch('/api/prompts/'+encodeURIComponent(detailsPrompt.id), {
                 method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(detailsPrompt)
@@ -166,19 +274,42 @@
         document.getElementById('create-prompt-json').value='';
         document.getElementById('create-comment').value='';
         createArtists=[]; fillArtistSelect(document.getElementById('create-artist-select')); renderArtistsChips('create-artists-list', createArtists);
+        updateCreateJsonHint();
         document.getElementById('prompt-create-modal').classList.remove('hidden');
     }
     function closeCreate(){ document.getElementById('prompt-create-modal').classList.add('hidden'); }
     async function createPrompt(){
-        const name = document.getElementById('create-prompt-name').value.trim();
-        if(!name){ showToast('Name required', 'error'); return; }
-        let prompt; try{ const raw = document.getElementById('create-prompt-json').value.trim(); prompt = raw ? JSON.parse(raw) : []; }catch(e){ showToast('Invalid JSON', 'error'); return; }
-        const rec = { id: crypto.randomUUID(), name, prompt, comment: document.getElementById('create-comment').value, artists: createArtists.slice() };
-        try{
-            const r = await fetch('/api/prompts', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rec)});
-            if(!r.ok){ const j=await r.json(); throw new Error(j.detail||'create failed'); }
+        console.log('[prompts.js v6] createPrompt invoked');
+        if (createBusy) { console.log('[prompts.js v6] createPrompt already in-flight, ignoring'); return; }
+        createBusy = true;
+        try {
+            const name = document.getElementById('create-prompt-name').value.trim();
+            if(!name){ showToast('Name required', 'error'); return; }
+            let prompt;
+            try{
+                prompt = parsePromptJson(document.getElementById('create-prompt-json').value);
+                if (prompt && !Array.isArray(prompt)) prompt = [prompt];
+            }
+            catch(e){ showToast('Invalid JSON: ' + e.message, 'error'); return; }
+            const uid = (window.crypto && typeof crypto.randomUUID === 'function')
+                ? crypto.randomUUID()
+                : 'id-' + Date.now().toString(36) + '-' + Math.random().toString(16).slice(2);
+            const rec = { id: uid, name, prompt, comment: document.getElementById('create-comment').value, artists: createArtists.slice() };
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 20000);
+            let r;
+            try { r = await fetch('/api/prompts', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(rec), signal: ctrl.signal}); }
+            finally { clearTimeout(timer); }
+            if(!r.ok){ let msg='create failed'; try{ const j=await r.json(); msg=j.detail||msg; }catch(e){} throw new Error(msg); }
             showToast('Created'); closeCreate(); await loadPrompts(); renderPrompts();
-        }catch(e){ showToast(e.message, 'error'); }
+        }catch(e){
+            const msg = (e && e.name === 'AbortError')
+                ? 'Request timed out after 20s (server did not respond)'
+                : (e.message||'create failed');
+            console.error('[prompts.js v6] createPrompt failed:', e);
+            showToast(msg, 'error');
+        }
+        finally { createBusy = false; }
     }
 
     async function bulkDelete(){
@@ -189,9 +320,11 @@
     }
 
     async function init(){
-        await loadArtists();
-        await loadPrompts();
-        renderPrompts();
+        console.log('[prompts.js v6] init, buttons present:',
+            'btn-create-prompt=' + !!document.getElementById('btn-create-prompt'),
+            'btn-create-save=' + !!document.getElementById('btn-create-save'),
+            'prompt-create-modal=' + !!document.getElementById('prompt-create-modal'));
+        // Wire UI first — so buttons work even if data load fails
         // search
         const si = document.getElementById('search-input');
         const sc = document.getElementById('search-clear');
@@ -217,11 +350,19 @@
         document.getElementById('btn-close-create-modal')?.addEventListener('click', closeCreate);
         document.getElementById('prompt-create-modal')?.addEventListener('mousedown', e=>{ if(e.target===e.currentTarget) closeCreate(); });
         document.getElementById('btn-create-save')?.addEventListener('click', createPrompt);
+        document.getElementById('btn-format-create-json')?.addEventListener('click', formatCreateJson);
+        document.getElementById('create-prompt-json')?.addEventListener('input', updateCreateJsonHint);
         document.getElementById('btn-create-add-artist')?.addEventListener('click', ()=>{
             const sel = document.getElementById('create-artist-select'); const v = sel.value; if(!v) return;
             if(!createArtists.includes(v)) createArtists.push(v);
             renderArtistsChips('create-artists-list', createArtists);
         });
+        // Then load data
+        try { await loadArtists(); }
+        catch(e){ console.error('loadArtists failed', e); artists=[]; }
+        try { await loadPrompts(); }
+        catch(e){ console.error('loadPrompts failed', e); showToast(e.message, 'error'); prompts=[]; }
+        renderPrompts();
     }
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

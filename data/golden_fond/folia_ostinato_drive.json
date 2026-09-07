@@ -1,0 +1,349 @@
+{
+    "name": "folia_ostinato_drive",
+    "bpm": 192,
+    "instrument": "harpsichord",
+    "steps": 128,
+    "key": "D",
+    "scale": "Minor",
+    "swing": 0.0,
+    "notes": [
+        {
+            "step": 0,
+            "note": "D2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 0,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 4,
+            "note": "D5",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "D2",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 8,
+            "note": "F5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 12,
+            "note": "D5",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "A1",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 16,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 20,
+            "note": "C#5",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "A1",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 24,
+            "note": "E5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 28,
+            "note": "C#5",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "D2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 32,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 36,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "D2",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 40,
+            "note": "D5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 44,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "C2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 48,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 52,
+            "note": "G4",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C2",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 56,
+            "note": "C5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 60,
+            "note": "G4",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "F1",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 64,
+            "note": "A4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 68,
+            "note": "C5",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "F1",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 72,
+            "note": "F5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 76,
+            "note": "C5",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "C2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 80,
+            "note": "G4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 84,
+            "note": "C5",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "C2",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 88,
+            "note": "E5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 92,
+            "note": "C5",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "D2",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 96,
+            "note": "F4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 100,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "D2",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 104,
+            "note": "D5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 108,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "A1",
+            "duration": "4n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 112,
+            "note": "E4",
+            "duration": "8n",
+            "velocity": 0.75,
+            "chance": null
+        },
+        {
+            "step": 116,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 120,
+            "note": "A1",
+            "duration": "4n",
+            "velocity": 0.8,
+            "chance": null
+        },
+        {
+            "step": 120,
+            "note": "C#5",
+            "duration": "8n",
+            "velocity": 0.85,
+            "chance": null
+        },
+        {
+            "step": 124,
+            "note": "A4",
+            "duration": "4n",
+            "velocity": 0.75,
+            "chance": null
+        }
+    ],
+    "comment": "\u0414\u0440\u0430\u0439\u0432\u043e\u0432\u044b\u0439 \u043e\u0441\u0442\u0438\u043d\u0430\u0442\u043e. \u0411\u0430\u0441 \u0436\u0435\u0441\u0442\u043a\u043e \u0431\u044c\u0435\u0442 \u0447\u0435\u0442\u0432\u0435\u0440\u0442\u043d\u044b\u043c\u0438 \u043d\u0430 \u0441\u0438\u043b\u044c\u043d\u0443\u044e \u0438 \u043e\u0442\u043d\u043e\u0441\u0438\u0442\u0435\u043b\u044c\u043d\u043e \u0441\u0438\u043b\u044c\u043d\u0443\u044e \u0434\u043e\u043b\u044e (0 \u0438 8 \u0448\u0430\u0433), \u0430 \u043c\u0435\u043b\u043e\u0434\u0438\u044f \u0441\u043a\u0430\u0447\u0435\u0442 \u043c\u0435\u0436\u0434\u0443 \u0432\u043e\u0441\u044c\u043c\u044b\u043c\u0438 \u0438 \u0447\u0435\u0442\u0432\u0435\u0440\u0442\u043d\u044b\u043c\u0438.",
+    "style": "baroque"
+}

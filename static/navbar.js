@@ -76,7 +76,7 @@
                         <button class="btn secondary active" data-tab="default">Default Prompt</button>
                         <button class="btn secondary" data-tab="correction">Correction Prompt</button>
                     </div>
-                    <button id="btn-copy-prompt" class="btn secondary" style="transform:scale(.8);transform-origin:right center;white-space:nowrap;">
+                        <button id="btn-copy-ai-prompt" class="btn secondary" style="transform:scale(.8);transform-origin:right center;white-space:nowrap;">
                         <span class="material-icons">content_copy</span> Copy Prompt
                     </button>
                 </div>
@@ -193,7 +193,7 @@ Output JSON within markdown code tags. Suggestions/explanations outside the bloc
         const btnOpen = document.getElementById('btn-instructions');
         const modal = document.getElementById('instructions-modal');
         const btnClose = document.getElementById('btn-close-modal');
-        const btnCopy = document.getElementById('btn-copy-prompt');
+        const btnCopy = document.getElementById('btn-copy-ai-prompt');
         const promptEl = document.getElementById('ai-prompt-text');
 
         if (!btnOpen || !modal) return;
