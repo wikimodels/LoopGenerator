@@ -448,5 +448,47 @@
     ],
     "comment": "Отличный промт! Красивейший запил! crumhorn and supporting dulcian bassoon.",
     "artists": []
+  },
+  {
+    "id": "45b0a69a-d0f2-43a7-b50b-0b89106f90a3",
+    "name": "(ZAPIL) BAR_LOOP Quodlibet",
+    "prompt": [
+      {
+        "songTitle": "alberti_agitated_presto",
+        "styles": "90 BPM, baroque quodlibet, simultaneous combination of several independent historical melodies, baroque transverse flute and viola da gamba duo, strict mathematical counterpoint, warm close-mic room acoustics, natural human breathing and phrasing, precise but not robotic, no drums, no vocals",
+        "negativePrompt": "synthesizer, digital, marimba, piano, modern metal flute, cello, orchestra, cinematic trailer, buildup, climax, emotional peak, drums, percussion, electronic beat, vocal loop, singing",
+        "lyrics": "[Instrumental]\n\n[Main Theme]\n\n[square wave lead melody, pulse wave harmony]\n\n[triangle wave bassline, noise-based percussion]\n\n[staccato synth arpeggios]\n\n[Variation]\n\n[lead melody shifts to higher octave]\n\n[syncopated noise-channel snare hits]"
+      }
+    ],
+    "comment": "Довольно мощный всеядный луп (разные стили) с хорошей производительностью и небольшим браком. \nИнтересные мелодии. ",
+    "artists": []
+  },
+  {
+    "id": "fa005929-cccc-4ab3-93ab-be46d8641e29",
+    "name": "ULTRASLOW JAZZ Guitar",
+    "prompt": [
+      {
+        "songTitle": "Smoke on the Rain-Slick Street - This one 1 - Treblo_40bpm",
+        "styles": "dark jazz, vintage jazz",
+        "negativePrompt": "accelerando, tempo increase, getting faster, speed up, rush, double time, crescendo, volume increase, swelling, wall of sound, buildup, drop, climax, epic, emotional peak, dramatic dynamics, loud transients, drums, percussion, cymbals, vocals, singing, bright, treble, shrill",
+        "lyrics": "[Instrumental]\n[Intro]\n[40 BPM]\n[Very Slow Tempo]\n[bowed cello swell, deep acoustic contrabass note, warm muted guitar chord]\n\n[Section 1: Dark Melt]\n[40 BPM]\n[Strictly No Acceleration]\n[dark jazz guitar melody with zero treble, heavy contrabass sub, slow warm chords]\n\n[Section 2: Deep Solo]\n[40 BPM]\n[Maintained very slow tempo]\n[solo jazz guitar improvisation over thick bass resonance]\n\n[Outro]\n[Ultra Slow Pacing]\n[Calm Graceful Ending]\n[End]"
+      }
+    ],
+    "comment": "Промпт даёт стабильный результат. Но и сбои есть. Многое зависит от положки. Если она ок, то трек получается ахуенным, по крайней мере, в 1 из 2-х генераций. Если подложка дерьмо, то регенрации и инспро не помогают. ",
+    "artists": []
+  },
+  {
+    "id": "e52d4507-5a54-41c6-a4d9-94fab11f549e",
+    "name": "SJUP-II & Baritone Sax",
+    "prompt": [
+      {
+        "songTitle": "f_minor_elegy_flowing",
+        "styles": "100bpm, upright piano, staccato baritone saxophone, lively folk neoclassical, bright chords, flat dynamics, no crescendo, steady volume, chamber acoustics, hi-fi, instrumental",
+        "negativePrompt": "",
+        "lyrics": "[Tempo: 100 bpm][Steady Dynamics][Intro: Solo Upright Piano][E] [A] [B] [E][Section: Cheerful Morning - Enter Baritone Saxophone][E] [E] [A] [A][B] [B] [E] [E][Section: Folk Melody - Staccato Baritone Bassline][A] [A] [B] [B][C#m] [C#m] [A] [B][Outro: Upright Piano Solo][E] [A] [B] [E][Graceful Ending][End]"
+      }
+    ],
+    "comment": "Отличный промпт стабильно дающих АХУЕННО при минорных (лучше) и мажорных барокко-лупах (фолио).",
+    "artists": []
   }
 ]

@@ -38,6 +38,7 @@ const toastEl = document.getElementById('toast');
 
 // Export Audio Overlay Elements
 const btnExportAudio = document.getElementById('btn-export-audio');
+const btnArchiveSelected = document.getElementById('btn-archive-selected');
 const exportOverlay = document.getElementById('export-overlay');
 const exportCurrentTrack = document.getElementById('export-current-track');
 const exportProgressFill = document.getElementById('export-progress-fill');
@@ -748,6 +749,7 @@ function updateSelection() {
     if (btnMergeDownload) btnMergeDownload.disabled = selectedLoops.size === 0;
     if (btnExportAudio) btnExportAudio.disabled = selectedLoops.size === 0;
     btnDelete.disabled = selectedLoops.size === 0;
+    if (btnArchiveSelected) btnArchiveSelected.disabled = selectedLoops.size === 0;
     
     if (filteredLoops.length === 0) {
         checkAll.checked = false;
@@ -830,6 +832,7 @@ function setupEventListeners() {
 
     btnDownload.addEventListener('click', batchExport);
     btnDelete.addEventListener('click', bulkDelete);
+    if (btnArchiveSelected) btnArchiveSelected.addEventListener('click', bulkArchive);
     if (btnExportAudio) btnExportAudio.addEventListener('click', bulkExportAudio);
     if (btnCancelExport) btnCancelExport.addEventListener('click', () => { exportCancelled = true; });
 
@@ -1719,6 +1722,25 @@ async function mergeExportFromModal() {
         }, 1500);
 
     }, (durationSec + 1.5) * 1000);
+}
+
+async function bulkArchive() {
+    if (selectedLoops.size === 0) return;
+    if (!confirm(`Send ${selectedLoops.size} track(s) to Archive?`)) return;
+
+    if (btnArchiveSelected) btnArchiveSelected.disabled = true;
+    let archived = 0;
+    for (const filename of selectedLoops) {
+        try {
+            const res = await fetch(`/api/archive/${encodeURIComponent(filename)}/send`, { method: 'POST' });
+            if (res.ok) archived++;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    showToast(`Archived ${archived} track(s).`);
+    selectedLoops.clear();
+    await fetchLoops();
 }
 
 async function bulkDelete() {

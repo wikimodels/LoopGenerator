@@ -3,15 +3,13 @@ title LoopGenerator
 cd /d "%~dp0"
 
 echo [~] Stopping old server (if running)...
-:: 1. Kill the process holding the port (and all its children)
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8000 " ^| findstr "LISTENING"') do (
+:: 1. Kill the process holding port 8000 (regardless of connection state)
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8000 "') do (
     taskkill /F /T /PID %%a >nul 2>&1
 )
 
-:: 2. Failsafe: kill any hanging uvicorn workers for this project by matching command line
-for /f "tokens=2 delims=," %%a in ('wmic process where "name='python.exe' and commandline like '%%uvicorn%%main:app%%'" get processid /format:csv 2^>nul ^| findstr /r "[0-9]"') do (
-    taskkill /F /T /PID %%a >nul 2>&1
-)
+:: 2. Failsafe: kill any remaining process holding port 8000 via PowerShell
+powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | Stop-Process -Force -ErrorAction SilentlyContinue" >nul 2>&1
 
 timeout /t 2 /nobreak >nul
 

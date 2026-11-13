@@ -391,14 +391,22 @@ def get_archive(response: Response):
 
 @app.post("/api/archive/{filename}/send")
 def send_to_archive(filename: str):
-    """Отправить трек из Golden Fund в архив (файл переезжает)."""
+    """Отправить трек из Golden Fund или Catalog (Loops) в архив (файл переезжает)."""
     safe = os.path.basename(filename)
-    src = os.path.join(GOLDEN_DIR, safe)
     dst = os.path.join(ARCHIVE_DIR, safe)
-    if not os.path.exists(src):
-        raise HTTPException(status_code=404, detail="Track not found in Golden")
     if os.path.exists(dst):
         raise HTTPException(status_code=400, detail="Already in archive")
+
+    src = None
+    for search_dir in [GOLDEN_DIR, LOOPS_DIR]:
+        candidate = os.path.join(search_dir, safe)
+        if os.path.exists(candidate):
+            src = candidate
+            break
+
+    if not src:
+        raise HTTPException(status_code=404, detail="Track not found in Golden or Loops")
+
     shutil.move(src, dst)
     return {"status": "ok", "archived": safe}
 
