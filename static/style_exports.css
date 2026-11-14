@@ -191,3 +191,31 @@
     border-color: var(--primary);
     color: var(--text);
 }
+
+#btn-open-folder {
+    padding: 0.4rem 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    transition: all 0.2s ease;
+}
+
+#btn-open-folder:hover {
+    color: #f59e0b;
+}
+
+#btn-open-folder.opening {
+    pointer-events: none;
+    opacity: 0.75;
+}
+
+#btn-open-folder.success {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+#btn-open-folder .material-icons {
+    font-size: 1.15rem;
+}
+

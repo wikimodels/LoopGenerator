@@ -147,6 +147,10 @@ body {
     border-color: var(--primary) !important;
 }
 
+body:not([data-page="editor"]) .nav-editor-only {
+    display: none !important;
+}
+
 .nav-label {
     line-height: 1;
 }

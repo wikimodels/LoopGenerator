@@ -926,6 +926,31 @@ def rename_export_audio(filename: str, req: RenameRequest):
                     pass
 
     return {"status": "ok", "new_filename": safe_new}
+
+@app.get("/api/exports/open_folder")
+@app.post("/api/exports/open_folder")
+def open_exports_folder():
+    """Open the audio exports folder in the OS file manager with foreground focus."""
+    import subprocess
+    import sys
+    norm_path = os.path.normpath(os.path.abspath(EXPORTS_DIR))
+    os.makedirs(norm_path, exist_ok=True)
+    try:
+        if sys.platform == "win32":
+            creationflags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+            subprocess.Popen(
+                ["explorer.exe", norm_path],
+                creationflags=creationflags,
+                close_fds=True,
+            )
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", norm_path])
+        else:
+            subprocess.Popen(["xdg-open", norm_path])
+        return {"status": "ok", "path": norm_path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 app.mount("/exports", StaticFiles(directory=EXPORTS_DIR), name="exports")
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 

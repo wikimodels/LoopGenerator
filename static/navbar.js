@@ -50,13 +50,14 @@
         <button id="btn-insert-json" class="btn nav-btn secondary" title="Insert JSON">
             <span class="material-icons">data_object</span><span class="nav-label">Insert JSON</span>
         </button>
+        ${IS_EDITOR ? `
         <!-- Editor-only -->
         <button id="btn-export" class="btn nav-btn secondary nav-editor-only" title="Export Audio">
             <span class="material-icons">download</span><span class="nav-label">Export Audio</span>
         </button>
         <button id="btn-save" class="btn nav-btn primary nav-editor-only" title="Save Loop">
             <span class="material-icons">save</span><span class="nav-label">Save</span>
-        </button>
+        </button>` : ''}
     </div>
 </header>`;
 
@@ -185,7 +186,7 @@ Output JSON within markdown code tags. Suggestions/explanations outside the bloc
 
     // Hide editor-only buttons on non-editor pages
     if (!IS_EDITOR) {
-        document.querySelectorAll('.nav-editor-only').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.nav-editor-only').forEach(el => el.remove());
     }
 
     // ── Wire up Help modal ───────────────────────────────────────────────────

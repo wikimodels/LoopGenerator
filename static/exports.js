@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkAll = document.getElementById('check-all');
     const btnBulkDelete = document.getElementById('btn-bulk-delete');
     const btnBulkDownload = document.getElementById('btn-bulk-download');
+    const btnOpenFolder = document.getElementById('btn-open-folder');
 
     // State
     const wavesurfers = [];
@@ -550,6 +551,52 @@ document.addEventListener('DOMContentLoaded', () => {
             btnBulkDownload.innerHTML = '<span class="material-icons">download</span> Download';
         }
     });
+
+    // Open Folder with Debounce & Visual Feedback
+    let isOpeningFolder = false;
+    if (btnOpenFolder) {
+        btnOpenFolder.addEventListener('click', async () => {
+            if (isOpeningFolder) return;
+            isOpeningFolder = true;
+
+            btnOpenFolder.classList.add('opening');
+            btnOpenFolder.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite; font-size: 1.15rem;">sync</span>';
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const res = await fetch('/api/exports/open_folder', {
+                    method: 'POST',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (res.ok) {
+                    btnOpenFolder.classList.add('success');
+                    btnOpenFolder.innerHTML = '<span class="material-icons" style="font-size: 1.15rem; color: #10b981;">folder_open</span>';
+                    showToast('📁 Folder opened in File Explorer');
+                    setTimeout(() => {
+                        btnOpenFolder.classList.remove('success');
+                        btnOpenFolder.innerHTML = '<span class="material-icons" style="font-size: 1.15rem;">folder_open</span>';
+                    }, 1200);
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showToast(data.detail || "Failed to open folder");
+                    btnOpenFolder.innerHTML = '<span class="material-icons" style="font-size: 1.15rem;">folder_open</span>';
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to open folder");
+                btnOpenFolder.innerHTML = '<span class="material-icons" style="font-size: 1.15rem;">folder_open</span>';
+            } finally {
+                btnOpenFolder.classList.remove('opening');
+                setTimeout(() => {
+                    isOpeningFolder = false;
+                }, 800);
+            }
+        });
+    }
 
     // Initial load
     loadExports();
